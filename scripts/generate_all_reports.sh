@@ -44,8 +44,13 @@ echo "📂 Generating Evidence Locker Data (traces.json)..."
 $PYTHON_CMD scripts/create_sample_traces.py
 
 # 9. AI Analyst & Semantic Clusters
-echo "🏷️ Generating AI Analyst Report & Clusters..."
-$PYTHON_CMD src/analysis/analyst.py
+if [ "$SKIP_LLM_ANALYSIS" != "true" ]; then
+    echo "🏷️ Generating AI Analyst Report & Clusters..."
+    $PYTHON_CMD src/analysis/analyst.py
+else
+    echo "⏭️ Skipping AI Analyst (LLM) to save costs..."
+fi
+
 $PYTHON_CMD src/cluster_analysis_simple.py
 
 echo "✅ All reports generated successfully!"

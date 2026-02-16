@@ -13,6 +13,16 @@ on:
         - low
         - mid
         - high
+      skip_collection:
+        description: 'Skip Model Collection (Use existing blob data)'
+        required: false
+        type: boolean
+        default: false
+      skip_llm_analysis:
+        description: 'Skip LLM Analysis (Save costs)'
+        required: false
+        type: boolean
+        default: false
   schedule:
     - cron: '0 4 * * 0' # Run every Sunday at 4am UTC (Efficiency/Low Tier)
 
@@ -57,6 +67,7 @@ jobs:
           python -m pytest -W ignore::DeprecationWarning
 
       - name: Run Model Collection
+        if: ${{ inputs.skip_collection != 'true' }}
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PYTHONPATH: .
@@ -105,11 +116,21 @@ jobs:
           done
           exit 1
           
+      - name: Download Latest Data (If Skipping Collection)
+        if: ${{ inputs.skip_collection == 'true' }}
+        run: |
+          mkdir -p web/public
+          echo "📥 Downloading latest audit log from Vercel Blob..."
+          curl -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz
+          echo "✅ Download complete."
+
       - name: Compress Data
+        if: ${{ inputs.skip_collection != 'true' }}
         run: python scripts/compress_data.py
 
       - name: Generate All Reports & Visuals
         env:
+          SKIP_LLM_ANALYSIS: ${{ inputs.skip_llm_analysis }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PYTHONPATH: .
         run: bash scripts/generate_all_reports.sh
