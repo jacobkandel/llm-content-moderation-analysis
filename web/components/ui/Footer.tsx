@@ -13,10 +13,7 @@ export function Footer() {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <Link href="https://x.com/jmk9494" target="_blank" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="X (Twitter)">
-                            <Twitter className="h-5 w-5" />
-                        </Link>
-                        <Link href="https://www.linkedin.com/in/jacobkandel" target="_blank" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
+                        <Link href="https://www.linkedin.com/in/jacob-kandel" target="_blank" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
                             <Linkedin className="h-5 w-5" />
                         </Link>
                         <Link href="https://github.com/jacobkandel" target="_blank" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
