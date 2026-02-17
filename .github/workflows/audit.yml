@@ -33,7 +33,7 @@ concurrency:
 jobs:
   run-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 120 
+    timeout-minutes: 360 
     permissions:
       contents: write 
 
@@ -65,6 +65,21 @@ jobs:
           PYTHONPATH: .
         run: |
           python -m pytest -W ignore::DeprecationWarning
+
+      - name: Download Existing Data (Persist History)
+        run: |
+          mkdir -p web/public
+          echo "📥 Downloading existing audit log from Vercel Blob..."
+          # Download the compressed log
+          if curl -f -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz; then
+            echo "✅ Download successful."
+            # Decompress it so the runner can append to it
+            echo "📦 Decompressing..."
+            gzip -d web/public/audit_log.csv.gz
+            echo "✅ Decompressed to web/public/audit_log.csv"
+          else
+            echo "⚠️ Failed to download existing data (or file doesn't exist yet). Starting fresh."
+          fi
 
       - name: Run Model Collection
         if: ${{ inputs.skip_collection != 'true' }}
@@ -144,6 +159,13 @@ jobs:
           node scripts/upload-blob.js
           cd ..
 
+      - name: Clean up Large Files
+        run: |
+          rm -f web/public/audit_log.csv.gz
+          rm -f web/public/audit_log.csv
+          rm -f audit.db
+          rm -f web/public/assets/traces_small.json
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
@@ -161,11 +183,6 @@ jobs:
             docs/
             **/*.csv
             **/*.json
-          delete-paths: |
-            web/public/audit_log.csv.gz
-            web/public/audit_log.csv
-            audit.db
-            web/public/assets/traces_small.json
 
       - name: Deploy to Vercel
         env:
