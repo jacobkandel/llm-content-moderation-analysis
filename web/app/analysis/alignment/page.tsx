@@ -97,16 +97,6 @@ export default function AlignmentPage() {
                         No efficiency data available — select models with cost data
                     </div>
                 )}
-                {efficiencyData.length > 0 && (
-                    <div className="flex flex-wrap gap-3 mt-2 justify-center">
-                        {efficiencyData.map((e: any, i: number) => (
-                            <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <span className="w-2.5 h-2.5 rounded-full bg-foreground" />
-                                {e.name}
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     );

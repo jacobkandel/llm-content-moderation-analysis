@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { BarChart3, Users, Calendar, TrendingUp } from 'lucide-react';
+import QuestionsModal from './QuestionsModal';
+import ModelsModal from './ModelsModal';
 
 interface MetricCardProps {
     label: string;
@@ -8,9 +11,10 @@ interface MetricCardProps {
     icon: React.ReactNode;
     description?: string;
     trend?: 'up' | 'down' | 'neutral';
+    onClick?: () => void;
 }
 
-function MetricCard({ label, value, icon, description, trend }: MetricCardProps) {
+function MetricCard({ label, value, icon, description, trend, onClick }: MetricCardProps) {
     const trendColors = {
         up: 'text-foreground',
         down: 'text-foreground',
@@ -18,7 +22,10 @@ function MetricCard({ label, value, icon, description, trend }: MetricCardProps)
     };
 
     return (
-        <div className="bg-card rounded-xl p-6 border border-border hover:bg-accent/50 transition-colors">
+        <div
+            onClick={onClick}
+            className={`bg-card rounded-xl p-6 border border-border hover:bg-accent/50 transition-colors ${onClick ? 'cursor-pointer hover:border-primary/50' : ''}`}
+        >
             <div className="flex items-start justify-between">
                 <div className="flex-1">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
@@ -46,6 +53,9 @@ interface KeyMetricsProps {
     dateRange: string;
     totalEvaluations: number;
     lastUpdated: string;
+    questions?: { id: string; text: string; category: string }[];
+    onOpenModal?: () => void;
+    models?: { id: string; name: string; lastTested: string; totalEvaluations: number }[];
 }
 
 export default function KeyMetrics({
@@ -54,8 +64,19 @@ export default function KeyMetrics({
     consistencyScore,
     dateRange,
     totalEvaluations,
-    lastUpdated
+    lastUpdated,
+    questions = [],
+    onOpenModal,
+    models = []
 }: KeyMetricsProps) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+        if (onOpenModal) onOpenModal();
+    };
+
     // Format numbers for display
     const formatNumber = (num: number) => {
         if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -81,6 +102,7 @@ export default function KeyMetrics({
                     icon={<BarChart3 className="w-6 h-6 text-foreground" />}
                     description="Unique moderation scenarios"
                     trend="neutral"
+                    onClick={handleOpenModal}
                 />
 
                 <MetricCard
@@ -89,6 +111,7 @@ export default function KeyMetrics({
                     icon={<Users className="w-6 h-6 text-foreground" />}
                     description="AI moderation models"
                     trend="neutral"
+                    onClick={() => setIsModelsModalOpen(true)}
                 />
 
                 <MetricCard
@@ -115,6 +138,18 @@ export default function KeyMetrics({
                     trend="neutral"
                 />
             </div>
+
+            <QuestionsModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                questions={questions}
+            />
+
+            <ModelsModal
+                isOpen={isModelsModalOpen}
+                onClose={() => setIsModelsModalOpen(false)}
+                models={models}
+            />
         </div>
     );
 }
