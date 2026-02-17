@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 CSV_PATH = "web/public/audit_log.csv"
-REPO_ID = os.getenv("HF_REPO_ID", "jkandel/moderation-bias-benchmark") 
+REPO_ID = os.getenv("HF_REPO_ID", "jmk9494/moderation-bias-benchmark") 
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 def sync_to_huggingface():
