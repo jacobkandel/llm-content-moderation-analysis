@@ -95,13 +95,14 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
     // Helper for color scale - Using UChicago Brand Colors
     const getColor = (rate: number) => {
         // UChicago Green: #00843D
-        if (rate === 0) return 'bg-[#00843D]/10 text-[#00843D] dark:text-[#00843D] hover:bg-[#00843D]/20';
+        // Fix: Use lighter text in dark mode for 0%
+        if (rate === 0) return 'bg-[#00843D]/10 text-[#00843D] dark:text-[#A3E6BE] hover:bg-[#00843D]/20';
         // UChicago Green (More opaque)
-        if (rate < 0.2) return 'bg-[#00843D]/30 text-[#006429] dark:text-[#4CBF80] hover:bg-[#00843D]/40';
+        if (rate < 0.2) return 'bg-[#00843D]/30 text-[#006429] dark:text-[#A3E6BE] hover:bg-[#00843D]/40';
         // UChicago Gold: #FFC72C
-        if (rate < 0.4) return 'bg-[#FFC72C]/30 text-[#8F6B00] dark:text-[#FFD966] hover:bg-[#FFC72C]/40';
+        if (rate < 0.4) return 'bg-[#FFC72C]/30 text-[#8F6B00] dark:text-[#FFEebb] hover:bg-[#FFC72C]/40';
         // UChicago Orange: #FF671F
-        if (rate < 0.6) return 'bg-[#FF671F]/40 text-[#A33600] dark:text-[#FF9E66] hover:bg-[#FF671F]/50';
+        if (rate < 0.6) return 'bg-[#FF671F]/40 text-[#A33600] dark:text-[#FFCCAA] hover:bg-[#FF671F]/50';
         // UChicago Brick: #A4343A
         if (rate < 0.8) return 'bg-[#A4343A]/80 text-white hover:bg-[#A4343A]';
         // UChicago Maroon: #800000
@@ -260,7 +261,7 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
             {/* Modal for cell details */}
             {showModal && selectedCell && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 transition-opacity" onClick={() => setShowModal(false)}>
-                    <div className="bg-background rounded-xl p-4 md:p-6 w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-border animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                    <div className="bg-popover text-popover-foreground rounded-xl p-4 md:p-6 w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-border animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-4 flex-shrink-0 border-b border-border pb-3">
                             <h4 className="text-base md:text-lg font-bold truncate pr-4 text-foreground flex flex-col md:flex-row md:items-center gap-1">
                                 <span className="text-primary">{selectedCell.model && typeof selectedCell.model === 'string'
@@ -286,8 +287,8 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                         <div className="space-y-3 overflow-y-auto flex-grow pr-1 custom-scrollbar">
                             {modalEntries.slice(0, 50).map((entry, idx) => (
                                 <div key={idx} className={`p-3 rounded-lg border text-sm ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
-                                    ? 'border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20'
-                                    : 'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20'
+                                    ? 'border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30'
+                                    : 'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30'
                                     }`}>
                                     <div className="flex justify-between items-center mb-2">
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
@@ -296,17 +297,35 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                             }`}>
                                             {entry.verdict}
                                         </span>
-                                        <span className="text-[10px] text-muted-foreground font-mono">{entry.case_id}</span>
+                                        <span className={`text-[10px] font-mono ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
+                                            ? 'text-emerald-700 dark:text-emerald-300'
+                                            : 'text-red-700 dark:text-red-300'
+                                            }`}>{entry.case_id}</span>
                                     </div>
                                     <div className="space-y-2.5">
                                         <div>
-                                            <p className="text-[10px] uppercase tracking-wide font-bold text-muted-foreground/80 mb-1">Prompt</p>
-                                            <p className="text-foreground leading-relaxed font-medium">{entry.prompt || <span className="italic text-muted-foreground">No prompt text available</span>}</p>
+                                            <p className={`text-[10px] uppercase tracking-wide font-bold mb-1 ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
+                                                ? 'text-emerald-600/80 dark:text-emerald-400/80'
+                                                : 'text-red-600/80 dark:text-red-400/80'
+                                                }`}>Prompt</p>
+                                            <p className={`leading-relaxed font-medium ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
+                                                ? 'text-emerald-900 dark:text-emerald-100'
+                                                : 'text-red-900 dark:text-red-100'
+                                                }`}>{entry.prompt || <span className="italic opacity-70">No prompt text available</span>}</p>
                                         </div>
                                         {entry.response && (
-                                            <div className="pt-2 border-t border-border/50">
-                                                <p className="text-[10px] uppercase tracking-wide font-bold text-muted-foreground/80 mb-1">Response</p>
-                                                <p className="text-foreground leading-relaxed text-xs">{entry.response}</p>
+                                            <div className={`pt-2 border-t ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
+                                                ? 'border-emerald-200/50 dark:border-emerald-800/50'
+                                                : 'border-red-200/50 dark:border-red-800/50'
+                                                }`}>
+                                                <p className={`text-[10px] uppercase tracking-wide font-bold mb-1 ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
+                                                    ? 'text-emerald-600/80 dark:text-emerald-400/80'
+                                                    : 'text-red-600/80 dark:text-red-400/80'
+                                                    }`}>Response</p>
+                                                <p className={`leading-relaxed text-xs ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
+                                                    ? 'text-emerald-900 dark:text-emerald-100'
+                                                    : 'text-red-900 dark:text-red-100'
+                                                    }`}>{entry.response}</p>
                                             </div>
                                         )}
                                     </div>

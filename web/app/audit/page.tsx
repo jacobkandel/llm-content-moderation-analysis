@@ -27,10 +27,10 @@ export default function AuditPage() {
     const columns = useMemo<ColumnDef<AuditRow>[]>(() => [
         {
             accessorKey: 'timestamp',
-            header: () => <span className="hidden md:inline">Date</span>,
+            header: 'Date',
             cell: ({ row }) => {
                 const date = new Date(row.getValue('timestamp'));
-                return <span className="hidden md:inline">{date.toLocaleDateString()}</span>;
+                return <span>{date.toLocaleDateString()}</span>;
             }
         },
         {
