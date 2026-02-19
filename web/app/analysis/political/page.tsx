@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ReferenceLine, Scatter, Cell } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
@@ -8,7 +9,8 @@ import AnalysisOverview from '@/components/AnalysisOverview';
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#06b6d4', '#84cc16'];
 
 export default function PoliticalPage() {
-    const { filteredPoliticalData: politicalData, loading } = useAnalysis();
+    const { filteredPoliticalData: politicalData, loading, ensurePolitical } = useAnalysis();
+    useEffect(() => { ensurePolitical(); }, []);
 
     if (loading) return <SkeletonLoader />;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
@@ -28,11 +28,26 @@ function erf(x: number): number {
 }
 
 export default function SignificancePage() {
-    const { filteredAuditData, loading } = useAnalysis();
+    const { filteredAuditData, loading, ensureAuditData, precomputedSignificance, selectedModels, dateRange } = useAnalysis();
+    const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+
+    // Load CSV only when filters are active
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
     const [showAll, setShowAll] = useState(false);
     const [sortBy, setSortBy] = useState<'pValue' | 'disagreements'>('pValue');
 
     const pairwiseResults = useMemo(() => {
+        // Use pre-computed data when no filters
+        if (!hasFilters && precomputedSignificance.length > 0) {
+            const results = [...precomputedSignificance];
+            if (sortBy === 'pValue') {
+                results.sort((a: any, b: any) => a.pValue - b.pValue);
+            } else {
+                results.sort((a: any, b: any) => b.disagreements - a.disagreements);
+            }
+            return results;
+        }
+
         if (!filteredAuditData || filteredAuditData.length === 0) return [];
 
         const isUnsafe = (v: string) => ['REFUSAL', 'REMOVED', 'BLOCKED', 'unsafe', 'Hard Refusal'].includes(v);
@@ -88,7 +103,7 @@ export default function SignificancePage() {
         }
 
         return results;
-    }, [filteredAuditData, sortBy]);
+    }, [filteredAuditData, sortBy, hasFilters, precomputedSignificance]);
 
     if (loading) return <SkeletonLoader />;
 

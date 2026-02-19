@@ -1,7 +1,7 @@
 'use client';
 
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, Line } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 
@@ -11,11 +11,36 @@ import AnalysisOverview from '@/components/AnalysisOverview';
 const MONO_SHADES = ['#000000', '#333333', '#666666', '#999999', '#AAAAAA', '#CCCCCC'];
 
 export default function LongitudinalPage() {
-    const { filteredAuditData, dateRange, loading } = useAnalysis();
+    const { filteredAuditData, dateRange, loading, ensureAuditData, precomputedLongitudinal, selectedModels } = useAnalysis();
+    const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+
+    // Load CSV only when filters are active
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
     // Local filter state for this view
     const [longitudinalModels, setLongitudinalModels] = useState<string[]>([]);
 
     const longitudinalData = useMemo(() => {
+        // Use pre-computed data when no global filters active
+        if (!hasFilters && precomputedLongitudinal) {
+            const activeModels = longitudinalModels.length > 0
+                ? longitudinalModels
+                : precomputedLongitudinal.activeModels;
+            // If local model filter, filter down the pre-computed chart data
+            const chartData = longitudinalModels.length > 0
+                ? precomputedLongitudinal.chartData.map((entry: any) => {
+                    const row: any = { date: entry.date };
+                    longitudinalModels.forEach((model: string) => {
+                        if (entry[model] !== undefined) {
+                            row[model] = entry[model];
+                            if (entry[`${model}_count`] !== undefined) row[`${model}_count`] = entry[`${model}_count`];
+                        }
+                    });
+                    return row;
+                })
+                : precomputedLongitudinal.chartData;
+            return { chartData, activeModels };
+        }
+
         if (filteredAuditData.length === 0) return { chartData: [], activeModels: [] };
 
         const filtered = filteredAuditData.filter((d) => longitudinalModels.length === 0 || longitudinalModels.includes(d.model));
@@ -36,7 +61,7 @@ export default function LongitudinalPage() {
             return row;
         });
         return { chartData, activeModels };
-    }, [filteredAuditData, longitudinalModels]);
+    }, [filteredAuditData, longitudinalModels, hasFilters, precomputedLongitudinal]);
 
     if (loading) return <SkeletonLoader />;
 
@@ -70,7 +95,7 @@ export default function LongitudinalPage() {
                         <YAxis unit="%" />
                         <RechartsTooltip />
                         <Legend />
-                        {longitudinalData.activeModels.map((m, i) => (
+                        {longitudinalData.activeModels.map((m: string, i: number) => (
                             <Line key={m} type="monotone" dataKey={m} stroke={MONO_SHADES[i % MONO_SHADES.length]} strokeWidth={2} dot={false} connectNulls />
                         ))}
                     </LineChart>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
@@ -13,10 +13,28 @@ import {
 const PIE_COLORS = ['#800000', '#767676', '#D6D6CE']; // Maroon, Dark Gray, Light Gray
 
 export default function ConsensusPage() {
-    const { filteredAuditData, loading } = useAnalysis();
+    const { filteredAuditData, loading, ensureAuditData, precomputedConsensus, selectedModels, dateRange } = useAnalysis();
 
-    // Compute consensus data dynamically from audit data
+    const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+
+    // Load CSV only when filters are active
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
+
+    // Compute consensus data dynamically from audit data (only when filters active)
     const consensusStats = useMemo(() => {
+        // Use pre-computed data when no filters
+        if (!hasFilters && precomputedConsensus) {
+            return {
+                totalPrompts: precomputedConsensus.totalPrompts,
+                distribution: precomputedConsensus.distribution,
+                perModel: precomputedConsensus.perModel.map((m: any) => ({
+                    ...m,
+                    provider: getProviderName(m.model),
+                    logo: getLogoUrl(m.model),
+                })),
+            };
+        }
+
         if (!filteredAuditData || filteredAuditData.length === 0) return null;
 
         const isUnsafe = (v: string) => ['REFUSAL', 'REMOVED', 'BLOCKED', 'unsafe', 'Hard Refusal'].includes(v);
@@ -108,7 +126,7 @@ export default function ConsensusPage() {
             distribution,
             perModel,
         };
-    }, [filteredAuditData]);
+    }, [filteredAuditData, hasFilters, precomputedConsensus]);
 
     if (loading) return <SkeletonLoader />;
 
@@ -154,7 +172,7 @@ export default function ConsensusPage() {
                     How often each model agrees with the majority verdict across {consensusStats.totalPrompts.toLocaleString()} prompts evaluated by multiple models
                 </p>
                 <div className="space-y-2">
-                    {consensusStats.perModel.map((m, i) => (
+                    {consensusStats.perModel.map((m: any, i: number) => (
                         <div key={m.model} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
                             <span className="text-xs text-muted-foreground w-5 font-mono">{i + 1}</span>
                             <img
@@ -212,7 +230,7 @@ export default function ConsensusPage() {
                                 dataKey="value"
                                 label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                             >
-                                {consensusStats.distribution.map((_, index) => (
+                                {consensusStats.distribution.map((_: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index]} />
                                 ))}
                             </Pie>
