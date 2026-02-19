@@ -19,7 +19,12 @@ async function uploadToBlob() {
         try {
             const fileContent = fs.readFileSync(filePath);
             // Upload to 'data/audit_log.csv.gz' etc.
-            const { url } = await put(`data/${fileName}`, fileContent, { access: 'public' });
+            const { url } = await put(`data/${fileName}`, fileContent, {
+                access: 'public',
+                addRandomSuffix: false, // Ensure consistent URL for app usage
+                // @ts-ignore - The error message suggests this flag exists
+                allowOverwrite: true
+            });
 
             console.log(`✅ Upload successful: ${fileName}`);
             console.log(`🔗 URL: ${url}`);

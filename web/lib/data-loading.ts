@@ -6,8 +6,8 @@ export type AuditRow = {
     case_id: string;
     category: string;
     verdict: string;
-    prompt: string;
-    response: string;
+    prompt?: string;
+    response?: string;
     cost: number;
     tokens_used: number;
     latency_ms: number;
