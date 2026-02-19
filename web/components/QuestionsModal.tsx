@@ -10,6 +10,7 @@ interface Question {
     id: string;
     text: string;
     category: string;
+    source?: string;
 }
 
 interface QuestionsModalProps {
@@ -137,10 +138,21 @@ export default function QuestionsModal({ isOpen, onClose, questions }: Questions
                                                 <div className="p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors group">
                                                     <div className="flex justify-between items-start gap-4">
                                                         <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-2">
+                                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                                 <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                                                                     {question.category}
                                                                 </span>
+                                                                {question.source && (
+                                                                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${question.source === 'Hand-Written' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' :
+                                                                        question.source === 'Template-Generated' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
+                                                                            question.source === 'Style Variant' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' :
+                                                                                question.source === 'Boundary Test' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' :
+                                                                                    question.source === 'False Positive Control' ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20' :
+                                                                                        'bg-muted text-muted-foreground border-border'
+                                                                        }`}>
+                                                                        {question.source}
+                                                                    </span>
+                                                                )}
                                                                 <span className="text-xs text-muted-foreground font-mono">
                                                                     ID: {question.id}
                                                                 </span>

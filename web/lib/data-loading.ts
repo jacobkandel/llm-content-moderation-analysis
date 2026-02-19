@@ -14,6 +14,8 @@ export type AuditRow = {
     prompt_id?: string; // Analysis page legacy compatibility
 };
 
+// Module-level cache: avoids re-downloading when navigating back to a page
+const dataCache = new Map<string, AuditRow[]>();
 
 /** Normalize category names so Sexual and Explicit Content are always merged */
 function normalizeCategory(cat: string): string {
@@ -23,6 +25,14 @@ function normalizeCategory(cat: string): string {
 
 
 export async function fetchAuditData(useRecent = false, lite = false): Promise<AuditRow[]> {
+    // Check module-level cache first
+    const cacheKey = `${useRecent ? 'recent' : 'main'}_${lite ? 'lite' : 'full'}`;
+    const cached = dataCache.get(cacheKey);
+    if (cached) {
+        console.log(`Cache hit for ${cacheKey} (${cached.length} rows)`);
+        return cached;
+    }
+
     // Priority 1: audit_log.csv.gz (Compressed ~5.8MB vs 48MB)
     // We use compressed to significantly reduce data transfer.
     // 'lite' version drops heavy text columns (~1MB vs ~6MB compressed)
@@ -30,7 +40,9 @@ export async function fetchAuditData(useRecent = false, lite = false): Promise<A
     console.log(`Fetching Audit Data (v5 - Compressed GZIP - ${version})...`);
 
     const fileBase = useRecent ? '/audit_recent' : '/audit_log';
-    const timestamp = Date.now();
+    // Daily cache version — allows browser/CDN caching within the same day
+    const d = new Date();
+    const cacheVersion = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 
     // Vercel Blob URL for the main audit log
     const blobName = lite ? 'audit_log_lite.csv.gz' : 'audit_log.csv.gz';
@@ -42,13 +54,13 @@ export async function fetchAuditData(useRecent = false, lite = false): Promise<A
     }
 
     // Try compressed first
-    // If not using recent data, use the Blob URL (with cache busting)
+    // If not using recent data, use the Blob URL (with daily cache version)
     const gzFile = useRecent
-        ? `/audit_recent.csv.gz?t=${timestamp}` // Local recent (unlikely lite)
-        : `${BLOB_URL}?t=${timestamp}`; // Blob URL
+        ? `/audit_recent.csv.gz?v=${cacheVersion}` // Local recent (unlikely lite)
+        : `${BLOB_URL}?v=${cacheVersion}`; // Blob URL
 
     // Fallback for uncompressed
-    const csvFile = useRecent ? `/audit_recent.csv?t=${timestamp}` : `/audit_log.csv?t=${timestamp}`;
+    const csvFile = useRecent ? `/audit_recent.csv?v=${cacheVersion}` : `/audit_log.csv?v=${cacheVersion}`;
 
     let csvText = '';
     let blocklist = ['yi-34b', 'mistral-medium', 'gpt-audio']; // Default fallback
@@ -197,6 +209,8 @@ export async function fetchAuditData(useRecent = false, lite = false): Promise<A
                     });
                 });
                 console.log(`Loaded ${data.length} rows from CSV (filtered noise and 0% refusals)`);
+                // Cache the result for future calls
+                dataCache.set(cacheKey, data);
                 resolve(data);
             },
             error: (err: any) => reject(err)

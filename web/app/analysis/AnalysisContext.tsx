@@ -41,6 +41,7 @@ interface AnalysisContextType {
     timelineDates: string[];
     stats: any;
     efficiencyData: any[];
+    precomputedPrompts: { id: string; text: string; category: string; source: string }[];
     precomputedHeatmap: any;
     precomputedConsensus: any;
     precomputedSignificance: any[];
@@ -99,6 +100,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const [precomputedSignificance, setPrecomputedSignificance] = useState<any[]>([]);
     const [precomputedReliability, setPrecomputedReliability] = useState<any>(null);
     const [precomputedLongitudinal, setPrecomputedLongitudinal] = useState<any>(null);
+    const [precomputedPrompts, setPrecomputedPrompts] = useState<{ id: string; text: string; category: string; source: string }[]>([]);
 
     // Global Filters – initialised from URL
     const [dateRange, setDateRange] = useState<{ start: string; end: string }>(() => ({
@@ -239,7 +241,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const loadPrecomputed = async () => {
             try {
-                const [summaryRes, spectrumRes, heatmapRes, consensusRes, significanceRes, reliabilityRes, longitudinalRes] = await Promise.allSettled([
+                const [summaryRes, spectrumRes, heatmapRes, consensusRes, significanceRes, reliabilityRes, longitudinalRes, promptsRes] = await Promise.allSettled([
                     fetch('/summary_stats.json').then(r => r.ok ? r.json() : null),
                     fetch('/spectrum_data.json').then(r => r.ok ? r.json() : null),
                     fetch('/heatmap_matrix.json').then(r => r.ok ? r.json() : null),
@@ -247,6 +249,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                     fetch('/significance_pairwise.json').then(r => r.ok ? r.json() : null),
                     fetch('/reliability_scores.json').then(r => r.ok ? r.json() : null),
                     fetch('/longitudinal_data.json').then(r => r.ok ? r.json() : null),
+                    fetch('/prompts_list.json').then(r => r.ok ? r.json() : []),
                 ]);
 
                 const summary = summaryRes.status === 'fulfilled' ? summaryRes.value : null;
@@ -256,6 +259,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 const significance = significanceRes.status === 'fulfilled' ? significanceRes.value : null;
                 const reliability = reliabilityRes.status === 'fulfilled' ? reliabilityRes.value : null;
                 const longitudinal = longitudinalRes.status === 'fulfilled' ? longitudinalRes.value : null;
+                const prompts = promptsRes.status === 'fulfilled' ? promptsRes.value : [];
 
                 if (summary) setPrecomputedSummary(summary);
                 if (spectrum) setPrecomputedSpectrum(spectrum);
@@ -264,11 +268,13 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 if (significance) setPrecomputedSignificance(significance);
                 if (reliability) setPrecomputedReliability(reliability);
                 if (longitudinal) setPrecomputedLongitudinal(longitudinal);
+                if (prompts?.length) setPrecomputedPrompts(prompts);
 
                 console.log('⚡ Pre-computed JSON loaded', {
                     summary: !!summary, spectrum: !!spectrum, heatmap: !!heatmap,
                     consensus: !!consensus, significance: !!significance,
-                    reliability: !!reliability, longitudinal: !!longitudinal
+                    reliability: !!reliability, longitudinal: !!longitudinal,
+                    prompts: prompts?.length || 0
                 });
             } catch (err) {
                 console.error("Failed to load pre-computed data", err);
@@ -448,7 +454,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
             reportContent, loading, dateRange, setDateRange, selectedModels, setSelectedModels, allModels,
             filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
             filteredConsensusData, filteredPValues, filteredClusters,
-            timelineDates, stats, efficiencyData, precomputedHeatmap,
+            timelineDates, stats, efficiencyData, precomputedPrompts, precomputedHeatmap,
             precomputedConsensus, precomputedSignificance, precomputedReliability, precomputedLongitudinal,
             isLite, isLoadingFull, loadFullDetails,
             ensureClusters, ensureDrift, ensureConsensus, ensurePValues,

@@ -91,7 +91,7 @@ export function NavBar() {
                                                                     : "text-popover-foreground hover:text-accent-foreground hover:bg-accent"
                                                             )}
                                                         >
-                                                            <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-muted-foreground group-hover:text-accent-foreground")} />
+                                                            <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-popover-foreground")} />
                                                             {sub.title}
                                                         </Link>
                                                     ))}
@@ -145,7 +145,7 @@ export function NavBar() {
                                                     pathname === sub.href ? "bg-accent text-accent-foreground" : "hover:bg-accent"
                                                 )}
                                             >
-                                                <sub.icon className="h-4 w-4" />
+                                                <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-foreground")} />
                                                 {sub.title}
                                             </Link>
                                         ))}

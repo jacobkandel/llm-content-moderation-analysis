@@ -5,6 +5,7 @@ import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { DataTable } from '@/components/ui/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import { Loader2 } from 'lucide-react';
+import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
 
 export default function AuditPage() {
     const [data, setData] = useState<AuditRow[]>([]);
@@ -47,6 +48,18 @@ export default function AuditPage() {
             accessorKey: 'category',
             header: () => <span className="hidden lg:inline">Category</span>,
             cell: ({ row }) => <span className="hidden lg:inline">{row.getValue('category')}</span>
+        },
+        {
+            id: 'source',
+            header: () => <span className="hidden lg:inline">Source</span>,
+            cell: ({ row }) => {
+                const source = getPromptSource(row.original.prompt_id);
+                return (
+                    <span className={`hidden lg:inline-flex text-xs font-medium px-2 py-0.5 rounded-full border ${getSourceBadgeClass(source)}`}>
+                        {source}
+                    </span>
+                );
+            }
         },
         {
             accessorKey: 'prompt',
