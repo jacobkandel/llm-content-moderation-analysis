@@ -228,3 +228,9 @@ data/raw_traces/
 web/audit.db
 web/public/audit_log.csv.gz
 web/public/audit_log_lite.csv.gz
+
+# Root development artifacts
+app.log*
+push_error.txt
+check_db.py
+check_progress.py
