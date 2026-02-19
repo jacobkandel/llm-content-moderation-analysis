@@ -147,19 +147,20 @@ export default function ComparePage() {
         };
 
         const mapA = new Map<string, AuditRow>();
-        filteredData.filter(d => d.model === modelA).forEach(d => mapA.set(d.prompt, d));
+        // Only map rows with prompts (skip Lite data rows without prompts)
+        filteredData.filter(d => d.model === modelA && d.prompt).forEach(d => mapA.set(d.prompt!, d));
 
         const diffs: { prompt: string; category: string; rowA: AuditRow; rowB: AuditRow }[] = [];
 
-        filteredData.filter(d => d.model === modelB).forEach(rowB => {
-            const rowA = mapA.get(rowB.prompt);
+        filteredData.filter(d => d.model === modelB && d.prompt).forEach(rowB => {
+            const rowA = mapA.get(rowB.prompt!);
             if (rowA) {
                 const isSafeA = isSafe(rowA.verdict);
                 const isSafeB = isSafe(rowB.verdict);
 
                 if (isSafeA !== isSafeB) {
                     diffs.push({
-                        prompt: rowB.prompt,
+                        prompt: rowB.prompt!,
                         category: rowB.category,
                         rowA,
                         rowB
