@@ -1,16 +1,25 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 
 export default function ReliabilityPage() {
-    const { stats, loading, filteredAuditData } = useAnalysis();
+    const { stats, loading, filteredAuditData, ensureAuditData, precomputedReliability, selectedModels, dateRange } = useAnalysis();
+    const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+
+    // Load CSV only when filters are active
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
 
     // Per-model self-consistency: how consistent is each model with itself across repeated prompts?
     const perModelKappa = useMemo(() => {
+        // Use pre-computed data when no filters
+        if (!hasFilters && precomputedReliability?.perModel?.length > 0) {
+            return precomputedReliability.perModel;
+        }
+
         if (!filteredAuditData || filteredAuditData.length === 0) return [];
 
         const isUnsafe = (v: string) => ['REFUSAL', 'REMOVED', 'BLOCKED', 'unsafe', 'Hard Refusal'].includes(v);
@@ -52,7 +61,7 @@ export default function ReliabilityPage() {
             }))
             .filter(m => m.total >= 50)
             .sort((a, b) => b.score - a.score);
-    }, [filteredAuditData]);
+    }, [filteredAuditData, hasFilters, precomputedReliability]);
 
     if (loading) return <SkeletonLoader />;
     if (!stats) return <div className="p-8 text-center text-slate-500">No data available for reliability analysis.</div>;
@@ -115,7 +124,7 @@ export default function ReliabilityPage() {
                     <p className="text-xs text-muted-foreground mb-6">How often each model agrees with the majority verdict across all prompts</p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {perModelKappa.map((m) => (
+                        {perModelKappa.map((m: any) => (
                             <div
                                 key={m.model}
                                 className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors bg-card"

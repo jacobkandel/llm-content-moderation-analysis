@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ModelDrift } from '@/components/ModelDrift';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 
 export default function DriftPage() {
-    const { filteredDriftData: driftData, loading } = useAnalysis();
+    const { filteredDriftData: driftData, loading, ensureDrift } = useAnalysis();
+    useEffect(() => { ensureDrift(); }, []);
 
     if (loading) return <SkeletonLoader />;
 

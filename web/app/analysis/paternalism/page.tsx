@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, Bar, Cell } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 
 export default function PaternalismPage() {
-    const { filteredPaternalismData: paternalismData, loading } = useAnalysis();
+    const { filteredPaternalismData: paternalismData, loading, ensurePaternalism } = useAnalysis();
+    useEffect(() => { ensurePaternalism(); }, []);
 
     if (loading) return <SkeletonLoader />;
 

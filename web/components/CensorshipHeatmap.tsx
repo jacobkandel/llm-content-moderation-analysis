@@ -44,13 +44,30 @@ const normalizeCategory = (cat: string): string => {
 };
 
 export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description, onCellClick }: HeatmapProps) {
-    const { isLite, isLoadingFull, loadFullDetails } = useAnalysis();
+    const { isLite, isLoadingFull, loadFullDetails, precomputedHeatmap, selectedModels, dateRange } = useAnalysis();
     const [selectedCell, setSelectedCell] = useState<{ model: string; category: string } | null>(null);
     const [expandedModel, setExpandedModel] = useState<string | null>(null); // For mobile accordion
     const [showModal, setShowModal] = useState(false);
 
+    const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+
     // 1. Process data to get Refusal Rate per Model per Category
-    const matrix = useMemo(() => {
+    //    Use pre-computed JSON when no filters are active
+    const matrix = useMemo((): { models: string[]; categories: string[]; stats: Record<string, Record<string, { total: number; refusals: number; entries: any[] }>> } => {
+        // Use pre-computed heatmap when available and no filters active
+        if (!hasFilters && precomputedHeatmap) {
+            const stats: Record<string, Record<string, { total: number; refusals: number; entries: any[] }>> = {};
+            for (const model of precomputedHeatmap.models) {
+                stats[model] = {};
+                for (const cat of precomputedHeatmap.categories) {
+                    const cell = precomputedHeatmap.cells[model]?.[cat] || { total: 0, refusals: 0 };
+                    stats[model][cat] = { total: cell.total, refusals: cell.refusals, entries: [] };
+                }
+            }
+            return { models: precomputedHeatmap.models, categories: precomputedHeatmap.categories, stats };
+        }
+
+        // Fall back to computing from raw data when filters are active
         const allModels = Array.from(new Set(data.map(d => d.model))).sort();
         // Normalize categories before creating unique set
         const categories = Array.from(new Set(data.map(d => normalizeCategory(d.category)))).filter(c => c).sort();
@@ -84,7 +101,7 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
         });
 
         return { models, categories, stats };
-    }, [data]);
+    }, [data, hasFilters, precomputedHeatmap]);
 
     // Reactive modal entries (so they update when full data loads)
     const modalEntries = useMemo(() => {

@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { SemanticClustersView } from '@/components/SemanticClusters';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 
 export default function ClustersPage() {
-    const { filteredClusters: clusters, loading } = useAnalysis();
+    const { filteredClusters: clusters, loading, ensureClusters } = useAnalysis();
+    useEffect(() => { ensureClusters(); }, []);
 
     if (loading) return <SkeletonLoader />;
 

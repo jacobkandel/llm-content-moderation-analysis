@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { calculateFleissKappa } from '@/lib/statistics';
 import Papa from 'papaparse';
@@ -40,9 +41,24 @@ interface AnalysisContextType {
     timelineDates: string[];
     stats: any;
     efficiencyData: any[];
+    precomputedHeatmap: any;
+    precomputedConsensus: any;
+    precomputedSignificance: any[];
+    precomputedReliability: any;
+    precomputedLongitudinal: any;
     isLite: boolean;
     isLoadingFull: boolean;
     loadFullDetails: () => Promise<void>;
+    // Lazy-load functions for supplementary data
+    ensureClusters: () => Promise<void>;
+    ensureDrift: () => Promise<void>;
+    ensureConsensus: () => Promise<void>;
+    ensurePValues: () => Promise<void>;
+    ensurePolitical: () => Promise<void>;
+    ensurePaternalism: () => Promise<void>;
+    ensureTriggers: () => Promise<void>;
+    ensureReport: () => Promise<void>;
+    ensureAuditData: () => Promise<void>;
 }
 
 const AnalysisContext = createContext<AnalysisContextType | undefined>(undefined);
@@ -57,11 +73,13 @@ function filterByModels<T extends { model?: string }>(data: T[], selectedModels:
 }
 
 export function AnalysisProvider({ children }: { children: React.ReactNode }) {
-    // Data Loading
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
     // Data Loading
     const [auditData, setAuditData] = useState<AuditRow[]>([]);
-    const [isLite, setIsLite] = useState(true); // Track if we are using lite data
-    const [isLoadingFull, setIsLoadingFull] = useState(false); // Track background loading
+    const [isLite, setIsLite] = useState(true);
+    const [isLoadingFull, setIsLoadingFull] = useState(false);
 
     const [clusters, setClusters] = useState<Cluster[]>([]);
     const [driftData, setDriftData] = useState<any[]>([]);
@@ -73,9 +91,39 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const [reportContent, setReportContent] = useState<string>('');
     const [loading, setLoading] = useState(true);
 
-    // Global Filters
-    const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
-    const [selectedModels, setSelectedModels] = useState<string[]>([]);
+    // Pre-computed JSON data (loaded instantly)
+    const [precomputedSummary, setPrecomputedSummary] = useState<any>(null);
+    const [precomputedSpectrum, setPrecomputedSpectrum] = useState<any[]>([]);
+    const [precomputedHeatmap, setPrecomputedHeatmap] = useState<any>(null);
+    const [precomputedConsensus, setPrecomputedConsensus] = useState<any>(null);
+    const [precomputedSignificance, setPrecomputedSignificance] = useState<any[]>([]);
+    const [precomputedReliability, setPrecomputedReliability] = useState<any>(null);
+    const [precomputedLongitudinal, setPrecomputedLongitudinal] = useState<any>(null);
+
+    // Global Filters – initialised from URL
+    const [dateRange, setDateRange] = useState<{ start: string; end: string }>(() => ({
+        start: searchParams.get('from') || '',
+        end: searchParams.get('to') || '',
+    }));
+    const [selectedModels, setSelectedModels] = useState<string[]>(() => {
+        const param = searchParams.get('models');
+        return param ? param.split(',').filter(Boolean) : [];
+    });
+
+    // Sync filter state → URL (skip the very first render to avoid replacing on mount)
+    const isInitialMount = useRef(true);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        const params = new URLSearchParams();
+        if (selectedModels.length > 0) params.set('models', selectedModels.join(','));
+        if (dateRange.start) params.set('from', dateRange.start);
+        if (dateRange.end) params.set('to', dateRange.end);
+        const qs = params.toString();
+        router.replace(qs ? `?${qs}` : '?', { scroll: false });
+    }, [selectedModels, dateRange, router]);
 
     // Action to load full data (text columns)
     const loadFullDetails = async () => {
@@ -95,63 +143,163 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    // --- Lazy-load helpers: fetch supplementary data on-demand (once) ---
+    const loaded = useRef<Record<string, boolean>>({});
+
+    const ensureClusters = async () => {
+        if (loaded.current.clusters) return;
+        loaded.current.clusters = true;
+        try {
+            const r = await fetch('/clusters.json');
+            if (r.ok) setClusters(await r.json());
+        } catch { }
+    };
+    const ensureDrift = async () => {
+        if (loaded.current.drift) return;
+        loaded.current.drift = true;
+        try {
+            const r = await fetch('/drift_report.json');
+            if (r.ok) setDriftData(await r.json());
+        } catch { }
+    };
+    const ensureConsensus = async () => {
+        if (loaded.current.consensus) return;
+        loaded.current.consensus = true;
+        try {
+            const r = await fetch('/consensus_bias.csv');
+            if (r.ok) {
+                const text = await r.text();
+                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setConsensusData(res.data) });
+            }
+        } catch { }
+    };
+    const ensurePValues = async () => {
+        if (loaded.current.pValues) return;
+        loaded.current.pValues = true;
+        try {
+            const r = await fetch('/assets/p_values.csv');
+            if (r.ok) {
+                const text = await r.text();
+                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setPValues(res.data) });
+            }
+        } catch { }
+    };
+    const ensurePolitical = async () => {
+        if (loaded.current.political) return;
+        loaded.current.political = true;
+        try {
+            const r = await fetch('/political_compass.json');
+            if (r.ok) setPoliticalData(await r.json());
+        } catch { }
+    };
+    const ensurePaternalism = async () => {
+        if (loaded.current.paternalism) return;
+        loaded.current.paternalism = true;
+        try {
+            const r = await fetch('/paternalism.json');
+            if (r.ok) setPaternalismData(await r.json());
+        } catch { }
+    };
+    const ensureTriggers = async () => {
+        if (loaded.current.triggers) return;
+        loaded.current.triggers = true;
+        try {
+            const r = await fetch('/assets/trigger_words.json');
+            if (r.ok) setTriggerData(await r.json());
+        } catch { }
+    };
+    const ensureReport = async () => {
+        if (loaded.current.report) return;
+        loaded.current.report = true;
+        try {
+            const r = await fetch('/api/report');
+            if (r.ok) {
+                const j = await r.json();
+                if (j.content) setReportContent(j.content);
+            }
+        } catch { }
+    };
+
+    // Load the lite CSV (for filtering & drill-downs)
+    const ensureAuditData = async () => {
+        if (loaded.current.csv) return;
+        loaded.current.csv = true;
+        console.log('📦 Loading lite CSV...');
+        try {
+            const data = await fetchAuditData(false, true);
+            setAuditData(data);
+            setIsLite(true);
+            console.log('✅ Lite CSV loaded');
+        } catch (e) {
+            console.error('Failed to load CSV', e);
+        }
+    };
+
+    // PHASE 1 (instant): Load pre-computed JSON files on mount
     useEffect(() => {
-        const loadAll = async () => {
+        const loadPrecomputed = async () => {
             try {
-                // progressive loading: fetch lite first
-                const data = await fetchAuditData(false, true); // lite=true
-                setAuditData(data);
-                setIsLite(true);
+                const [summaryRes, spectrumRes, heatmapRes, consensusRes, significanceRes, reliabilityRes, longitudinalRes] = await Promise.allSettled([
+                    fetch('/summary_stats.json').then(r => r.ok ? r.json() : null),
+                    fetch('/spectrum_data.json').then(r => r.ok ? r.json() : null),
+                    fetch('/heatmap_matrix.json').then(r => r.ok ? r.json() : null),
+                    fetch('/consensus_stats.json').then(r => r.ok ? r.json() : null),
+                    fetch('/significance_pairwise.json').then(r => r.ok ? r.json() : null),
+                    fetch('/reliability_scores.json').then(r => r.ok ? r.json() : null),
+                    fetch('/longitudinal_data.json').then(r => r.ok ? r.json() : null),
+                ]);
 
-                fetch('/api/report').then(async r => {
-                    if (r.ok) {
-                        const j = await r.json();
-                        if (j.content) setReportContent(j.content);
-                    }
-                }).catch(() => { });
+                const summary = summaryRes.status === 'fulfilled' ? summaryRes.value : null;
+                const spectrum = spectrumRes.status === 'fulfilled' ? spectrumRes.value : null;
+                const heatmap = heatmapRes.status === 'fulfilled' ? heatmapRes.value : null;
+                const consensus = consensusRes.status === 'fulfilled' ? consensusRes.value : null;
+                const significance = significanceRes.status === 'fulfilled' ? significanceRes.value : null;
+                const reliability = reliabilityRes.status === 'fulfilled' ? reliabilityRes.value : null;
+                const longitudinal = longitudinalRes.status === 'fulfilled' ? longitudinalRes.value : null;
 
-                setTimeout(() => {
-                    Promise.allSettled([
-                        fetch('/clusters.json').then(async r => { if (r.ok) setClusters(await r.json()); }).catch(() => { }),
-                        fetch('/drift_report.json').then(async r => { if (r.ok) setDriftData(await r.json()); }).catch(() => { }),
-                        fetch('/consensus_bias.csv').then(async r => {
-                            if (r.ok) {
-                                const text = await r.text();
-                                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setConsensusData(res.data) });
-                            }
-                        }).catch(() => { }),
-                        fetch('/assets/p_values.csv').then(async r => {
-                            if (r.ok) {
-                                const text = await r.text();
-                                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setPValues(res.data) });
-                            }
-                        }).catch(() => { }),
-                        fetch('/political_compass.json').then(async r => { if (r.ok) setPoliticalData(await r.json()); }).catch(() => { }),
-                        fetch('/paternalism.json').then(async r => { if (r.ok) setPaternalismData(await r.json()); }).catch(() => { }),
-                        fetch('/assets/trigger_words.json').then(async r => { if (r.ok) setTriggerData(await r.json()); }).catch(() => { })
-                    ]);
-                }, 100);
+                if (summary) setPrecomputedSummary(summary);
+                if (spectrum) setPrecomputedSpectrum(spectrum);
+                if (heatmap) setPrecomputedHeatmap(heatmap);
+                if (consensus) setPrecomputedConsensus(consensus);
+                if (significance) setPrecomputedSignificance(significance);
+                if (reliability) setPrecomputedReliability(reliability);
+                if (longitudinal) setPrecomputedLongitudinal(longitudinal);
 
+                console.log('⚡ Pre-computed JSON loaded', {
+                    summary: !!summary, spectrum: !!spectrum, heatmap: !!heatmap,
+                    consensus: !!consensus, significance: !!significance,
+                    reliability: !!reliability, longitudinal: !!longitudinal
+                });
             } catch (err) {
-                console.error("Failed to load analysis data", err);
+                console.error("Failed to load pre-computed data", err);
             } finally {
                 setLoading(false);
             }
         };
-        loadAll();
+        loadPrecomputed();
     }, []);
 
-    // All available models (from raw data, before any filtering)
+    // PHASE 2 (deferred): Load CSV only when filters are applied
+    const hasFiltersForCsv = selectedModels.length > 0 || dateRange.start !== '' || dateRange.end !== '';
+    useEffect(() => {
+        if (hasFiltersForCsv) {
+            ensureAuditData();
+        }
+    }, [hasFiltersForCsv]);
+
+    // All available models — prefer pre-computed, fall back to raw data
     const allModels = useMemo(() => {
+        if (precomputedSummary?.allModels?.length > 0) return precomputedSummary.allModels;
         if (auditData.length === 0) return [];
         return Array.from(new Set(auditData.map(d => d.model))).filter(m => m).sort();
-    }, [auditData]);
+    }, [auditData, precomputedSummary]);
 
-    // Derived State
+    // Derived State — prefer pre-computed
     const timelineDates = useMemo(() => {
+        if (precomputedSummary?.timelineDates?.length > 0) return precomputedSummary.timelineDates;
         if (auditData.length === 0) return [];
         return Array.from(new Set(auditData.map(d => d.timestamp?.split('T')[0] || ''))).filter(d => d).sort();
-    }, [auditData]);
+    }, [auditData, precomputedSummary]);
 
     const filteredAuditData = useMemo(() => {
         let data = auditData;
@@ -209,7 +357,21 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         }).filter(c => c.size > 0);
     }, [clusters, selectedModels]);
 
+    // Are filters active? If not, use pre-computed data
+    const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+
     const stats = useMemo(() => {
+        // Use pre-computed summary when no filters are active
+        if (!hasFilters && precomputedSummary) {
+            return {
+                reliability: precomputedReliability
+                    ? { score: precomputedReliability.globalKappa, interpretation: precomputedReliability.interpretation }
+                    : { score: 0, interpretation: 'Pre-computed' },
+                models: precomputedSummary.allModels || [],
+                prompts: Array.from({ length: precomputedSummary.totalCases || 0 }, (_, i) => String(i)),
+                distribution: precomputedSummary.distribution || [],
+            };
+        }
         if (filteredAuditData.length === 0) return null;
         const uniqueModels = new Set<string>();
         const uniquePrompts = new Set<string>();
@@ -253,9 +415,13 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         const distribution = Array.from(distributionMap.entries()).map(([name, value]) => ({ name, value }));
 
         return { reliability, models, prompts, distribution };
-    }, [filteredAuditData]);
+    }, [filteredAuditData, hasFilters, precomputedSummary]);
 
     const efficiencyData = useMemo(() => {
+        // Use pre-computed spectrum when no filters are active
+        if (!hasFilters && precomputedSpectrum.length > 0) {
+            return precomputedSpectrum;
+        }
         if (filteredAuditData.length === 0) return [];
         const modelStats = new Map<string, { total: number, refused: number, cost: number }>();
         filteredAuditData.forEach(row => {
@@ -273,7 +439,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
             costPer1k: (stats.cost / stats.total) * 1000,
             total: stats.total
         })).filter(m => m.total > 0);
-    }, [filteredAuditData]);
+    }, [filteredAuditData, hasFilters, precomputedSpectrum]);
 
     return (
         <AnalysisContext.Provider value={{
@@ -281,8 +447,11 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
             reportContent, loading, dateRange, setDateRange, selectedModels, setSelectedModels, allModels,
             filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
             filteredConsensusData, filteredPValues, filteredClusters,
-            timelineDates, stats, efficiencyData,
-            isLite, isLoadingFull, loadFullDetails
+            timelineDates, stats, efficiencyData, precomputedHeatmap,
+            precomputedConsensus, precomputedSignificance, precomputedReliability, precomputedLongitudinal,
+            isLite, isLoadingFull, loadFullDetails,
+            ensureClusters, ensureDrift, ensureConsensus, ensurePValues,
+            ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData
         }}>
             {children}
         </AnalysisContext.Provider>

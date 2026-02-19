@@ -17,7 +17,7 @@ export default function SummaryPage() {
     const totalCases = stats?.prompts.length || 0;
     const modelsCount = stats?.models.length || 0;
     const consistencyScore = stats?.reliability?.score ?? 0;
-    const totalEvaluations = filteredAuditData?.length || 0;
+    const totalEvaluations = filteredAuditData?.length || stats?.prompts?.length * stats?.models?.length || 0;
 
     // Calculate relative time for last update
     const lastUpdated = useMemo(() => {

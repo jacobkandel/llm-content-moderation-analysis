@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Bar } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 
 export default function TriggersPage() {
-    const { triggerData, loading } = useAnalysis();
+    const { triggerData, loading, ensureTriggers } = useAnalysis();
+    useEffect(() => { ensureTriggers(); }, []);
 
     if (loading) return <SkeletonLoader />;
 
