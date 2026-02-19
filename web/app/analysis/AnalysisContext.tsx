@@ -380,6 +380,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         filteredAuditData.forEach((row) => {
             uniqueModels.add(row.model);
             const pId = row.case_id || row.prompt_id || row.prompt;
+            if (!pId) return;
             uniquePrompts.add(pId);
             if (!promptMap.has(pId)) promptMap.set(pId, []);
             promptMap.get(pId)!.push(row);
