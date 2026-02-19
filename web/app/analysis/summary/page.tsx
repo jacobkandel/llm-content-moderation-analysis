@@ -11,7 +11,7 @@ import ShareButton from '@/components/ShareButton';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 
 export default function SummaryPage() {
-    const { loading, stats, efficiencyData, filteredAuditData, timelineDates, loadFullDetails } = useAnalysis();
+    const { loading, stats, efficiencyData, filteredAuditData, timelineDates, loadFullDetails, precomputedPrompts, precomputedLongitudinal } = useAnalysis();
 
     // Calculate metrics
     const totalCases = stats?.prompts.length || 0;
@@ -55,54 +55,45 @@ export default function SummaryPage() {
             }));
     }, [efficiencyData]);
 
-    // Extract unique questions
+    // Use precomputed prompts list (instant, no CSV needed)
     const questions = useMemo(() => {
-        if (!stats?.prompts || !filteredAuditData) return [];
-        console.log("Generating questions list", { prompts: stats.prompts.length, data: filteredAuditData.length });
-        const unique = new Map();
-        stats.prompts.forEach((pId: string) => {
-            const row = filteredAuditData.find(d => (d.case_id || d.prompt_id || d.prompt) === pId);
-            if (row && !unique.has(pId)) {
-                unique.set(pId, {
-                    id: pId,
-                    text: row.prompt,
-                    category: row.category
-                });
-            }
-        });
-        return Array.from(unique.values());
-    }, [stats?.prompts, filteredAuditData]);
+        return precomputedPrompts.map(p => ({
+            id: p.id,
+            text: p.text,
+            category: p.category,
+            source: p.source,
+        }));
+    }, [precomputedPrompts]);
 
-    // Prepare models list for modal
+    // Prepare models list for modal — use precomputed efficiency + longitudinal data (no CSV needed)
     const modelsList = useMemo(() => {
-        if (!stats?.models || !filteredAuditData) return [];
+        if (!efficiencyData || efficiencyData.length === 0) return [];
 
-        return stats.models.map((modelId: string) => {
-            const modelRows = filteredAuditData.filter(r => r.model === modelId);
-
-            // Get latest timestamp
-            let lastTested = 'N/A';
-            if (modelRows.length > 0) {
-                const maxDate = modelRows.reduce((max: number, row) => {
-                    const current = new Date(row.timestamp).getTime();
-                    return current > max ? current : max;
-                }, 0);
-                if (maxDate > 0) {
-                    lastTested = new Date(maxDate).toLocaleDateString();
+        // Build a map of model → last tested date from longitudinal data
+        const lastTestedMap: Record<string, string> = {};
+        if (precomputedLongitudinal?.chartData) {
+            const chartData = precomputedLongitudinal.chartData;
+            // Walk dates in reverse to find last date each model had data
+            for (let i = chartData.length - 1; i >= 0; i--) {
+                const entry = chartData[i];
+                for (const key of Object.keys(entry)) {
+                    if (key === 'date' || key.endsWith('_count')) continue;
+                    if (entry[key] !== null && entry[key] !== undefined && !lastTestedMap[key]) {
+                        lastTestedMap[key] = entry.date;
+                    }
                 }
             }
+        }
 
-            const efficiencyInfo = efficiencyData?.find(e => e.name === modelId);
-            const displayName = efficiencyInfo ? efficiencyInfo.fullName : modelId;
-
-            return {
-                id: modelId,
-                name: displayName,
-                lastTested,
-                totalEvaluations: modelRows.length
-            };
-        }).sort((a: any, b: any) => b.totalEvaluations - a.totalEvaluations);
-    }, [stats?.models, filteredAuditData, efficiencyData]);
+        return efficiencyData.map((m: any) => ({
+            id: m.fullName,
+            name: m.fullName,
+            lastTested: lastTestedMap[m.fullName]
+                ? new Date(lastTestedMap[m.fullName]).toLocaleDateString()
+                : 'N/A',
+            totalEvaluations: m.total || 0,
+        })).sort((a: any, b: any) => b.totalEvaluations - a.totalEvaluations);
+    }, [efficiencyData, precomputedLongitudinal]);
 
     if (loading) return <SkeletonLoader />;
 

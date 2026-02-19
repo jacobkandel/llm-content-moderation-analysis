@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Loader2, X } from 'lucide-react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
+import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
 
 type HeatmapProps = {
     data: any[];
@@ -44,7 +45,7 @@ const normalizeCategory = (cat: string): string => {
 };
 
 export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description, onCellClick }: HeatmapProps) {
-    const { isLite, isLoadingFull, loadFullDetails, precomputedHeatmap, selectedModels, dateRange } = useAnalysis();
+    const { isLite, isLoadingFull, loadFullDetails, precomputedHeatmap, precomputedPrompts, selectedModels, dateRange } = useAnalysis();
     const [selectedCell, setSelectedCell] = useState<{ model: string; category: string } | null>(null);
     const [expandedModel, setExpandedModel] = useState<string | null>(null); // For mobile accordion
     const [showModal, setShowModal] = useState(false);
@@ -109,6 +110,20 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
         return matrix.stats[selectedCell.model]?.[selectedCell.category]?.entries || [];
     }, [selectedCell, matrix]);
 
+    // When using precomputed data, entries are empty - show matching prompts instead
+    const categoryPrompts = useMemo(() => {
+        if (!selectedCell || modalEntries.length > 0) return [];
+        return precomputedPrompts.filter(p => {
+            const pCat = p.category;
+            const selCat = selectedCell.category;
+            // Handle normalized categories
+            if (selCat === 'Explicit/Sexual') {
+                return pCat === 'Explicit Content' || pCat === 'Sexual' || pCat === 'Explicit/Sexual';
+            }
+            return pCat === selCat;
+        });
+    }, [selectedCell, modalEntries, precomputedPrompts]);
+
     // Helper for color scale - Using UChicago Brand Colors
     const getColor = (rate: number) => {
         // UChicago Green: #00843D
@@ -132,12 +147,10 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
             loadFullDetails();
         }
 
-        const cell = matrix.stats[model]?.[category];
-        const entries = cell?.entries || [];
-        if (entries.length === 0) return;
-
         setSelectedCell({ model, category });
         setShowModal(true);
+        const cell = matrix.stats[model]?.[category];
+        const entries = cell?.entries || [];
         if (onCellClick) onCellClick(model, category, entries);
     };
 
@@ -293,7 +306,9 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                         </div>
 
                         <div className="flex items-center justify-between mb-3 flex-shrink-0 px-1">
-                            <p className="text-sm text-muted-foreground font-medium">{modalEntries.length} entries found</p>
+                            <p className="text-sm text-muted-foreground font-medium">
+                                {modalEntries.length > 0 ? `${modalEntries.length} entries found` : `${categoryPrompts.length} prompts in this category`}
+                            </p>
                             {isLoadingFull && (
                                 <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-2.5 py-1 rounded-full animate-pulse">
                                     <Loader2 className="w-3 h-3 animate-spin" /> Loading full text...
@@ -302,7 +317,8 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                         </div>
 
                         <div className="space-y-3 overflow-y-auto flex-grow pr-1 custom-scrollbar">
-                            {modalEntries.slice(0, 50).map((entry, idx) => (
+                            {/* Show full audit entries when available (from CSV) */}
+                            {modalEntries.length > 0 ? modalEntries.slice(0, 50).map((entry, idx) => (
                                 <div key={idx} className={`p-3 rounded-lg border text-sm ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
                                     ? 'border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30'
                                     : 'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30'
@@ -347,10 +363,31 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                         )}
                                     </div>
                                 </div>
-                            ))}
-                            {modalEntries.length > 50 && (
+                            )) : null}
+                            {modalEntries.length > 0 && modalEntries.length > 50 && (
                                 <div className="py-4 text-center">
                                     <p className="text-muted-foreground text-sm">...and {modalEntries.length - 50} more entries</p>
+                                </div>
+                            )}
+
+                            {/* Show precomputed prompts when no CSV entries (precomputed mode) */}
+                            {modalEntries.length === 0 && categoryPrompts.slice(0, 50).map((prompt, idx) => {
+                                const source = prompt.source || getPromptSource(prompt.id);
+                                return (
+                                    <div key={idx} className="p-3 rounded-lg border border-border bg-muted/20 text-sm">
+                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getSourceBadgeClass(source)}`}>
+                                                {source}
+                                            </span>
+                                            <span className="text-[10px] font-mono text-muted-foreground">ID: {prompt.id}</span>
+                                        </div>
+                                        <p className="text-sm text-foreground leading-relaxed">{prompt.text || <span className="italic opacity-70">No prompt text available</span>}</p>
+                                    </div>
+                                );
+                            })}
+                            {modalEntries.length === 0 && categoryPrompts.length > 50 && (
+                                <div className="py-4 text-center">
+                                    <p className="text-muted-foreground text-sm">...and {categoryPrompts.length - 50} more prompts</p>
                                 </div>
                             )}
                         </div>

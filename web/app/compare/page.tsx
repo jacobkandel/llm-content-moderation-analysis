@@ -1,18 +1,44 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { ChevronDown, BarChart2, AlertCircle, CheckCircle, Zap, Shield, ArrowRightLeft, Search, Filter, Calendar, X } from 'lucide-react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { ChevronDown, CheckCircle, Search, Filter, Calendar, X } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import Papa from 'papaparse';
 
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
-import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
+import { getLogoUrl } from '@/lib/provider-logos';
+import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
+
+// --- Types for precomputed data ---
+type CompareModelStats = {
+    refusalRate: number;
+    avgVerbosity: number;
+    total: number;
+    categoryRates: Record<string, number>;
+};
+
+type CompareData = {
+    models: string[];
+    categories: string[];
+    dates: string[];
+    modelStats: Record<string, CompareModelStats>;
+    pairwiseDisagreements: Record<string, number>;
+};
 
 const getProviderLogo = (model: string): string => getLogoUrl(model);
 
 export default function ComparePage() {
-    const [data, setData] = useState<AuditRow[]>([]);
+    // --- Phase 1: Instant data (precomputed JSON, ~20KB) ---
+    const [compareData, setCompareData] = useState<CompareData | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // --- Phase 2: Full CSV data (lazy, for disagreement text) ---
+    const [fullData, setFullData] = useState<AuditRow[] | null>(null);
+    const [fullDataLoading, setFullDataLoading] = useState(false);
+    const fullDataTriggered = useRef(false);
+    const disagreeRef = useRef<HTMLDivElement>(null);
+
+    // --- UI state ---
     const [modelA, setModelA] = useState<string>('');
     const [modelB, setModelB] = useState<string>('');
     const [isClient, setIsClient] = useState(false);
@@ -20,45 +46,34 @@ export default function ComparePage() {
 
     // Filters
     const [searchKeyword, setSearchKeyword] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedDate, setSelectedDate] = useState('all');
 
+    // Debounce search input (300ms)
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchKeyword), 300);
+        return () => clearTimeout(timer);
+    }, [searchKeyword]);
+
+    // --- Phase 1: Load precomputed JSON (instant) ---
     useEffect(() => {
         setIsClient(true);
 
-        async function loadData() {
-            try {
-                // 1. Instant Load (Lite)
-                const liteRows = await fetchAuditData(false, true);
-                processData(liteRows);
+        fetch('/compare_data.json')
+            .then(r => r.json())
+            .then((data: CompareData) => {
+                setCompareData(data);
+                if (data.models.length > 0) setModelA(data.models[0]);
+                if (data.models.length > 1) setModelB(data.models[1]);
                 setLoading(false);
-
-                // 2. Background Load (Full)
-                const fullRows = await fetchAuditData(false, false);
-                processData(fullRows);
-            } catch (err) {
-                console.error(err);
+            })
+            .catch(err => {
+                console.error('Failed to load compare_data.json', err);
                 setLoading(false);
-            }
-        }
+            });
 
-        function processData(rows: AuditRow[]) {
-            // Filter out ERROR verdicts (broken models)
-            const cleanRows = (rows || []).filter((r: AuditRow) => r.verdict !== 'ERROR');
-            setData(cleanRows);
-
-            // Set defaults: first two unique models (only if not set)
-            if (!modelA && !modelB) {
-                const uniqueModels = Array.from(new Set(cleanRows.map((r: AuditRow) => r.model))) as string[];
-                if (uniqueModels.length > 0) setModelA(uniqueModels[0]);
-                if (uniqueModels.length > 1) setModelB(uniqueModels[1]);
-                else if (uniqueModels.length > 0) setModelB(uniqueModels[0]);
-            }
-        }
-
-        loadData();
-
-        // Load pairwise significance data
+        // Load pairwise significance data (small file)
         fetch('/assets/p_values.csv').then(async r => {
             if (r.ok) {
                 const text = await r.text();
@@ -67,118 +82,108 @@ export default function ComparePage() {
         }).catch(() => { });
     }, []);
 
-    // Filter Options
-    const filterOptions = useMemo(() => {
-        const categories = Array.from(new Set(data.map(d => d.category))).filter(Boolean).sort();
-        const dates = Array.from(new Set(data.map(d => d.timestamp?.split('T')[0]))).filter(Boolean).sort().reverse();
-        return { categories, dates };
-    }, [data]);
+    // --- Phase 2: Lazy-load full CSV when disagreement section is visible ---
+    const loadFullData = useCallback(() => {
+        if (fullDataTriggered.current) return;
+        fullDataTriggered.current = true;
+        setFullDataLoading(true);
 
-    const availableModels = useMemo(() => {
-        // Filter out models with < 100 VALID data points
-        const modelCounts = new Map<string, number>();
-        data.forEach(d => {
-            if (d.verdict && d.verdict !== 'ERROR' && d.verdict !== 'BLOCKED') {
-                modelCounts.set(d.model, (modelCounts.get(d.model) || 0) + 1);
-            }
+        fetchAuditData(false, false).then(rows => {
+            const cleanRows = (rows || []).filter(r => r.verdict !== 'ERROR');
+            setFullData(cleanRows);
+            setFullDataLoading(false);
+        }).catch(err => {
+            console.error('Failed to load full data', err);
+            setFullDataLoading(false);
         });
-        return Array.from(new Set(data.map(d => d.model))).filter(m => (modelCounts.get(m) || 0) >= 100).sort();
-    }, [data]);
+    }, []);
 
-    // Filtered data based on search/category/date
-    const filteredData = useMemo(() => {
-        return data.filter(d => {
-            if (selectedCategory !== 'all' && d.category !== selectedCategory) return false;
-            if (selectedDate !== 'all' && !d.timestamp?.startsWith(selectedDate)) return false;
-            if (searchKeyword && !d.prompt?.toLowerCase().includes(searchKeyword.toLowerCase())) return false;
-            return true;
-        });
-    }, [data, selectedCategory, selectedDate, searchKeyword]);
+    useEffect(() => {
+        if (!disagreeRef.current || !compareData) return;
 
-    // Comparison Stats
-    const getStats = (modelId: string) => {
-        const modelData = filteredData.filter(d => d.model === modelId);
-        const total = modelData.length;
-        if (total === 0) return null;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    loadFullData();
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: '200px' } // Start loading 200px before visible
+        );
+        observer.observe(disagreeRef.current);
+        return () => observer.disconnect();
+    }, [compareData, loadFullData]);
 
-        const refusals = modelData.filter(d => d.verdict === 'REFUSAL' || d.verdict === 'REMOVED' || d.verdict === 'unsafe').length;
-        const totalLen = modelData.reduce((sum, d) => sum + (d.response?.length || 0), 0);
+    // --- Computed values from precomputed data ---
+    const statsA = useMemo(() => {
+        if (!compareData || !modelA) return null;
+        return compareData.modelStats[modelA] || null;
+    }, [compareData, modelA]);
 
-        return {
-            refusalRate: (refusals / total) * 100,
-            avgVerbosity: Math.round(totalLen / total),
-            total
-        };
-    };
+    const statsB = useMemo(() => {
+        if (!compareData || !modelB) return null;
+        return compareData.modelStats[modelB] || null;
+    }, [compareData, modelB]);
 
-    const statsA = useMemo(() => getStats(modelA), [filteredData, modelA]);
-    const statsB = useMemo(() => getStats(modelB), [filteredData, modelB]);
-
-    // Radar Chart Data (Category Sensitivity)
+    // Radar chart from precomputed per-category rates
     const radarData = useMemo(() => {
-        if (!modelA || !modelB) return [];
+        if (!compareData || !modelA || !modelB) return [];
+        const statsForA = compareData.modelStats[modelA];
+        const statsForB = compareData.modelStats[modelB];
+        if (!statsForA || !statsForB) return [];
 
-        const categories = Array.from(new Set(filteredData.map(d => d.category))).sort();
+        return compareData.categories.map(cat => ({
+            subject: cat,
+            A: statsForA.categoryRates[cat] || 0,
+            B: statsForB.categoryRates[cat] || 0,
+            fullMark: 100,
+        }));
+    }, [compareData, modelA, modelB]);
 
-        return categories.map(cat => {
-            const dataA = filteredData.filter(d => d.model === modelA && d.category === cat);
-            const dataB = filteredData.filter(d => d.model === modelB && d.category === cat);
+    // Disagreement count from precomputed pairwise data
+    const disagreementCount = useMemo(() => {
+        if (!compareData || !modelA || !modelB) return 0;
+        const key1 = `${modelA}||${modelB}`;
+        const key2 = `${modelB}||${modelA}`;
+        return compareData.pairwiseDisagreements[key1] || compareData.pairwiseDisagreements[key2] || 0;
+    }, [compareData, modelA, modelB]);
 
-            const rateA = dataA.length ? (dataA.filter(d => d.verdict === 'REFUSAL' || d.verdict === 'REMOVED' || d.verdict === 'unsafe').length / dataA.length) * 100 : 0;
-            const rateB = dataB.length ? (dataB.filter(d => d.verdict === 'REFUSAL' || d.verdict === 'REMOVED' || d.verdict === 'unsafe').length / dataB.length) * 100 : 0;
-
-            return {
-                subject: cat,
-                A: rateA,
-                B: rateB,
-                fullMark: 100
-            };
-        });
-    }, [filteredData, modelA, modelB]);
-
-    // Disagreement Analysis
+    // --- Disagreements from full data (Phase 2, only when loaded) ---
     const disagreements = useMemo(() => {
-        if (!modelA || !modelB) return [];
+        if (!fullData || !modelA || !modelB) return [];
 
-        // Helper function to determine if verdict is "safe"
         const isSafe = (verdict: string) => {
             const v = verdict?.toUpperCase();
             return v !== 'REMOVED' && v !== 'REFUSAL' && v !== 'UNSAFE';
         };
 
+        let filtered = fullData;
+        if (selectedCategory !== 'all') filtered = filtered.filter(d => d.category === selectedCategory);
+        if (selectedDate !== 'all') filtered = filtered.filter(d => d.timestamp?.startsWith(selectedDate));
+        if (debouncedSearch) filtered = filtered.filter(d => d.prompt?.toLowerCase().includes(debouncedSearch.toLowerCase()));
+
         const mapA = new Map<string, AuditRow>();
-        // Only map rows with prompts (skip Lite data rows without prompts)
-        filteredData.filter(d => d.model === modelA && d.prompt).forEach(d => mapA.set(d.prompt!, d));
+        filtered.filter(d => d.model === modelA && d.prompt).forEach(d => mapA.set(d.prompt!, d));
 
         const diffs: { prompt: string; category: string; rowA: AuditRow; rowB: AuditRow }[] = [];
-
-        filteredData.filter(d => d.model === modelB && d.prompt).forEach(rowB => {
+        filtered.filter(d => d.model === modelB && d.prompt).forEach(rowB => {
             const rowA = mapA.get(rowB.prompt!);
-            if (rowA) {
-                const isSafeA = isSafe(rowA.verdict);
-                const isSafeB = isSafe(rowB.verdict);
-
-                if (isSafeA !== isSafeB) {
-                    diffs.push({
-                        prompt: rowB.prompt!,
-                        category: rowB.category,
-                        rowA,
-                        rowB
-                    });
-                }
+            if (rowA && isSafe(rowA.verdict) !== isSafe(rowB.verdict)) {
+                diffs.push({ prompt: rowB.prompt!, category: rowB.category, rowA, rowB });
             }
         });
 
         return diffs;
-    }, [filteredData, modelA, modelB]);
+    }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch]);
 
     const clearFilters = () => {
         setSearchKeyword('');
+        setDebouncedSearch('');
         setSelectedCategory('all');
         setSelectedDate('all');
     };
 
-    if (!isClient) return null; // Hydration fix
+    if (!isClient) return null;
 
     return (
         <main className="min-h-screen bg-background font-sans text-foreground">
@@ -222,7 +227,7 @@ export default function ComparePage() {
                                     className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary text-foreground"
                                 >
                                     <option value="all">All Categories</option>
-                                    {filterOptions.categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                    {(compareData?.categories || []).map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
                         </div>
@@ -238,7 +243,7 @@ export default function ComparePage() {
                                     className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-indigo-500 text-foreground"
                                 >
                                     <option value="all">All Dates</option>
-                                    {filterOptions.dates.map(d => <option key={d} value={d}>{d}</option>)}
+                                    {(compareData?.dates || []).slice().reverse().map(d => <option key={d} value={d}>{d}</option>)}
                                 </select>
                             </div>
                         </div>
@@ -262,7 +267,7 @@ export default function ComparePage() {
                                 onChange={(e) => setModelA(e.target.value)}
                                 className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-primary font-medium"
                             >
-                                {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                                {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                         </div>
@@ -280,7 +285,7 @@ export default function ComparePage() {
                                 onChange={(e) => setModelB(e.target.value)}
                                 className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-primary font-medium"
                             >
-                                {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                                {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                         </div>
@@ -288,7 +293,7 @@ export default function ComparePage() {
                 </div>
 
                 {loading ? (
-                    <div className="p-12 text-center text-muted-foreground">Loading audit data...</div>
+                    <div className="p-12 text-center text-muted-foreground">Loading comparison data...</div>
                 ) : (
                     <>
                         {/* Pairwise Significance for Selected Pair */}
@@ -335,11 +340,7 @@ export default function ComparePage() {
                             {/* Card A */}
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-primary relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    <img
-                                        src={getProviderLogo(modelA)}
-                                        alt=""
-                                        className="h-32 w-32 object-contain"
-                                    />
+                                    <img src={getProviderLogo(modelA)} alt="" className="h-32 w-32 object-contain" />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
@@ -371,11 +372,7 @@ export default function ComparePage() {
                             {/* Card B */}
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#275D38] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    <img
-                                        src={getProviderLogo(modelB)}
-                                        alt=""
-                                        className="h-32 w-32 object-contain"
-                                    />
+                                    <img src={getProviderLogo(modelB)} alt="" className="h-32 w-32 object-contain" />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
@@ -448,90 +445,129 @@ export default function ComparePage() {
                         </div>
 
                         {/* Disagreement Analysis */}
-                        <div className="space-y-4">
+                        <div className="space-y-4" ref={disagreeRef}>
                             <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
-                                Disagreement Analysis ({disagreements.length})
+                                Disagreement Analysis ({fullData ? disagreements.length : disagreementCount})
                             </h3>
                             <p className="text-sm text-muted-foreground">
                                 Showing instances where one model refused while the other allowed (and vice versa).
                             </p>
 
-                            <div className="grid gap-4">
-                                {disagreements.slice(0, 50).map((diff, idx) => (
-                                    <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-accent/50 transition-colors">
-                                        <div className="bg-muted/30 p-3 border-b border-border flex justify-between items-center">
-                                            <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
-                                                {diff.category}
-                                            </span>
-                                        </div>
-                                        <div className="p-4 space-y-4">
-                                            {/* Prompt */}
-                                            <div>
-                                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Prompt</p>
-                                                <div className="text-sm text-foreground font-mono bg-muted/50 p-3 rounded border border-border max-h-32 overflow-y-auto">
-                                                    {diff.prompt ? diff.prompt : <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />}
+                            {!fullData ? (
+                                /* Skeleton placeholders while full data loads */
+                                <div className="grid gap-4">
+                                    {fullDataLoading ? (
+                                        Array.from({ length: Math.min(3, disagreementCount) }).map((_, idx) => (
+                                            <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden animate-pulse">
+                                                <div className="bg-muted/30 p-3 border-b border-border">
+                                                    <div className="h-3 w-24 bg-muted rounded" />
+                                                </div>
+                                                <div className="p-4 space-y-4">
+                                                    <div className="space-y-2">
+                                                        <div className="h-3 w-16 bg-muted rounded" />
+                                                        <div className="h-16 bg-muted/50 rounded" />
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="h-24 bg-muted/30 rounded-lg" />
+                                                        <div className="h-24 bg-muted/30 rounded-lg" />
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            {/* Side-by-Side Responses */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {/* Model A Response */}
-                                                <div className={`rounded-lg border ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
-                                                    <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
-                                                        <div className="flex items-center gap-2">
-                                                            <img
-                                                                src={getProviderLogo(modelA)}
-                                                                alt=""
-                                                                className="h-5 w-5 rounded object-contain"
-                                                                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                                            />
-                                                            <span className="font-bold text-sm text-foreground">{modelA?.split('/')[1] || modelA}</span>
-                                                        </div>
-                                                        <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
-                                                            {diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
-                                                        </span>
+                                        ))
+                                    ) : (
+                                        <div className="text-center text-muted-foreground py-8 bg-card rounded-lg border border-dashed border-border">
+                                            <p className="text-sm">Scroll down to load detailed disagreement data ({disagreementCount} disagreements).</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="grid gap-4">
+                                    {disagreements.slice(0, 50).map((diff, idx) => (
+                                        <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-accent/50 transition-colors">
+                                            <div className="bg-muted/30 p-3 border-b border-border flex justify-between items-center">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
+                                                        {diff.category}
+                                                    </span>
+                                                    {(() => {
+                                                        const source = getPromptSource(diff.rowA?.prompt_id || diff.rowB?.prompt_id);
+                                                        return (
+                                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getSourceBadgeClass(source)}`}>
+                                                                {source}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </div>
+                                            <div className="p-4 space-y-4">
+                                                {/* Prompt */}
+                                                <div>
+                                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Prompt</p>
+                                                    <div className="text-sm text-foreground font-mono bg-muted/50 p-3 rounded border border-border max-h-32 overflow-y-auto">
+                                                        {diff.prompt || <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />}
                                                     </div>
-                                                    <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
-                                                        {diff.rowA.response || (loading ? <div className="h-4 w-full bg-muted/50 rounded animate-pulse" /> : 'No response recorded')}
-                                                    </p>
                                                 </div>
 
-                                                {/* Model B Response */}
-                                                <div className={`rounded-lg border ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
-                                                    <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
-                                                        <div className="flex items-center gap-2">
-                                                            <img
-                                                                src={getProviderLogo(modelB)}
-                                                                alt=""
-                                                                className="h-5 w-5 rounded object-contain"
-                                                                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                                            />
-                                                            <span className="font-bold text-sm text-foreground">{modelB?.split('/')[1] || modelB}</span>
+                                                {/* Side-by-Side Responses */}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {/* Model A Response */}
+                                                    <div className={`rounded-lg border ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
+                                                        <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
+                                                            <div className="flex items-center gap-2">
+                                                                <img
+                                                                    src={getProviderLogo(modelA)}
+                                                                    alt=""
+                                                                    className="h-5 w-5 rounded object-contain"
+                                                                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                                />
+                                                                <span className="font-bold text-sm text-foreground">{modelA?.split('/')[1] || modelA}</span>
+                                                            </div>
+                                                            <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
+                                                                {diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
+                                                            </span>
                                                         </div>
-                                                        <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
-                                                            {diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
-                                                        </span>
+                                                        <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
+                                                            {diff.rowA.response || 'No response recorded'}
+                                                        </p>
                                                     </div>
-                                                    <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
-                                                        {diff.rowB.response || (loading ? <div className="h-4 w-full bg-muted/50 rounded animate-pulse" /> : 'No response recorded')}
-                                                    </p>
+
+                                                    {/* Model B Response */}
+                                                    <div className={`rounded-lg border ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
+                                                        <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
+                                                            <div className="flex items-center gap-2">
+                                                                <img
+                                                                    src={getProviderLogo(modelB)}
+                                                                    alt=""
+                                                                    className="h-5 w-5 rounded object-contain"
+                                                                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                                />
+                                                                <span className="font-bold text-sm text-foreground">{modelB?.split('/')[1] || modelB}</span>
+                                                            </div>
+                                                            <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
+                                                                {diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
+                                                            </span>
+                                                        </div>
+                                                        <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
+                                                            {diff.rowB.response || 'No response recorded'}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                                {disagreements.length > 50 && (
-                                    <div className="text-center text-muted-foreground text-sm py-4">
-                                        ...and {disagreements.length - 50} more
-                                    </div>
-                                )}
-                                {disagreements.length === 0 && (
-                                    <div className="text-center text-muted-foreground py-8 bg-card rounded-lg border border-dashed border-border">
-                                        <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                        No disagreements found between selected models.
-                                    </div>
-                                )}
-                            </div>
+                                    ))}
+                                    {disagreements.length > 50 && (
+                                        <div className="text-center text-muted-foreground text-sm py-4">
+                                            ...and {disagreements.length - 50} more
+                                        </div>
+                                    )}
+                                    {disagreements.length === 0 && (
+                                        <div className="text-center text-muted-foreground py-8 bg-card rounded-lg border border-dashed border-border">
+                                            <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                            No disagreements found between selected models.
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </>
                 )}

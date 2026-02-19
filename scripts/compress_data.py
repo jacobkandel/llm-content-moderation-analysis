@@ -367,6 +367,79 @@ def generate_precomputed_json(df):
         json.dump(reliability_json, f, separators=(',', ':'))
     print(f"   ✅ reliability_scores.json (kappa={global_kappa:.4f}, {len(per_model_reliability)} models, {os.path.getsize('web/public/reliability_scores.json')} bytes)")
 
+    # --- 7.5 compare_data.json ---
+    # Pre-computed data for the Compare page: per-model stats, per-category rates,
+    # and pairwise disagreement summaries so the page renders instantly.
+    compare_models = sorted(keep_models)
+    compare_categories = sorted(df['category'].unique())
+
+    # Per-model stats
+    model_stats = {}
+    for model in compare_models:
+        rows = df[df['model'] == model]
+        total = len(rows)
+        if total == 0:
+            continue
+        valid = rows[~rows['verdict'].isin({'ERROR', 'BLOCKED'})]
+        valid_count = len(valid)
+        if valid_count < 100:
+            continue
+        refused = rows['verdict'].isin(REFUSAL_VERDICTS).sum()
+        # Avg verbosity from response_text or response column
+        resp_col = 'response_text' if 'response_text' in df.columns else 'response'
+        if resp_col in df.columns:
+            avg_verb = int(rows[resp_col].fillna('').str.len().mean())
+        else:
+            avg_verb = 0
+
+        # Per-category refusal rates for this model
+        cat_rates = {}
+        for cat in compare_categories:
+            cat_rows = rows[rows['category'] == cat]
+            ct = len(cat_rows)
+            if ct == 0:
+                cat_rates[cat] = 0
+            else:
+                cat_rates[cat] = round((cat_rows['verdict'].isin(REFUSAL_VERDICTS).sum() / ct) * 100, 2)
+
+        model_stats[model] = {
+            'refusalRate': round((refused / total) * 100, 2),
+            'avgVerbosity': avg_verb,
+            'total': int(total),
+            'categoryRates': cat_rates,
+        }
+
+    # Available dates for filter
+    compare_dates = sorted(df['_date'].str.split('T').str[0].unique().tolist())
+    compare_dates = [d for d in compare_dates if d]
+
+    # Pairwise disagreement counts (reuse prompt_verdicts from consensus)
+    pairwise_disagree = {}
+    eligible_models = [m for m in compare_models if m in model_stats]
+    for i in range(len(eligible_models)):
+        for j in range(i + 1, len(eligible_models)):
+            mA, mB = eligible_models[i], eligible_models[j]
+            disagree_count = 0
+            for pid, mv in prompt_verdicts.items():
+                if mA in mv and mB in mv:
+                    if mv[mA] != mv[mB]:
+                        disagree_count += 1
+            if disagree_count > 0:
+                key = f"{mA}||{mB}"
+                pairwise_disagree[key] = disagree_count
+
+    compare_json = {
+        'models': eligible_models,
+        'categories': compare_categories,
+        'dates': compare_dates,
+        'modelStats': model_stats,
+        'pairwiseDisagreements': pairwise_disagree,
+    }
+
+    with open('web/public/compare_data.json', 'w') as f:
+        json.dump(compare_json, f, separators=(',', ':'))
+    print(f"   ✅ compare_data.json ({len(eligible_models)} models, {os.path.getsize('web/public/compare_data.json')} bytes)")
+
     # --- 7. longitudinal_data.json ---
     # Per-date, per-model refusal rates
     date_model_stats = defaultdict(lambda: defaultdict(lambda: {'total': 0, 'refused': 0}))
@@ -401,6 +474,45 @@ def generate_precomputed_json(df):
     with open('web/public/longitudinal_data.json', 'w') as f:
         json.dump(longitudinal_json, f, separators=(',', ':'))
     print(f"   ✅ longitudinal_data.json ({len(chart_data)} dates, {len(longitudinal_models)} models, {os.path.getsize('web/public/longitudinal_data.json')} bytes)")
+
+    # --- 8. prompts_list.json ---
+    # Unique prompts with source attribution for the Test Cases modal
+    def get_prompt_source(pid):
+        """Determine source type from prompt ID pattern."""
+        if not pid:
+            return "Unknown"
+        pid_upper = pid.upper()
+        if pid_upper.startswith("GEN-"):
+            # Check for style variants (augmented)
+            for suffix in ("-DIRECT", "-ROLEPLAY", "-ACADEMIC", "-CASUAL"):
+                if pid_upper.endswith(suffix):
+                    return "Style Variant"
+            return "Template-Generated"
+        elif pid_upper.startswith("B-"):
+            return "Boundary Test"
+        elif pid_upper.startswith("FPC-"):
+            return "False Positive Control"
+        else:
+            return "Hand-Written"
+
+    seen_prompts = {}
+    for _, row in df.iterrows():
+        pid = str(row.get('prompt_id', '')).strip()
+        if pid and pid not in seen_prompts:
+            text = str(row.get('prompt_text', row.get('prompt', ''))).strip()
+            cat = normalize_category(str(row.get('category', '')))
+            source = get_prompt_source(pid)
+            seen_prompts[pid] = {
+                'id': pid,
+                'text': text[:500],  # Truncate very long prompts
+                'category': cat,
+                'source': source,
+            }
+
+    prompts_list = sorted(seen_prompts.values(), key=lambda p: p['id'])
+    with open('web/public/prompts_list.json', 'w') as f:
+        json.dump(prompts_list, f, separators=(',', ':'))
+    print(f"   ✅ prompts_list.json ({len(prompts_list)} unique prompts, {os.path.getsize('web/public/prompts_list.json')} bytes)")
 
 
 def compress_csv():
