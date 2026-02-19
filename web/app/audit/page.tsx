@@ -13,11 +13,16 @@ export default function AuditPage() {
     useEffect(() => {
         async function loadData() {
             try {
-                const rows = await fetchAuditData();
-                setData(rows);
+                // 1. Instant Load (Lite)
+                const liteRows = await fetchAuditData(false, true);
+                setData(liteRows);
+                setLoading(false);
+
+                // 2. Background Load (Full)
+                const fullRows = await fetchAuditData(false, false);
+                setData(fullRows);
             } catch (error) {
                 console.error('Failed to load audit data:', error);
-            } finally {
                 setLoading(false);
             }
         }
@@ -46,20 +51,28 @@ export default function AuditPage() {
         {
             accessorKey: 'prompt',
             header: 'Prompt',
-            cell: ({ row }) => (
-                <div className="max-w-[120px] lg:max-w-[200px] truncate" title={row.getValue('prompt')}>
-                    {row.getValue('prompt')}
-                </div>
-            )
+            cell: ({ row }) => {
+                const val = row.getValue('prompt') as string;
+                if (!val) return <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />;
+                return (
+                    <div className="max-w-[120px] lg:max-w-[200px] truncate" title={val}>
+                        {val}
+                    </div>
+                )
+            }
         },
         {
             accessorKey: 'response',
             header: () => <span className="hidden sm:inline">Response</span>,
-            cell: ({ row }) => (
-                <div className="hidden sm:block max-w-[150px] lg:max-w-[200px] truncate" title={row.getValue('response')}>
-                    {row.getValue('response')}
-                </div>
-            )
+            cell: ({ row }) => {
+                const val = row.getValue('response') as string;
+                if (!val) return <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />;
+                return (
+                    <div className="hidden sm:block max-w-[150px] lg:max-w-[200px] truncate" title={val}>
+                        {val}
+                    </div>
+                )
+            }
         },
         {
             accessorKey: 'verdict',

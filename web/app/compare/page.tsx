@@ -25,24 +25,38 @@ export default function ComparePage() {
 
     useEffect(() => {
         setIsClient(true);
-        fetchAuditData(false)
-            .then(rows => {
-                // Filter out ERROR verdicts (broken models)
-                const cleanRows = (rows || []).filter((r: AuditRow) => r.verdict !== 'ERROR');
-                setData(cleanRows);
 
-                // Set defaults: first two unique models
+        async function loadData() {
+            try {
+                // 1. Instant Load (Lite)
+                const liteRows = await fetchAuditData(false, true);
+                processData(liteRows);
+                setLoading(false);
+
+                // 2. Background Load (Full)
+                const fullRows = await fetchAuditData(false, false);
+                processData(fullRows);
+            } catch (err) {
+                console.error(err);
+                setLoading(false);
+            }
+        }
+
+        function processData(rows: AuditRow[]) {
+            // Filter out ERROR verdicts (broken models)
+            const cleanRows = (rows || []).filter((r: AuditRow) => r.verdict !== 'ERROR');
+            setData(cleanRows);
+
+            // Set defaults: first two unique models (only if not set)
+            if (!modelA && !modelB) {
                 const uniqueModels = Array.from(new Set(cleanRows.map((r: AuditRow) => r.model))) as string[];
                 if (uniqueModels.length > 0) setModelA(uniqueModels[0]);
                 if (uniqueModels.length > 1) setModelB(uniqueModels[1]);
                 else if (uniqueModels.length > 0) setModelB(uniqueModels[0]);
+            }
+        }
 
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
+        loadData();
 
         // Load pairwise significance data
         fetch('/assets/p_values.csv').then(async r => {
@@ -454,7 +468,7 @@ export default function ComparePage() {
                                             <div>
                                                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Prompt</p>
                                                 <div className="text-sm text-foreground font-mono bg-muted/50 p-3 rounded border border-border max-h-32 overflow-y-auto">
-                                                    {diff.prompt}
+                                                    {diff.prompt ? diff.prompt : <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />}
                                                 </div>
                                             </div>
 
@@ -477,7 +491,7 @@ export default function ComparePage() {
                                                         </span>
                                                     </div>
                                                     <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
-                                                        {diff.rowA.response || 'No response recorded'}
+                                                        {diff.rowA.response || (loading ? <div className="h-4 w-full bg-muted/50 rounded animate-pulse" /> : 'No response recorded')}
                                                     </p>
                                                 </div>
 
@@ -498,7 +512,7 @@ export default function ComparePage() {
                                                         </span>
                                                     </div>
                                                     <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
-                                                        {diff.rowB.response || 'No response recorded'}
+                                                        {diff.rowB.response || (loading ? <div className="h-4 w-full bg-muted/50 rounded animate-pulse" /> : 'No response recorded')}
                                                     </p>
                                                 </div>
                                             </div>
