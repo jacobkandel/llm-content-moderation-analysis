@@ -65,9 +65,9 @@
   --muted: 0 0% 96%;
   --muted-foreground: 0 0% 45%;
 
-  /* Accent: Goldenrod (Standard UChicago Accent) */
-  --accent: 41 100% 46%;
-  --accent-foreground: 0 0% 100%;
+  /* Accent: Neutral Gray */
+  --accent: 0 0% 92%;
+  --accent-foreground: 0 0% 12%;
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
@@ -104,9 +104,9 @@
   --muted: 0 0% 20%;
   --muted-foreground: 0 0% 65%;
 
-  /* Accent: Goldenrod */
-  --accent: 41 100% 46%;
-  --accent-foreground: 0 0% 10%;
+  /* Accent: Dark Gray */
+  --accent: 0 0% 20%;
+  --accent-foreground: 0 0% 90%;
 
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;

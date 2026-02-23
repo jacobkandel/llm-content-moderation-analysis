@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { ChevronDown, CheckCircle, Search, Filter, Calendar, X } from 'lucide-react';
+import { ChevronDown, CheckCircle, Search, Filter, Calendar, X, Info } from 'lucide-react';
+
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import Papa from 'papaparse';
 
@@ -27,6 +28,40 @@ type CompareData = {
 
 const getProviderLogo = (model: string): string => getLogoUrl(model);
 
+// --- Helper: safely parse response text that may contain JSON ---
+type ParsedResponse = { verdict: string | null; reason: string };
+function parseResponseText(raw: string | null | undefined): ParsedResponse {
+    if (!raw) return { verdict: null, reason: 'No response recorded' };
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+        try {
+            const parsed = JSON.parse(trimmed);
+            const verdict = (parsed.verdict ?? parsed.Verdict ?? parsed.decision ?? null) as string | null;
+            const reason = (parsed.reason ?? parsed.Reason ?? parsed.explanation ?? parsed.message ?? '') as string;
+            return { verdict, reason: reason || trimmed };
+        } catch {
+            // not valid JSON, fall through
+        }
+    }
+    return { verdict: null, reason: trimmed };
+}
+
+function VerdictBadge({ verdict }: { verdict: string | null | undefined }) {
+    if (!verdict) return null;
+    const v = verdict.toUpperCase();
+    const isAllowed = v === 'ALLOWED' || v === 'SAFE';
+    return (
+        <span
+            className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${isAllowed
+                ? 'bg-[#275D38] text-white'
+                : 'bg-[#A4343A] text-white'
+                }`}
+        >
+            {isAllowed ? '✓ ALLOWED' : '✕ REMOVED'}
+        </span>
+    );
+}
+
 export default function ComparePage() {
     // --- Phase 1: Instant data (precomputed JSON, ~20KB) ---
     const [compareData, setCompareData] = useState<CompareData | null>(null);
@@ -42,11 +77,13 @@ export default function ComparePage() {
     const [modelA, setModelA] = useState<string>('');
     const [modelB, setModelB] = useState<string>('');
     const [isClient, setIsClient] = useState(false);
+    const [showStats, setShowStats] = useState(false);
     const [pValues, setPValues] = useState<any[]>([]);
 
     // Filters
     const [searchKeyword, setSearchKeyword] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedDate, setSelectedDate] = useState('all');
 
@@ -205,14 +242,43 @@ export default function ComparePage() {
                         <div className="flex-1 min-w-[200px]">
                             <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Search Prompts</label>
                             <div className="relative">
-                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground z-10" />
                                 <input
                                     type="text"
                                     value={searchKeyword}
                                     onChange={e => setSearchKeyword(e.target.value)}
-                                    placeholder="Search..."
+                                    onFocus={() => setShowSuggestions(true)}
+                                    onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                                    placeholder="Search prompts…"
                                     className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                                 />
+                                {showSuggestions && !searchKeyword && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 pt-2.5 pb-1.5">
+                                            Try one of these
+                                        </p>
+                                        {[
+                                            'Should abortion be legal?',
+                                            'How do I legally own a gun?',
+                                            'What are the arguments for drug legalization?',
+                                            'Is capital punishment ever justified?',
+                                            'How does racial profiling work in policing?',
+                                            'What is the evidence for and against climate change?',
+                                        ].map(suggestion => (
+                                            <button
+                                                key={suggestion}
+                                                onMouseDown={() => {
+                                                    setSearchKeyword(suggestion);
+                                                    setShowSuggestions(false);
+                                                }}
+                                                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-[#f0f0f0] hover:text-[#1a1a1a] transition-colors flex items-center gap-2"
+                                            >
+                                                <Search className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                                {suggestion}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -265,7 +331,7 @@ export default function ComparePage() {
                             <select
                                 value={modelA}
                                 onChange={(e) => setModelA(e.target.value)}
-                                className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-primary font-medium"
+                                className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
                             >
                                 {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
@@ -283,7 +349,7 @@ export default function ComparePage() {
                             <select
                                 value={modelB}
                                 onChange={(e) => setModelB(e.target.value)}
-                                className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-primary font-medium"
+                                className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
                             >
                                 {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
@@ -296,40 +362,63 @@ export default function ComparePage() {
                     <div className="p-12 text-center text-muted-foreground">Loading comparison data...</div>
                 ) : (
                     <>
-                        {/* Pairwise Significance for Selected Pair */}
+                        {/* Advanced Stats (collapsed by default) */}
                         {(() => {
                             const pairResult = pValues.find((row: any) =>
                                 (row['Model A'] === modelA && row['Model B'] === modelB) ||
                                 (row['Model A'] === modelB && row['Model B'] === modelA)
                             );
                             return (
-                                <div className="bg-card rounded-xl border border-border p-5">
-                                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                                        📊 Statistical Significance
-                                    </h3>
-                                    {pairResult ? (
-                                        <div className="flex items-center gap-6">
-                                            <div>
-                                                <span className="text-xs text-muted-foreground">P-Value</span>
-                                                <div className="text-2xl font-black font-mono text-foreground">
-                                                    {parseFloat(pairResult['P-Value']).toExponential(2)}
+                                <div className="bg-card rounded-xl border border-border overflow-hidden">
+                                    {/* Toggle header */}
+                                    <button
+                                        onClick={() => setShowStats(s => !s)}
+                                        className="w-full flex items-center justify-between px-5 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+                                        aria-expanded={showStats}
+                                    >
+                                        <span className="flex items-center gap-2 font-medium">
+                                            <Info className="h-4 w-4" />
+                                            Advanced Stats
+                                            {pairResult && (
+                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${pairResult['Significant'] === 'YES'
+                                                    ? 'bg-[#275D38]/10 text-[#275D38]'
+                                                    : 'bg-muted text-muted-foreground'
+                                                    }`}>
+                                                    {pairResult['Significant'] === 'YES' ? 'Significant' : 'Not Significant'}
+                                                </span>
+                                            )}
+                                        </span>
+                                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${showStats ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {/* Expanded content */}
+                                    {showStats && (
+                                        <div className="px-5 pb-5 pt-1 border-t border-border">
+                                            {pairResult ? (
+                                                <div className="flex flex-wrap items-start gap-8 mt-3">
+                                                    <div>
+                                                        <span className="text-xs text-muted-foreground uppercase tracking-wider">P-Value (McNemar's)</span>
+                                                        <div className="text-2xl font-black font-mono text-foreground mt-1">
+                                                            {parseFloat(pairResult['P-Value']).toExponential(2)}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Result</span>
+                                                        <div className="mt-2">
+                                                            {pairResult['Significant'] === 'YES'
+                                                                ? <span className="text-sm bg-[#275D38]/10 text-[#275D38] dark:text-[#9CAF88] px-3 py-1.5 rounded-full font-bold">✓ Statistically Significant</span>
+                                                                : <span className="text-sm bg-muted text-muted-foreground px-3 py-1.5 rounded-full">Not Significant</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground max-w-xs mt-3 self-end">
+                                                        P&nbsp;&lt;&nbsp;0.05 means the difference in refusal behavior is statistically real, not random chance.
+                                                    </p>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <span className="text-xs text-muted-foreground">Result</span>
-                                                <div className="mt-1">
-                                                    {pairResult['Significant'] === 'YES'
-                                                        ? <span className="text-sm bg-[#275D38]/10 text-[#275D38] dark:text-[#9CAF88] px-3 py-1.5 rounded-full font-bold">✓ Statistically Significant</span>
-                                                        : <span className="text-sm bg-muted text-muted-foreground px-3 py-1.5 rounded-full">Not Significant</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                            <div className="ml-auto text-xs text-muted-foreground max-w-xs">
-                                                McNemar&#39;s test: P &lt; 0.05 means the difference in refusal behavior is real, not random chance.
-                                            </div>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground mt-3">No significance data available for this model pair.</p>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground">No significance data for this pair. Run the audit pipeline to generate p-values.</p>
                                     )}
                                 </div>
                             );
@@ -338,7 +427,7 @@ export default function ComparePage() {
                         {/* Comparison Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Card A */}
-                            <div className="bg-card rounded-xl border border-border p-6 border-t border-t-primary relative overflow-hidden">
+                            <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#800000] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     <img src={getProviderLogo(modelA)} alt="" className="h-32 w-32 object-contain" />
                                 </div>
@@ -483,7 +572,7 @@ export default function ComparePage() {
                             ) : (
                                 <div className="grid gap-4">
                                     {disagreements.slice(0, 50).map((diff, idx) => (
-                                        <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-accent/50 transition-colors">
+                                        <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-[#f5f5f5] transition-colors">
                                             <div className="bg-muted/30 p-3 border-b border-border flex justify-between items-center">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
@@ -526,9 +615,9 @@ export default function ComparePage() {
                                                                 {diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
                                                             </span>
                                                         </div>
-                                                        <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
-                                                            {diff.rowA.response || 'No response recorded'}
-                                                        </p>
+                                                        <div className="p-3 space-y-2">
+                                                            {(() => { const p = parseResponseText(diff.rowA.response); return (<><VerdictBadge verdict={p.verdict} /><p className="text-sm text-foreground leading-relaxed max-h-36 overflow-y-auto">{p.reason}</p></>); })()}
+                                                        </div>
                                                     </div>
 
                                                     {/* Model B Response */}
@@ -547,9 +636,9 @@ export default function ComparePage() {
                                                                 {diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
                                                             </span>
                                                         </div>
-                                                        <p className="p-3 text-sm text-foreground max-h-36 overflow-y-auto">
-                                                            {diff.rowB.response || 'No response recorded'}
-                                                        </p>
+                                                        <div className="p-3 space-y-2">
+                                                            {(() => { const p = parseResponseText(diff.rowB.response); return (<><VerdictBadge verdict={p.verdict} /><p className="text-sm text-foreground leading-relaxed max-h-36 overflow-y-auto">{p.reason}</p></>); })()}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
