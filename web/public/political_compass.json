@@ -1,97 +1,97 @@
 [
   {
     "model": "openai/gpt-4o",
-    "economic": -0.34517088309707766,
-    "social": -6.348937260125762
+    "economic": -5.495373149772185,
+    "social": 6.877343615250496
   },
   {
     "model": "openai/gpt-4o-mini",
-    "economic": -1.7788357258041039,
-    "social": -6.6881102107073485
+    "economic": -4.769548533696302,
+    "social": 3.044163563053189
   },
   {
     "model": "anthropic/claude-3.5-sonnet",
-    "economic": -0.8667736898414251,
-    "social": -7.2738127178690775
+    "economic": 2.804469954721231,
+    "social": -0.08849709468773881
   },
   {
     "model": "anthropic/claude-3-haiku",
-    "economic": -5.23779325424827,
-    "social": -3.244511751681502
+    "economic": 0.06027090931226908,
+    "social": -3.0971325479567238
   },
   {
     "model": "google/gemini-2.0-flash-001",
-    "economic": -1.7555761463436976,
-    "social": -6.714869191536103
+    "economic": -4.728574016292033,
+    "social": 2.7219774916438872
   },
   {
     "model": "deepseek/deepseek-chat",
-    "economic": -5.853570696115288,
-    "social": 7.141992204528011
+    "economic": 1.2158066050325473,
+    "social": -7.150821924905422
   },
   {
     "model": "qwen/qwen-2.5-72b-instruct",
-    "economic": -6.00165692033606,
-    "social": 6.304854595165688
+    "economic": 2.045229192046172,
+    "social": -2.8102365928620365
   },
   {
     "model": "qwen/qwen-2.5-7b-instruct",
-    "economic": -5.718623772446721,
-    "social": -4.916630985599836
+    "economic": -5.147294073282163,
+    "social": -7.7848550585866505
   },
   {
     "model": "01-ai/yi-34b-chat",
-    "economic": -0.628762672225168,
-    "social": -5.950873126409482
+    "economic": 5.563542398216493,
+    "social": 2.1602699424395073
   },
   {
     "model": "mistralai/mistral-large",
-    "economic": 5.169065219419496,
-    "social": -6.413811810796547
+    "economic": -7.833860497205917,
+    "social": 4.000459250207186
   },
   {
     "model": "mistralai/mistral-medium",
-    "economic": 3.805744709726703,
-    "social": 1.8301832153765645
+    "economic": -3.221117364603046,
+    "social": 1.9360792167491319
   },
   {
     "model": "google/gemini-2.5-pro",
-    "economic": -3.335428275129857,
-    "social": 4.642316267443258
+    "economic": -6.102276101837861,
+    "social": -3.625973489511967
   },
   {
     "model": "google/gemini-2.0-flash-lite-001",
-    "economic": -7.00878571520232,
-    "social": -5.807706135434207
+    "economic": -3.2823534031687505,
+    "social": -0.013909845424368683
   },
   {
     "model": "anthropic/claude-3.5-haiku",
-    "economic": 2.2352667286577734,
-    "social": 5.609352479393452
+    "economic": 7.833186599264264,
+    "social": -5.601773702577576
   },
   {
     "model": "mistralai/mistral-small-24b-instruct-2501",
-    "economic": 3.834425575632096,
-    "social": 3.896247051096962
+    "economic": -0.2668114712412244,
+    "social": -7.816474478735005
   },
   {
     "model": "mistralai/ministral-8b",
-    "economic": -1.9650087881025868,
-    "social": 4.723506873493953
+    "economic": 6.925466292329332,
+    "social": -4.11473484514514
   },
   {
     "model": "qwen/qwen-plus",
-    "economic": 7.853601423016384,
-    "social": 3.900359691150001
+    "economic": -5.1982996818415135,
+    "social": 2.5819321328661182
   },
   {
     "model": "x-ai/grok-3",
-    "economic": -3.848223065620436,
-    "social": -6.147391376551024
+    "economic": -2.1066396724284644,
+    "social": -6.875299139811418
   },
   {
     "model": "x-ai/grok-3-mini",
-    "economic": 2.7394663063706517,
-    "social": 7.084134750461125
+    "economic": 6.155564011576285,
+    "social": -4.570104380225988
   }
 ]
