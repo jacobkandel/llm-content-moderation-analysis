@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard, FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Table
+    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Table, Info, Home
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -34,7 +34,12 @@ const navItems = [
             { title: 'Council Consensus', href: '/analysis/consensus', icon: Users },
         ]
     },
-    { name: 'Database', href: '/audit', icon: Table }
+    { name: 'Database', href: '/audit', icon: Table },
+    { name: 'About', href: '/about', icon: Info },
+];
+
+const mobileOnlyItems = [
+    { name: 'Home', href: '/', icon: Home },
 ];
 
 export function NavBar() {
@@ -70,7 +75,7 @@ export function NavBar() {
                                             <button
                                                 className={cn(
                                                     "flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                                                    isActive ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                                    isActive ? "text-[#800000] bg-[#800000]/8 font-semibold" : "text-muted-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
                                                 )}
                                             >
                                                 <item.icon className="h-4 w-4" />
@@ -87,11 +92,11 @@ export function NavBar() {
                                                             className={cn(
                                                                 "flex items-center gap-2 px-3 py-2 text-sm rounded-sm transition-colors",
                                                                 pathname === sub.href
-                                                                    ? "bg-accent text-accent-foreground font-medium"
-                                                                    : "text-popover-foreground hover:text-accent-foreground hover:bg-accent"
+                                                                    ? "bg-[#800000]/8 text-[#800000] font-medium"
+                                                                    : "text-popover-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
                                                             )}
                                                         >
-                                                            <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-popover-foreground")} />
+                                                            <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-[#800000]" : "text-popover-foreground")} />
                                                             {sub.title}
                                                         </Link>
                                                     ))}
@@ -108,7 +113,7 @@ export function NavBar() {
                                         href={item.href}
                                         className={cn(
                                             "flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                                            isActive ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                            isActive ? "text-[#800000] bg-[#800000]/8 font-semibold" : "text-muted-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
                                         )}
                                     >
                                         <item.icon className="h-4 w-4" />
@@ -129,6 +134,21 @@ export function NavBar() {
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
                 <div className="md:hidden border-t border-border bg-background p-4 space-y-4">
+                    {/* Mobile-only: Home link */}
+                    {mobileOnlyItems.map((item) => (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={cn(
+                                "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
+                                pathname === item.href ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
+                            )}
+                        >
+                            <item.icon className="h-4 w-4" />
+                            {item.name}
+                        </Link>
+                    ))}
                     {navItems.map((item) => (
                         <div key={item.name} className="space-y-2">
                             {item.dropdown ? (
@@ -142,7 +162,7 @@ export function NavBar() {
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                                 className={cn(
                                                     "flex items-center gap-2 px-2 py-2 text-sm rounded-md",
-                                                    pathname === sub.href ? "bg-accent text-accent-foreground" : "hover:bg-accent"
+                                                    pathname === sub.href ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
                                                 )}
                                             >
                                                 <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-foreground")} />
@@ -157,7 +177,7 @@ export function NavBar() {
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className={cn(
                                         "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
-                                        pathname === item.href ? "bg-accent text-accent-foreground" : "hover:bg-accent"
+                                        pathname === item.href ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
                                     )}
                                 >
                                     <item.icon className="h-4 w-4" />
