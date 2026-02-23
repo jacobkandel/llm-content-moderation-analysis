@@ -75,7 +75,7 @@ jobs:
             echo "✅ Download successful."
             # Decompress it so the runner can append to it
             echo "📦 Decompressing..."
-            gzip -d web/public/audit_log.csv.gz
+            gzip -df web/public/audit_log.csv.gz
             echo "✅ Decompressed to web/public/audit_log.csv"
           else
             echo "⚠️ Failed to download existing data (or file doesn't exist yet). Starting fresh."
