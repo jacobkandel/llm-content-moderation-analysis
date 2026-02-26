@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    twitter: {
+        card: 'summary_large_image',
+    },
     title: 'Behavior Clusters | Moderation Bias',
     description: 'Cluster analysis grouping LLMs by similar content moderation behavior. Reveals which models share censorship strategies and policy approaches.',
     openGraph: {

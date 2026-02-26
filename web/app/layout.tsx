@@ -15,6 +15,9 @@ import { NavBar } from "@/components/layout/NavBar";
 import { FocusManager } from "@/components/layout/FocusManager";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { BackToTop } from "@/components/ui/BackToTop";
+import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegister";
+import { KeyboardShortcuts } from "@/components/ui/KeyboardShortcuts";
+import { OnboardingTour } from "@/components/ui/OnboardingTour";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,6 +88,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://www.google.com" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex min-h-screen bg-background text-foreground overflow-x-hidden`}
       >
@@ -98,6 +104,7 @@ export default function RootLayout({
           <ToastProvider>
             <SidebarProvider>
               <JsonLd />
+              <ServiceWorkerRegister />
               <SkipLink />
               <MainContentWrapper className="flex flex-col min-h-screen">
                 <BrandBar />
@@ -112,6 +119,8 @@ export default function RootLayout({
             <Analytics />
             <SpeedInsights />
             <BackToTop />
+            <KeyboardShortcuts />
+            <OnboardingTour />
           </ToastProvider>
         </ThemeProvider>
       </body>

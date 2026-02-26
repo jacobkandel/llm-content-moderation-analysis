@@ -9,6 +9,7 @@ import { CensorshipHeatmap } from '@/components/CensorshipHeatmap';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import ShareButton from '@/components/ShareButton';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function SummaryPage() {
     const { loading, stats, efficiencyData, filteredAuditData, timelineDates, loadFullDetails, precomputedPrompts, precomputedLongitudinal } = useAnalysis();
@@ -128,7 +129,6 @@ export default function SummaryPage() {
 
 
 
-            {/* Refusal Heatmap */}
             <div className="mb-8">
                 <CensorshipHeatmap
                     data={filteredAuditData}
@@ -136,6 +136,12 @@ export default function SummaryPage() {
                     description="Detailed breakdown of refusal rates per model and category. Darker red indicates higher refusal rates."
                 />
             </div>
+
+            <RelatedPages
+                title="Statistical Significance"
+                description="Are these refusal rate differences real, or just statistical noise? Explore pairwise p-values and significance testing."
+                href="/analysis/significance"
+            />
         </div>
     );
 }

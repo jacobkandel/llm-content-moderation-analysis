@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 
 interface ModelData {
@@ -48,11 +49,12 @@ export default function RestrictivenessScale({ models, onModelClick }: Restricti
                         >
                             {/* Provider Logo */}
                             <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center overflow-hidden">
-                                <img
+                                <Image
                                     src={getLogoUrl(model.name)}
                                     alt={getProviderName(model.name)}
-                                    className="w-6 h-6 object-contain"
-                                    loading="lazy"
+                                    width={24}
+                                    height={24}
+                                    className="object-contain"
                                 />
                             </div>
 

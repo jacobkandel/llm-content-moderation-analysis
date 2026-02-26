@@ -28,6 +28,18 @@
   --font-sans: "DM Sans", var(--font-geist-sans), sans-serif;
   --font-serif: "Merriweather", serif;
   --font-mono: var(--font-geist-mono);
+
+  /* Spacing Scale */
+  --spacing-xs: 0.5rem;
+  /* 8px */
+  --spacing-s: 1rem;
+  /* 16px */
+  --spacing-m: 2rem;
+  /* 32px */
+  --spacing-l: 4rem;
+  /* 64px */
+  --spacing-xl: 8rem;
+  /* 128px */
 }
 
 :root {
@@ -82,6 +94,19 @@
   /* High contrast Maroon for focus */
 
   --radius: 0.5rem;
+
+  /* Semantic Colors for Refusal/Safe */
+  --refusal: 0 100% 25%;
+  /* Maroon */
+  --safe: 142 71% 26%;
+  /* Dark Green */
+}
+
+.colorblind:root {
+  --refusal: 217 91% 60%;
+  /* Bright Blue */
+  --safe: 32 95% 44%;
+  /* Dark Orange */
 }
 
 .dark {
@@ -123,6 +148,18 @@
 
   --focus-ring: 41 100% 46%;
   /* Goldenrod for high contrast focus in dark mode */
+
+  --refusal: 357 52% 42%;
+  /* Brick */
+  --safe: 142 71% 45%;
+  /* Lighter Green */
+}
+
+.colorblind.dark {
+  --refusal: 217 91% 60%;
+  /* Bright Blue */
+  --safe: 32 95% 60%;
+  /* Lighter Orange */
 }
 
 
@@ -184,6 +221,36 @@ body {
     padding: 1.5rem !important;
   }
 }
+
+/* Premium Micro-animations */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px -3px hsla(var(--primary), 0.3);
+}
+
+.tap-scale:active {
+  transform: scale(0.98);
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-morphism {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 
 @media (max-width: 768px) {
 

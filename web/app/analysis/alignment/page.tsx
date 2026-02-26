@@ -4,6 +4,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Scatter, Cell, Label } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 // No colors needed for monochrome design
 
@@ -98,6 +99,12 @@ export default function AlignmentPage() {
                     </div>
                 )}
             </div>
+
+            <RelatedPages
+                title="Council Consensus"
+                description="When do models agree? Discover prompts where the entire AI 'council' reaches a unanimous moderation verdict."
+                href="/analysis/consensus"
+            />
         </div>
     );
 }

@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    twitter: {
+        card: 'summary_large_image',
+    },
     title: 'Model Alignment | Moderation Bias',
     description: 'Cross-model alignment analysis showing where LLMs agree and disagree on content moderation decisions. Identifies consensus and outlier behaviors.',
     openGraph: {

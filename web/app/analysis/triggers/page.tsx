@@ -5,6 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Bar } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function TriggersPage() {
     const { triggerData, loading, ensureTriggers } = useAnalysis();
@@ -52,6 +53,12 @@ export default function TriggersPage() {
                     )}
                 </div>
             </div>
+
+            <RelatedPages
+                title="Longitudinal Analysis"
+                description="How often do these triggers change? Track refusal rates over time to see model policy drift."
+                href="/analysis/longitudinal"
+            />
         </div>
     );
 }

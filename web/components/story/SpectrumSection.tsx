@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
+import Image from 'next/image';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 
 interface ModelData {
@@ -14,9 +15,10 @@ interface SpectrumSectionProps {
     modelData: ModelData[];
 }
 
-// Rate coloring - now using shades of grey/black for flat design
+// Rate coloring - now using the new semantic variables
 function getRateColor(rate: number): string {
-    return 'hsl(var(--foreground))';
+    if (rate > 30) return 'hsl(var(--refusal))';
+    return 'hsl(var(--safe))';
 }
 
 /**
@@ -50,17 +52,26 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
                     </p>
                 </motion.div>
 
-                {/* Animated monochrome bar */}
+                {/* Animated spectrum bar */}
                 <div className="mb-20">
-                    <div className="relative h-3 bg-muted rounded-full overflow-hidden border border-border">
+                    <div className="relative h-4 bg-muted rounded-full overflow-hidden border border-border shadow-inner">
                         <motion.div
-                            className="absolute inset-0 bg-foreground origin-left"
-                            style={{ scaleX: useTransform(scaleX, [0, 1], [0, 1]) }}
+                            className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--safe))] to-[hsl(var(--refusal))] origin-left"
+                            initial={{ scaleX: 0 }}
+                            whileInView={{ scaleX: 1 }}
+                            viewport={{ once: true, amount: 0.5 }}
+                            transition={{ duration: 1.5, ease: "circOut" }}
                         />
                     </div>
-                    <div className="flex justify-between mt-3 text-sm font-medium">
-                        <span className="text-muted-foreground">← Most Permissive</span>
-                        <span className="text-foreground">Most Restrictive →</span>
+                    <div className="flex justify-between mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        <span className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[hsl(var(--safe))]" />
+                            Most Permissive
+                        </span>
+                        <span className="flex items-center gap-2">
+                            Most Restrictive
+                            <div className="w-2 h-2 rounded-full bg-[hsl(var(--refusal))]" />
+                        </span>
                     </div>
                 </div>
 
@@ -69,19 +80,20 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
                     {sortedModels.map((model, idx) => (
                         <motion.div
                             key={model.name}
-                            initial={{ opacity: 0, x: -50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, amount: 0.5 }}
-                            transition={{ duration: 0.5, delay: idx * 0.06 }}
-                            className="flex items-center gap-5 bg-card p-5 rounded-xl border border-border hover:bg-accent/50 transition-colors"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.8 }}
+                            transition={{ duration: 0.4, delay: idx * 0.05 }}
+                            className="flex items-center gap-spacing-s bg-card p-spacing-s rounded-2xl border border-border hover:bg-muted/50 transition-all hover-lift shadow-sm group"
                         >
                             {/* Provider Logo */}
                             <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-muted/20 border border-border flex items-center justify-center overflow-hidden">
-                                <img
+                                <Image
                                     src={getLogoUrl(model.name)}
                                     alt={getProviderName(model.name)}
-                                    className="w-8 h-8 object-contain opacity-90"
-                                    loading="lazy"
+                                    width={32}
+                                    height={32}
+                                    className="object-contain opacity-90"
                                 />
                             </div>
 
@@ -96,14 +108,14 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
                             </div>
 
                             {/* Percentage */}
-                            <div className="flex-shrink-0 text-right">
+                            <div className="flex-shrink-0 text-right min-w-[100px]">
                                 <span
-                                    className="text-3xl font-black"
+                                    className="text-3xl font-black tabular-nums transition-colors duration-500"
                                     style={{ color: getRateColor(model.rate) }}
                                 >
                                     {model.rate}%
                                 </span>
-                                <p className="text-xs text-muted-foreground mt-0.5">refusal</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Refusal Rate</p>
                             </div>
                         </motion.div>
                     ))}

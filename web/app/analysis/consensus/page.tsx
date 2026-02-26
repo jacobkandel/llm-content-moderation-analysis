@@ -5,6 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 import {
     ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, Legend
@@ -240,6 +241,12 @@ export default function ConsensusPage() {
                     </ResponsiveContainer>
                 </div>
             </div>
+
+            <RelatedPages
+                title="Reliability & Consistency"
+                description="Do models flag the same content consistently over time? Check Fleiss' Kappa scores for internal consistency."
+                href="/analysis/reliability"
+            />
         </div >
     );
 }

@@ -2,14 +2,17 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
-import { DataTable } from '@/components/ui/DataTable';
+import { DataTable, SortableHeader } from '@/components/ui/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Pin, PinOff } from 'lucide-react';
 import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
+import { ExpandableText } from '@/components/ui/ExpandableText';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function AuditPage() {
     const [data, setData] = useState<AuditRow[]>([]);
     const [loading, setLoading] = useState(true);
+    const [pinnedPrompt, setPinnedPrompt] = useState<string | null>(null);
 
     useEffect(() => {
         async function loadData() {
@@ -33,7 +36,7 @@ export default function AuditPage() {
     const columns = useMemo<ColumnDef<AuditRow>[]>(() => [
         {
             accessorKey: 'timestamp',
-            header: 'Date',
+            header: ({ column }) => <SortableHeader column={column} title="Date" />,
             cell: ({ row }) => {
                 const date = new Date(row.getValue('timestamp'));
                 return <span>{date.toLocaleDateString()}</span>;
@@ -41,12 +44,16 @@ export default function AuditPage() {
         },
         {
             accessorKey: 'model',
-            header: 'Model',
+            header: ({ column }) => <SortableHeader column={column} title="Model" />,
             cell: ({ row }) => <span className="font-medium text-xs md:text-sm">{row.getValue('model')}</span>
         },
         {
             accessorKey: 'category',
-            header: () => <span className="hidden lg:inline">Category</span>,
+            header: ({ column }) => (
+                <div className="hidden lg:block">
+                    <SortableHeader column={column} title="Category" />
+                </div>
+            ),
             cell: ({ row }) => <span className="hidden lg:inline">{row.getValue('category')}</span>
         },
         {
@@ -68,8 +75,8 @@ export default function AuditPage() {
                 const val = row.getValue('prompt') as string;
                 if (!val) return <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />;
                 return (
-                    <div className="max-w-[120px] lg:max-w-[200px] truncate" title={val}>
-                        {val}
+                    <div className="min-w-[150px] lg:min-w-[250px]">
+                        <ExpandableText text={val} maxLines={2} />
                     </div>
                 )
             }
@@ -81,37 +88,75 @@ export default function AuditPage() {
                 const val = row.getValue('response') as string;
                 if (!val) return <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />;
                 return (
-                    <div className="hidden sm:block max-w-[150px] lg:max-w-[200px] truncate" title={val}>
-                        {val}
+                    <div className="hidden sm:block min-w-[150px] lg:min-w-[250px]">
+                        <ExpandableText text={val} maxLines={2} />
                     </div>
                 )
             }
         },
         {
             accessorKey: 'verdict',
-            header: 'Verdict',
+            header: ({ column }) => <SortableHeader column={column} title="Verdict" />,
             cell: ({ row }) => {
                 const verdict = String(row.getValue('verdict'));
                 const isRefusal = ['REFUSAL', 'REMOVED', 'unsafe', 'Hard Refusal'].includes(verdict);
                 return (
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold font-sans border ${isRefusal
-                        ? 'bg-[#800000] text-white border-[#800000]'
-                        : 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                        ? 'bg-[hsl(var(--refusal))] text-white border-[hsl(var(--refusal))]'
+                        : 'bg-[hsl(var(--safe))] text-white border-[hsl(var(--safe))]'
                         }`}>
                         {verdict}
                     </span>
                 );
             }
         },
-    ], []);
+        {
+            id: 'pin',
+            header: '',
+            cell: ({ row }) => {
+                const prompt = (row.original.prompt || '') as string;
+                const isPinned = pinnedPrompt === prompt;
+                return (
+                    <button
+                        onClick={() => setPinnedPrompt(isPinned ? null : prompt)}
+                        className={`p-2 rounded-md transition-colors ${isPinned
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                            }`}
+                        title={isPinned ? "Unpin prompt" : "Pin prompt to compare all models"}
+                    >
+                        {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                    </button>
+                );
+            }
+        },
+    ], [pinnedPrompt]);
+
+    const filteredData = useMemo(() => {
+        if (!pinnedPrompt) return data;
+        return data.filter(row => row.prompt === pinnedPrompt);
+    }, [data, pinnedPrompt]);
 
     return (
-        <main className="min-h-screen bg-background p-6 md:p-8 lg:p-12">
-            <div className="w-full max-w-[95vw] mx-auto space-y-6">
+        <main className="min-h-screen bg-background p-spacing-s md:p-spacing-m lg:p-spacing-l">
+            <div className="w-full max-w-7xl mx-auto space-y-spacing-m">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground">Global Audit Log</h1>
-                        <p className="text-muted-foreground mt-1">Full access to all {data.length.toLocaleString()} audit records.</p>
+                        <p className="text-muted-foreground mt-1">
+                            {pinnedPrompt
+                                ? `Showing all models for the pinned prompt. `
+                                : `Full access to all ${data.length.toLocaleString()} audit records.`
+                            }
+                            {pinnedPrompt && (
+                                <button
+                                    onClick={() => setPinnedPrompt(null)}
+                                    className="text-primary font-bold hover:underline ml-1"
+                                >
+                                    Clear pin
+                                </button>
+                            )}
+                        </p>
                     </div>
                 </div>
 
@@ -122,7 +167,17 @@ export default function AuditPage() {
                             <p>Loading audit data...</p>
                         </div>
                     ) : (
-                        <DataTable columns={columns} data={data} exportFilename="moderation_audit_full" />
+                        <DataTable
+                            columns={columns}
+                            data={filteredData}
+                            searchKey="prompt"
+                            exportFilename="moderation_audit_full"
+                            emptyState={{
+                                title: "No prompts found",
+                                description: "We couldn't find any prompts matching your search criteria. Try adjusting your filters.",
+                                icon: "search"
+                            }}
+                        />
                     )}
                 </div>
             </div>

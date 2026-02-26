@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
-import { SemanticClustersView } from '@/components/SemanticClusters';
+import dynamic from 'next/dynamic';
+const SemanticClustersView = dynamic(() => import('@/components/SemanticClusters').then((mod) => mod.SemanticClustersView), { ssr: false });
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function ClustersPage() {
     const { filteredClusters: clusters, loading, ensureClusters } = useAnalysis();
@@ -25,6 +27,12 @@ export default function ClustersPage() {
                 ]}
             />
             <SemanticClustersView clusters={clusters} />
+
+            <RelatedPages
+                title="Alignment Tax"
+                description="Explore the trade-off between model safety and helpfulness on the Pareto frontier."
+                href="/analysis/alignment"
+            />
         </div>
     );
 }

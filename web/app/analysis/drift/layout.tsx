@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    twitter: {
+        card: 'summary_large_image',
+    },
     title: 'Behavioral Drift | Moderation Bias',
     description: 'Track how LLM content moderation behavior changes over time. Detect model updates, policy shifts, and behavioral drift across audit runs.',
     openGraph: {

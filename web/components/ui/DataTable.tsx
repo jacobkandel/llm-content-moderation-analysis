@@ -30,6 +30,7 @@ import {
     ChevronRight as ExpandIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { EmptyState } from './EmptyState';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -37,6 +38,11 @@ interface DataTableProps<TData, TValue> {
     searchKey?: string;
     renderExpanded?: (row: TData) => React.ReactNode;
     exportFilename?: string;
+    emptyState?: {
+        title: string;
+        description: string;
+        icon?: 'search' | 'inbox';
+    };
 }
 
 export function DataTable<TData, TValue>({
@@ -45,6 +51,7 @@ export function DataTable<TData, TValue>({
     searchKey,
     renderExpanded,
     exportFilename = 'export',
+    emptyState,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -244,8 +251,12 @@ export function DataTable<TData, TValue>({
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={columns.length + (renderExpanded ? 1 : 0)} className="h-24 text-center text-muted-foreground">
-                                        No results.
+                                    <td colSpan={columns.length + (renderExpanded ? 1 : 0)} className="py-spacing-l px-spacing-m">
+                                        {emptyState ? (
+                                            <EmptyState {...emptyState} />
+                                        ) : (
+                                            <div className="text-center text-muted-foreground">No results.</div>
+                                        )}
                                     </td>
                                 </tr>
                             )}

@@ -34,6 +34,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
     const [search, setSearch] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [modelsData, setModelsData] = useState<{ id: string, display_name: string, provider: string }[]>([]);
+    const [promptsData, setPromptsData] = useState<{ id: string, text: string, category: string }[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
@@ -42,6 +43,11 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
             .then(res => res.json())
             .then(data => setModelsData(data))
             .catch(err => console.error('Failed to pre-fetch models for command palette', err));
+
+        fetch('/prompts_list.json')
+            .then(res => res.json())
+            .then(data => setPromptsData(data))
+            .catch(err => console.error('Failed to pre-fetch prompts for command palette', err));
     }, []);
 
     const hardcodedCategories = [
@@ -147,7 +153,16 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
         keywords: ['category', 'topic', 'policy', cat]
     }));
 
-    const allCommands = [...staticCommands, ...modelCommands, ...categoryCommands];
+    const promptCommands: CommandItem[] = promptsData.map(p => ({
+        id: `prompt-${p.id}`,
+        title: p.text,
+        description: `Prompt in ${p.category}`,
+        icon: <Search className="h-4 w-4" />,
+        action: () => router.push(`/audit?q=${encodeURIComponent(p.text)}`),
+        keywords: ['prompt', 'query', p.category, ...p.text.split(' ')]
+    }));
+
+    const allCommands = [...staticCommands, ...modelCommands, ...categoryCommands, ...promptCommands];
 
     const filteredCommands = allCommands.filter(cmd => {
         const searchLower = sanitizeSearchInput(search).toLowerCase();

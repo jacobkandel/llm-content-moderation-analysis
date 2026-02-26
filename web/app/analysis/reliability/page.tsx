@@ -5,6 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function ReliabilityPage() {
     const { stats, loading, filteredAuditData, ensureAuditData, precomputedReliability, selectedModels, dateRange } = useAnalysis();
@@ -162,6 +163,12 @@ export default function ReliabilityPage() {
                     </div>
                 </div>
             )}
+
+            <RelatedPages
+                title="Model Stability (Drift)"
+                description="How much do these models change over time? Track refusal rate shifts to see if policies are becoming stricter or more lenient."
+                href="/analysis/drift"
+            />
         </div>
     );
 }

@@ -25,7 +25,7 @@ export default async function HomePage() {
         {/* Maroon accent strip */}
         <div className="h-1.5 w-full bg-[#800000]" aria-hidden />
 
-        <div className="max-w-5xl mx-auto px-8 md:px-16 py-20 md:py-28">
+        <div className="px-8 md:px-16 py-16 md:py-24">
           {/* Eyebrow */}
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#800000] mb-6">
             Open-Source AI Research
@@ -38,7 +38,7 @@ export default async function HomePage() {
           </h1>
 
           {/* Subtext */}
-          <p className="text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed">
+          <p className="text-lg text-[#555] max-w-2xl mb-10 leading-relaxed">
             We run identical prompts through every major LLM and measure exactly which models
             refuse — and which ones don't.
           </p>
@@ -94,7 +94,7 @@ export default async function HomePage() {
           <h2 className="text-2xl md:text-3xl font-black text-center text-foreground mb-3">
             How It Works
           </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
             A transparent, reproducible pipeline from prompt to insight.
           </p>
 

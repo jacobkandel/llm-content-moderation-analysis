@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 // Simple McNemar's test approximation for paired binary data
 function mcnemarsTest(b: number, c: number): { pValue: number; significant: boolean } {
@@ -210,6 +211,12 @@ export default function SignificancePage() {
                     </button>
                 )}
             </div>
+
+            <RelatedPages
+                title="Behavior Clusters"
+                description="Which models behave similarly? See how models group together based on their moderation policies and rules."
+                href="/analysis/clusters"
+            />
         </div>
     );
 }

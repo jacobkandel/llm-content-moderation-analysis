@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Calendar, Box } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import Image from 'next/image';
 
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { sanitizeSearchInput } from '@/lib/utils';
@@ -133,10 +134,12 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-border overflow-hidden shrink-0">
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                            <img
+                                                            <Image
                                                                 src={getLogoUrl(model.name)}
                                                                 alt={getProviderName(model.name)}
-                                                                className="w-7 h-7 object-contain"
+                                                                width={28}
+                                                                height={28}
+                                                                className="object-contain"
                                                                 onError={(e) => {
                                                                     // Fallback to text or icon if needed, but standard onError to hide is usually safe or swap src
                                                                     e.currentTarget.style.display = 'none';

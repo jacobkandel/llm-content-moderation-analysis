@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    twitter: {
+        card: 'summary_large_image',
+    },
     title: 'Compare Models | Moderation Bias',
     description: 'Compare content moderation behavior between any two LLMs side-by-side. View disagreements, refusal rate differences, and response comparisons.',
     openGraph: {

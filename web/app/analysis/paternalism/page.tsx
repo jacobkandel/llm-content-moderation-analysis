@@ -5,6 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, Bar, Cell } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function PaternalismPage() {
     const { filteredPaternalismData: paternalismData, loading, ensurePaternalism } = useAnalysis();
@@ -54,6 +55,12 @@ export default function PaternalismPage() {
                     </div>
                 </div>
             </div>
+
+            <RelatedPages
+                title="Censorship Triggers"
+                description="What words or topics automatically trigger a refusal? Discover the hidden rules guiding AI moderation."
+                href="/analysis/triggers"
+            />
         </div>
     );
 }

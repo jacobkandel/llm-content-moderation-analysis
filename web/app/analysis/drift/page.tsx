@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
-import { ModelDrift } from '@/components/ModelDrift';
+import dynamic from 'next/dynamic';
+const ModelDrift = dynamic(() => import('@/components/ModelDrift').then((mod) => mod.ModelDrift), { ssr: false });
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function DriftPage() {
     const { filteredDriftData: driftData, loading, ensureDrift } = useAnalysis();
@@ -25,6 +27,12 @@ export default function DriftPage() {
                 ]}
             />
             <ModelDrift data={driftData} />
+
+            <RelatedPages
+                title="Political Compass"
+                description="Do these models exhibit ideological bias? See how they score on standard political compass questions."
+                href="/analysis/political"
+            />
         </div>
     );
 }

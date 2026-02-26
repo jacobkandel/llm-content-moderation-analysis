@@ -5,6 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ReferenceLine, Scatter, Cell } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#06b6d4', '#84cc16'];
 
@@ -82,6 +83,12 @@ export default function PoliticalPage() {
                     </div>
                 </div>
             </div>
+
+            <RelatedPages
+                title="Paternalism Audit"
+                description="Do models treat different users differently based on their claimed identity or expertise? Uncover persona-based discrimination."
+                href="/analysis/paternalism"
+            />
         </div>
     );
 }

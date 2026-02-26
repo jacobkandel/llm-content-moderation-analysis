@@ -9,7 +9,7 @@ export default function EvidencePage() {
             <p className="text-muted-foreground mb-8 max-w-md">
                 Explore raw audit traces with full transparency. Identify cases where models exhibit "Paternalism" or inconsistent safety boundaries.
             </p>
-            <a href="/explorer.html" target="_blank" className="inline-flex justify-center items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-base gap-2">
+            <a href="/explorer.html" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-base gap-2">
                 <Search className="w-5 h-5" /> Open Evidence Locker
             </a>
         </div>

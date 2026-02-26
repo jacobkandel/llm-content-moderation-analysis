@@ -8,7 +8,8 @@ import {
 import { SkeletonCard, SkeletonChart, SkeletonTable } from '@/components/ui/Skeleton';
 import { HeroSection } from '@/components/story/HeroSection';
 import { SpectrumSection } from '@/components/story/SpectrumSection';
-import { CategorySection } from '@/components/story/CategorySection';
+import dynamic from 'next/dynamic';
+const CategorySection = dynamic(() => import('@/components/story/CategorySection').then((mod) => mod.CategorySection), { ssr: false });
 
 // Types for precomputed JSON data
 interface SummaryStats {

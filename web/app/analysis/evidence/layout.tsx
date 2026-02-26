@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    twitter: {
+        card: 'summary_large_image',
+    },
     title: 'Evidence Explorer | Moderation Bias',
     description: 'Explore the raw evidence behind LLM content moderation evaluations. View detailed prompt-response pairs with model verdicts.',
     openGraph: {

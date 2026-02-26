@@ -6,6 +6,7 @@ import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip as
 import SkeletonLoader from '@/components/SkeletonLoader';
 
 import AnalysisOverview from '@/components/AnalysisOverview';
+import { RelatedPages } from '@/components/ui/RelatedPages';
 
 // Monochrome shades for lines
 const MONO_SHADES = ['#000000', '#333333', '#666666', '#999999', '#AAAAAA', '#CCCCCC'];
@@ -101,6 +102,12 @@ export default function LongitudinalPage() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
+
+            <RelatedPages
+                title="Evidence Locker"
+                description="Ready to see the raw data? Dive into the interactive evidence locker to explore every single prompt and verdict."
+                href="/analysis/evidence"
+            />
         </div>
     );
 }
