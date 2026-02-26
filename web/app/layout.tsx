@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   creator: 'Jacob Kandel',
   alternates: {
     canonical: '/',
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
   },
   openGraph: {
     title: 'LLM Censorship Benchmark: Live Audit',
