@@ -95,6 +95,10 @@ export default function FilterBar() {
                     {/* Model Multi-Select Dropdown */}
                     <div className="relative w-full sm:w-auto" ref={dropdownRef}>
                         <button
+                            aria-label={`Select models. Currently ${activeModelCount} selected.`}
+                            aria-expanded={modelDropdownOpen}
+                            aria-controls="model-dropdown-menu"
+                            aria-haspopup="listbox"
                             onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
                             className={`w-full sm:w-auto flex items-center justify-between gap-2 text-xs border rounded-lg px-3 py-1.5 hover:border-primary transition-colors ${activeModelCount > 0
                                 ? 'border-primary/50 bg-primary/20 text-primary'
@@ -114,13 +118,14 @@ export default function FilterBar() {
                         </button>
 
                         {modelDropdownOpen && (
-                            <div className="absolute top-full left-0 mt-1 w-full sm:w-80 bg-white dark:bg-zinc-900 border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                            <div id="model-dropdown-menu" role="listbox" className="absolute top-full left-0 mt-1 w-full sm:w-80 bg-white dark:bg-zinc-900 border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
                                 <div className="sticky top-0 bg-popover border-b border-border px-3 py-2 flex items-center justify-between">
                                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                                         Select Models ({activeModelCount}/{allModels.length})
                                     </span>
                                     {activeModelCount > 0 && (
                                         <button
+                                            aria-label="Clear all filters"
                                             onClick={() => setSelectedModels([])}
                                             className="text-xs text-primary hover:text-primary/80 font-medium"
                                         >
@@ -135,6 +140,8 @@ export default function FilterBar() {
                                         return (
                                             <button
                                                 key={model}
+                                                role="option"
+                                                aria-selected={isSelected}
                                                 onClick={() => toggleModel(model)}
                                                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${isSelected
                                                     ? 'bg-primary/20 text-primary'
@@ -194,7 +201,7 @@ export default function FilterBar() {
                     {selectedModels.map(m => (
                         <span key={m} className="inline-flex items-center gap-1 text-[10px] bg-primary/20 text-primary rounded-full px-2 py-0.5 font-medium border border-primary/20">
                             {m.split('/').pop()}
-                            <button onClick={() => toggleModel(m)} className="hover:text-primary/70">
+                            <button aria-label={`Remove model ${m.split('/').pop()}`} onClick={() => toggleModel(m)} className="hover:text-primary/70">
                                 <X className="h-2.5 w-2.5" />
                             </button>
                         </span>

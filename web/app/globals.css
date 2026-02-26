@@ -62,8 +62,8 @@
   /* Maroon text */
 
   /* Muted: Lighter Grey */
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 30%; /* Darkened from 35% for WCAG AA on white */
 
   /* Accent: Neutral Gray */
   --accent: 0 0% 92%;
@@ -101,8 +101,8 @@
   --secondary: 0 0% 45%;
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 0 0% 20%;
-  --muted-foreground: 0 0% 65%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 70%; /* Lightened from 65% for WCAG AA on dark */
 
   /* Accent: Dark Gray */
   --accent: 0 0% 20%;

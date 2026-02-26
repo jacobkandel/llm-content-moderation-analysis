@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown, CheckCircle, Search, Filter, Calendar, X, Info, Share2, Check, ExternalLink } from 'lucide-react';
+import { Calendar, Users, X, ChevronDown, Filter, Search, Download, RefreshCw, Share2, Check, Info, AlertTriangle, ArrowLeftRight, ExternalLink, CheckCircle } from 'lucide-react';
 
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import Papa from 'papaparse';
@@ -292,15 +292,58 @@ export default function ComparePage() {
                     </button>
                 </header>
 
+                {/* Model Selectors (Moved up for correct Tab order) */}
+                <div className="flex flex-col md:flex-row items-center gap-4 bg-card p-4 rounded-xl border border-border">
+                    <div className="w-full md:w-1/2 relative">
+                        <label htmlFor="model-a-select" className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Model A</label>
+                        <select
+                            id="model-a-select"
+                            value={modelA}
+                            onChange={(e) => setModelA(e.target.value)}
+                            className="w-full relative z-10 appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
+                        >
+                            {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-9 h-4 w-4 text-muted-foreground pointer-events-none z-20" />
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            const temp = modelA;
+                            setModelA(modelB);
+                            setModelB(temp);
+                        }}
+                        aria-label="Swap models"
+                        title="Swap Model A and Model B"
+                        className="hidden md:flex items-center justify-center p-3 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors mt-5 focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                        <ArrowLeftRight className="h-4 w-4" />
+                    </button>
+
+                    <div className="w-full md:w-1/2 relative">
+                        <label htmlFor="model-b-select" className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Model B</label>
+                        <select
+                            id="model-b-select"
+                            value={modelB}
+                            onChange={(e) => setModelB(e.target.value)}
+                            className="w-full relative z-10 appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
+                        >
+                            {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-9 h-4 w-4 text-muted-foreground pointer-events-none z-20" />
+                    </div>
+                </div>
+
                 {/* Filters Bar */}
                 <div className="bg-card p-4 rounded-xl border border-border">
                     <div className="flex flex-wrap gap-4 items-end">
                         {/* Search */}
                         <div className="flex-1 min-w-[200px]">
-                            <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Search Prompts</label>
+                            <label htmlFor="search-prompts" className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Search Prompts</label>
                             <div className="relative">
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground z-10" />
                                 <input
+                                    id="search-prompts"
                                     type="text"
                                     value={searchKeyword}
                                     onChange={e => setSearchKeyword(e.target.value)}
@@ -341,13 +384,14 @@ export default function ComparePage() {
 
                         {/* Category */}
                         <div className="w-48">
-                            <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Category</label>
+                            <label htmlFor="filter-category" className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Category</label>
                             <div className="relative">
                                 <Filter className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <select
+                                    id="filter-category"
                                     value={selectedCategory}
                                     onChange={e => setSelectedCategory(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary text-foreground"
+                                    className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary text-foreground relative z-10"
                                 >
                                     <option value="all">All Categories</option>
                                     {(compareData?.categories || []).map(c => <option key={c} value={c}>{c}</option>)}
@@ -357,13 +401,14 @@ export default function ComparePage() {
 
                         {/* Date */}
                         <div className="w-48">
-                            <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Date</label>
+                            <label htmlFor="filter-date" className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Date</label>
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <select
+                                    id="filter-date"
                                     value={selectedDate}
                                     onChange={e => setSelectedDate(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-indigo-500 text-foreground"
+                                    className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-[#800000] text-foreground relative z-10"
                                 >
                                     <option value="all">All Dates</option>
                                     {(compareData?.dates || []).slice().reverse().map(d => <option key={d} value={d}>{d}</option>)}
@@ -373,45 +418,10 @@ export default function ComparePage() {
 
                         {/* Clear */}
                         {(searchKeyword || selectedCategory !== 'all' || selectedDate !== 'all') && (
-                            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg">
+                            <button aria-label="Clear Compare Filters" onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg">
                                 <X className="h-4 w-4" /> Clear
                             </button>
                         )}
-                    </div>
-                </div>
-
-                {/* Model Selectors */}
-                <div className="flex flex-col md:flex-row items-center gap-4 bg-card p-4 rounded-xl border border-border">
-                    <div className="w-full md:w-1/2">
-                        <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Model A</label>
-                        <div className="relative">
-                            <select
-                                value={modelA}
-                                onChange={(e) => setModelA(e.target.value)}
-                                className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
-                            >
-                                {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
-                            </select>
-                            <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        </div>
-                    </div>
-
-                    <div className="hidden md:flex items-center justify-center p-2 rounded-full bg-muted mt-6">
-                        <span className="text-xs font-bold text-muted-foreground">VS</span>
-                    </div>
-
-                    <div className="w-full md:w-1/2">
-                        <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Model B</label>
-                        <div className="relative">
-                            <select
-                                value={modelB}
-                                onChange={(e) => setModelB(e.target.value)}
-                                className="w-full appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
-                            >
-                                {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
-                            </select>
-                            <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        </div>
                     </div>
                 </div>
 
