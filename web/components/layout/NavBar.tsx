@@ -48,7 +48,7 @@ export function NavBar() {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
     return (
-        <nav className="sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        <nav aria-label="Main Navigation" className="sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
             <div className="max-w-7xl mx-auto px-4 md:px-8">
                 <div className="flex h-14 items-center justify-between">
                     {/* Left: Mobile Menu & Logo Placeholder/Title if needed */}
@@ -133,7 +133,7 @@ export function NavBar() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden border-t border-border bg-background p-4 space-y-4">
+                <nav aria-label="Mobile Navigation" className="md:hidden border-t border-border bg-background p-4 space-y-4">
                     {/* Mobile-only: Home link */}
                     {mobileOnlyItems.map((item) => (
                         <Link
@@ -186,7 +186,7 @@ export function NavBar() {
                             )}
                         </div>
                     ))}
-                </div>
+                </nav>
             )}
         </nav>
     );

@@ -12,6 +12,7 @@ import { SidebarProvider } from "@/components/providers/SidebarProvider";
 import { MainContentWrapper } from "@/components/layout/MainContentWrapper";
 import { BrandBar } from "@/components/layout/BrandBar";
 import { NavBar } from "@/components/layout/NavBar";
+import { FocusManager } from "@/components/layout/FocusManager";
 
 
 const geistSans = Geist({
@@ -92,6 +93,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <FocusManager />
           <ToastProvider>
             <SidebarProvider>
               <JsonLd />

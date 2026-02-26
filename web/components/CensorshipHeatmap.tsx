@@ -141,6 +141,14 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
         return 'bg-[#800000] text-white font-bold hover:bg-[#600000]';
     };
 
+    const getSeverity = (rate: number) => {
+        if (rate < 0.2) return 'Safe';
+        if (rate < 0.4) return 'Low';
+        if (rate < 0.6) return 'Medium';
+        if (rate < 0.8) return 'High';
+        return 'Critical';
+    };
+
     const handleCellClick = (model: string, category: string) => {
         // Trigger download of full text if needed
         if (isLite) {
@@ -209,8 +217,12 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                     return (
                                         <td
                                             key={c}
-                                            className={`p-1.5 text-center cursor-pointer transition-colors text-xs ${getColor(rate)}`}
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-label={`${m} in ${c}: ${getSeverity(rate)} severity with ${(rate * 100).toFixed(0)}% refusals`}
+                                            className={`p-1.5 text-center cursor-pointer transition-colors text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getColor(rate)}`}
                                             onClick={() => handleCellClick(m, c)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCellClick(m, c); } }}
                                             title={`${cell.refusals}/${cell.total} refusals - Click for details`}
                                         >
                                             {(rate * 100).toFixed(0)}%
@@ -265,8 +277,12 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
 
                                         return (
                                             <div key={c}
-                                                className={`p-2 rounded flex justify-between items-center cursor-pointer ${getColor(rate)}`}
+                                                role="button"
+                                                tabIndex={0}
+                                                aria-label={`${c}: ${getSeverity(rate)} severity with ${(rate * 100).toFixed(0)}% refusals`}
+                                                className={`p-2 rounded flex justify-between items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getColor(rate)}`}
                                                 onClick={() => handleCellClick(m, c)}
+                                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCellClick(m, c); } }}
                                             >
                                                 <span className="truncate mr-2 font-medium">{sanitizeCategory(c)}</span>
                                                 <span>{(rate * 100).toFixed(0)}%</span>

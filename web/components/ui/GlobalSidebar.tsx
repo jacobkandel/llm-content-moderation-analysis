@@ -80,6 +80,7 @@ export function GlobalSidebar() {
 
             {/* Sidebar */}
             <aside
+                aria-label="Sidebar"
                 className={cn(
                     'fixed top-0 left-0 z-40 h-screen bg-card border-r border-border transition-all duration-300 overflow-y-auto flex flex-col',
                     isMobileMenuOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0',
@@ -105,7 +106,7 @@ export function GlobalSidebar() {
                 </div>
 
                 {/* Main Navigation */}
-                <div className={cn("p-4 space-y-1 flex-1", isCollapsed && "px-2")}>
+                <nav aria-label="Sidebar Navigation" className={cn("p-4 space-y-1 flex-1", isCollapsed && "px-2")}>
                     {mainNavItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
@@ -217,7 +218,7 @@ export function GlobalSidebar() {
                             })}
                         </div>
                     </div>
-                </div>
+                </nav>
 
                 {/* Footer Actions */}
                 <div className={cn("p-4 border-t border-border mt-auto", isCollapsed && "px-2")}>

@@ -63,7 +63,8 @@
 
   /* Muted: Lighter Grey */
   --muted: 0 0% 95%;
-  --muted-foreground: 0 0% 30%; /* Darkened from 35% for WCAG AA on white */
+  --muted-foreground: 0 0% 30%;
+  /* Darkened from 35% for WCAG AA on white */
 
   /* Accent: Neutral Gray */
   --accent: 0 0% 92%;
@@ -76,6 +77,9 @@
   --input: 0 0% 85%;
   --ring: 0 100% 25%;
   /* Maroon Ring */
+
+  --focus-ring: 0 100% 25%;
+  /* High contrast Maroon for focus */
 
   --radius: 0.5rem;
 }
@@ -102,7 +106,8 @@
   --secondary-foreground: 0 0% 100%;
 
   --muted: 0 0% 18%;
-  --muted-foreground: 0 0% 70%; /* Lightened from 65% for WCAG AA on dark */
+  --muted-foreground: 0 0% 70%;
+  /* Lightened from 65% for WCAG AA on dark */
 
   /* Accent: Dark Gray */
   --accent: 0 0% 20%;
@@ -115,6 +120,9 @@
   --input: 0 0% 20%;
   --ring: 357 52% 42%;
   /* Brick Ring */
+
+  --focus-ring: 41 100% 46%;
+  /* Goldenrod for high contrast focus in dark mode */
 }
 
 
@@ -140,7 +148,7 @@ body {
 
 /* Focus visibility for accessibility */
 *:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid hsl(var(--focus-ring));
   outline-offset: 2px;
 }
 
