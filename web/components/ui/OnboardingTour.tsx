@@ -5,7 +5,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, Check } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
-const TOUR_STEPS = [
+interface TourPosition {
+    top?: string;
+    bottom?: string;
+    left?: string;
+    right?: string;
+}
+
+interface TourStep {
+    title: string;
+    content: string;
+    position: TourPosition;
+}
+
+const TOUR_STEPS: TourStep[] = [
     {
         title: "Welcome to Moderation Bias",
         content: "This tool tracks the hidden censorship rules of major AI models. We send thousands of controversial prompts and monitor what gets blocked.",
