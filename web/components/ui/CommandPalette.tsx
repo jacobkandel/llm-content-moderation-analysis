@@ -10,7 +10,9 @@ import {
     Settings,
     ArrowRight,
     Beaker,
-    Shield
+    Shield,
+    Cpu,
+    Layers
 } from 'lucide-react';
 
 interface CommandItem {
@@ -22,14 +24,32 @@ interface CommandItem {
     keywords?: string[];
 }
 
-export function CommandPalette() {
+interface CommandPaletteProps {
+    isCollapsed?: boolean;
+}
+
+export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [modelsData, setModelsData] = useState<{ id: string, display_name: string, provider: string }[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
-    const commands: CommandItem[] = [
+    useEffect(() => {
+        fetch('/models.json')
+            .then(res => res.json())
+            .then(data => setModelsData(data))
+            .catch(err => console.error('Failed to pre-fetch models for command palette', err));
+    }, []);
+
+    const hardcodedCategories = [
+        'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
+        'false-positive-control', 'harassment', 'hate-speech', 'health-misinformation',
+        'incitement-to-violence', 'paternalism', 'political', 'self-harm', 'weapons'
+    ];
+
+    const staticCommands: CommandItem[] = [
         // Overview
         {
             id: 'dashboard',
@@ -108,7 +128,27 @@ export function CommandPalette() {
         },
     ];
 
-    const filteredCommands = commands.filter(cmd => {
+    const modelCommands: CommandItem[] = modelsData.map(m => ({
+        id: `model-${m.id}`,
+        title: m.display_name,
+        description: `View model profile (${m.provider})`,
+        icon: <Cpu className="h-4 w-4" />,
+        action: () => router.push(`/models/${m.id}`),
+        keywords: ['model', 'llm', m.provider, m.display_name, m.id]
+    }));
+
+    const categoryCommands: CommandItem[] = hardcodedCategories.map(cat => ({
+        id: `cat-${cat}`,
+        title: cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        description: `View category behavior`,
+        icon: <Layers className="h-4 w-4" />,
+        action: () => router.push(`/categories/${cat}`),
+        keywords: ['category', 'topic', 'policy', cat]
+    }));
+
+    const allCommands = [...staticCommands, ...modelCommands, ...categoryCommands];
+
+    const filteredCommands = allCommands.filter(cmd => {
         const searchLower = search.toLowerCase();
         return (
             cmd.title.toLowerCase().includes(searchLower) ||
@@ -164,16 +204,26 @@ export function CommandPalette() {
     return (
         <>
             {/* Trigger hint - shown in sidebar */}
-            <button
-                onClick={() => setIsOpen(true)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-accent/50 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
-            >
-                <Search className="h-4 w-4" />
-                <span className="flex-1 text-left">Search...</span>
-                <kbd className="px-1.5 py-0.5 text-xs font-mono bg-background rounded border border-border text-muted-foreground">
-                    ⌘K
-                </kbd>
-            </button>
+            {isCollapsed ? (
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="w-full flex justify-center p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
+                    title="Search (Cmd+K)"
+                >
+                    <Search className="h-5 w-5" />
+                </button>
+            ) : (
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-accent/50 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                    <Search className="h-4 w-4" />
+                    <span className="flex-1 text-left">Search...</span>
+                    <kbd className="px-1.5 py-0.5 text-xs font-mono bg-background rounded border border-border text-muted-foreground">
+                        ⌘K
+                    </kbd>
+                </button>
+            )}
 
             {/* Modal */}
             <AnimatePresence>

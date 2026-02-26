@@ -99,24 +99,9 @@ export function GlobalSidebar() {
                     </Link>
                 </div>
 
-                {/* Command Palette / Search */}
+                {/* Command Palette / Search (Always mount to keep keyboard listener active) */}
                 <div className={cn("px-4 pt-4", isCollapsed && "px-2")}>
-                    {isCollapsed ? (
-                        <button
-                            onClick={() => {
-                                // Expand to show search or open palette directly?
-                                // Let's open palette directly but maybe expand sidebar too?
-                                // For now just open palette
-                                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
-                            }}
-                            className="w-full flex justify-center p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
-                            title="Search (Cmd+K)"
-                        >
-                            <Search className="h-5 w-5" />
-                        </button>
-                    ) : (
-                        <CommandPalette />
-                    )}
+                    <CommandPalette isCollapsed={isCollapsed} />
                 </div>
 
                 {/* Main Navigation */}
