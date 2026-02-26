@@ -51,5 +51,7 @@ jobs:
       working-directory: web
     
     - name: Build Next.js App
+      env:
+        NEXT_TELEMETRY_DISABLED: 1
       run: npm run build
       working-directory: web
