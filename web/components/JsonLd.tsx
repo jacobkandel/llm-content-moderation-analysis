@@ -1,5 +1,11 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+
 export default function JsonLd() {
-    const jsonLd = [
+    const pathname = usePathname();
+
+    const jsonLd: any[] = [
         {
             '@context': 'https://schema.org',
             '@type': 'WebSite',
@@ -72,6 +78,43 @@ export default function JsonLd() {
             ],
         },
     ];
+
+    if (pathname && pathname !== '/') {
+        const segments = pathname.split('/').filter(Boolean);
+        const itemListElement = [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://moderationbias.com',
+            },
+        ];
+
+        let currentPath = '';
+        segments.forEach((segment, index) => {
+            currentPath += `/${segment}`;
+            // Format nicely: "analysis" -> "Analysis", "gpt-4" -> "Gpt 4"
+            const name = segment
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+            // If it's a model ID segment, it might be URL-encoded, so decode it
+            // but the UI typically uses human-readable names there if possible. The pathname provides URL segments.
+            itemListElement.push({
+                '@type': 'ListItem',
+                position: index + 2,
+                name: decodeURIComponent(name),
+                item: `https://moderationbias.com${currentPath}`,
+            });
+        });
+
+        jsonLd.push({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement,
+        });
+    }
 
     return (
         <section>
