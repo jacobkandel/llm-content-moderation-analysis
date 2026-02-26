@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <main className="flex flex-col">
       {/* ── Hero ── */}
-      <section className="relative bg-white rounded-2xl overflow-hidden border border-[#e5e5e5] shadow-sm">
+      <section className="relative bg-card rounded-2xl overflow-hidden border border-border shadow-sm">
         {/* Maroon accent strip */}
         <div className="h-1.5 w-full bg-[#800000]" aria-hidden />
 
@@ -16,13 +16,13 @@ export default function HomePage() {
           </p>
 
           {/* Headline — left-aligned, editorial */}
-          <h1 className="text-4xl md:text-[3.75rem] font-black leading-[1.1] tracking-tight text-[#1a1a1a] mb-6 max-w-3xl">
+          <h1 className="text-4xl md:text-[3.75rem] font-black leading-[1.1] tracking-tight text-foreground mb-6 max-w-3xl">
             See How AI Models Differ in{' '}
             <span className="text-[#800000]">Censorship and Bias</span>
           </h1>
 
           {/* Subtext */}
-          <p className="text-lg text-[#555] max-w-xl mb-10 leading-relaxed">
+          <p className="text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed">
             We run identical prompts through every major LLM and measure exactly which models
             refuse — and which ones don't.
           </p>
@@ -38,7 +38,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/about"
-              className="inline-flex items-center gap-2 text-[#555] hover:text-[#333] text-sm font-medium transition-colors mt-0.5 py-3.5"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors mt-0.5 py-3.5"
             >
               More about the project <ChevronRight className="h-4 w-4" />
             </Link>

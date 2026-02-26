@@ -60,6 +60,8 @@ interface AnalysisContextType {
     ensureTriggers: () => Promise<void>;
     ensureReport: () => Promise<void>;
     ensureAuditData: () => Promise<void>;
+    ensureSignificance: () => Promise<void>;
+    ensurePrompts: () => Promise<void>;
 }
 
 const AnalysisContext = createContext<AnalysisContextType | undefined>(undefined);
@@ -222,6 +224,27 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         } catch { }
     };
 
+    const ensureSignificance = async () => {
+        if (loaded.current.significance) return;
+        loaded.current.significance = true;
+        try {
+            const r = await fetch('/significance_pairwise.json');
+            if (r.ok) setPrecomputedSignificance(await r.json());
+        } catch { }
+    };
+
+    const ensurePrompts = async () => {
+        if (loaded.current.prompts) return;
+        loaded.current.prompts = true;
+        try {
+            const r = await fetch('/prompts_list.json');
+            if (r.ok) {
+                const data = await r.json();
+                if (data?.length) setPrecomputedPrompts(data);
+            }
+        } catch { }
+    };
+
     // Load the lite CSV (for filtering & drill-downs)
     const ensureAuditData = async () => {
         if (loaded.current.csv) return;
@@ -241,40 +264,33 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const loadPrecomputed = async () => {
             try {
-                const [summaryRes, spectrumRes, heatmapRes, consensusRes, significanceRes, reliabilityRes, longitudinalRes, promptsRes] = await Promise.allSettled([
+                const [summaryRes, spectrumRes, heatmapRes, consensusRes, reliabilityRes, longitudinalRes] = await Promise.allSettled([
                     fetch('/summary_stats.json').then(r => r.ok ? r.json() : null),
                     fetch('/spectrum_data.json').then(r => r.ok ? r.json() : null),
                     fetch('/heatmap_matrix.json').then(r => r.ok ? r.json() : null),
                     fetch('/consensus_stats.json').then(r => r.ok ? r.json() : null),
-                    fetch('/significance_pairwise.json').then(r => r.ok ? r.json() : null),
                     fetch('/reliability_scores.json').then(r => r.ok ? r.json() : null),
                     fetch('/longitudinal_data.json').then(r => r.ok ? r.json() : null),
-                    fetch('/prompts_list.json').then(r => r.ok ? r.json() : []),
                 ]);
 
                 const summary = summaryRes.status === 'fulfilled' ? summaryRes.value : null;
                 const spectrum = spectrumRes.status === 'fulfilled' ? spectrumRes.value : null;
                 const heatmap = heatmapRes.status === 'fulfilled' ? heatmapRes.value : null;
                 const consensus = consensusRes.status === 'fulfilled' ? consensusRes.value : null;
-                const significance = significanceRes.status === 'fulfilled' ? significanceRes.value : null;
                 const reliability = reliabilityRes.status === 'fulfilled' ? reliabilityRes.value : null;
                 const longitudinal = longitudinalRes.status === 'fulfilled' ? longitudinalRes.value : null;
-                const prompts = promptsRes.status === 'fulfilled' ? promptsRes.value : [];
 
                 if (summary) setPrecomputedSummary(summary);
                 if (spectrum) setPrecomputedSpectrum(spectrum);
                 if (heatmap) setPrecomputedHeatmap(heatmap);
                 if (consensus) setPrecomputedConsensus(consensus);
-                if (significance) setPrecomputedSignificance(significance);
                 if (reliability) setPrecomputedReliability(reliability);
                 if (longitudinal) setPrecomputedLongitudinal(longitudinal);
-                if (prompts?.length) setPrecomputedPrompts(prompts);
 
                 console.log('⚡ Pre-computed JSON loaded', {
                     summary: !!summary, spectrum: !!spectrum, heatmap: !!heatmap,
-                    consensus: !!consensus, significance: !!significance,
+                    consensus: !!consensus,
                     reliability: !!reliability, longitudinal: !!longitudinal,
-                    prompts: prompts?.length || 0
                 });
             } catch (err) {
                 console.error("Failed to load pre-computed data", err);
@@ -458,7 +474,8 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
             precomputedConsensus, precomputedSignificance, precomputedReliability, precomputedLongitudinal,
             isLite, isLoadingFull, loadFullDetails,
             ensureClusters, ensureDrift, ensureConsensus, ensurePValues,
-            ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData
+            ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData,
+            ensureSignificance, ensurePrompts
         }}>
             {children}
         </AnalysisContext.Provider>

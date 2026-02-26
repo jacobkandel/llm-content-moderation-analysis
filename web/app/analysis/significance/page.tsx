@@ -28,11 +28,14 @@ function erf(x: number): number {
 }
 
 export default function SignificancePage() {
-    const { filteredAuditData, loading, ensureAuditData, precomputedSignificance, selectedModels, dateRange } = useAnalysis();
+    const { filteredAuditData, loading, ensureAuditData, ensureSignificance, precomputedSignificance, selectedModels, dateRange } = useAnalysis();
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
 
+    // Load significance data on mount (lazy)
+    useEffect(() => { ensureSignificance(); }, []);
     // Load CSV only when filters are active
     useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
+
     const [showAll, setShowAll] = useState(false);
     const [sortBy, setSortBy] = useState<'pValue' | 'disagreements'>('pValue');
 

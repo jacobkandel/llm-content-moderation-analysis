@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { ChevronDown, CheckCircle, Search, Filter, Calendar, X, Info } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ChevronDown, CheckCircle, Search, Filter, Calendar, X, Info, Share2, Check, ExternalLink } from 'lucide-react';
 
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import Papa from 'papaparse';
@@ -63,6 +65,9 @@ function VerdictBadge({ verdict }: { verdict: string | null | undefined }) {
 }
 
 export default function ComparePage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
     // --- Phase 1: Instant data (precomputed JSON, ~20KB) ---
     const [compareData, setCompareData] = useState<CompareData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -74,11 +79,19 @@ export default function ComparePage() {
     const disagreeRef = useRef<HTMLDivElement>(null);
 
     // --- UI state ---
-    const [modelA, setModelA] = useState<string>('');
-    const [modelB, setModelB] = useState<string>('');
+    const [modelA, setModelA] = useState<string>(searchParams.get('modelA') || '');
+    const [modelB, setModelB] = useState<string>(searchParams.get('modelB') || '');
     const [isClient, setIsClient] = useState(false);
     const [showStats, setShowStats] = useState(false);
     const [pValues, setPValues] = useState<any[]>([]);
+    const [copied, setCopied] = useState(false);
+
+    const handleShare = useCallback(() => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    }, []);
 
     // Filters
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -86,6 +99,10 @@ export default function ComparePage() {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedDate, setSelectedDate] = useState('all');
+
+    // Pagination
+    const [batchSize, setBatchSize] = useState(10);
+    const [visibleCount, setVisibleCount] = useState(10);
 
     // Debounce search input (300ms)
     useEffect(() => {
@@ -97,12 +114,24 @@ export default function ComparePage() {
     useEffect(() => {
         setIsClient(true);
 
+        const urlModelA = searchParams.get('modelA');
+        const urlModelB = searchParams.get('modelB');
+
         fetch('/compare_data.json')
             .then(r => r.json())
             .then((data: CompareData) => {
                 setCompareData(data);
-                if (data.models.length > 0) setModelA(data.models[0]);
-                if (data.models.length > 1) setModelB(data.models[1]);
+                // Prefer URL params, fall back to first two models
+                if (urlModelA && data.models.includes(urlModelA)) {
+                    setModelA(urlModelA);
+                } else if (data.models.length > 0) {
+                    setModelA(data.models[0]);
+                }
+                if (urlModelB && data.models.includes(urlModelB)) {
+                    setModelB(urlModelB);
+                } else if (data.models.length > 1) {
+                    setModelB(data.models[1]);
+                }
                 setLoading(false);
             })
             .catch(err => {
@@ -118,6 +147,17 @@ export default function ComparePage() {
             }
         }).catch(() => { });
     }, []);
+
+    // Sync model selection → URL (skip initial mount to avoid replacing on load)
+    const isInitialMount = useRef(true);
+    useEffect(() => {
+        if (isInitialMount.current) { isInitialMount.current = false; return; }
+        if (!modelA && !modelB) return;
+        const params = new URLSearchParams();
+        if (modelA) params.set('modelA', modelA);
+        if (modelB) params.set('modelB', modelB);
+        router.replace(`?${params.toString()}`, { scroll: false });
+    }, [modelA, modelB]);
 
     // --- Phase 2: Lazy-load full CSV when disagreement section is visible ---
     const loadFullData = useCallback(() => {
@@ -218,7 +258,13 @@ export default function ComparePage() {
         setDebouncedSearch('');
         setSelectedCategory('all');
         setSelectedDate('all');
+        setVisibleCount(batchSize);
     };
+
+    // Reset visible count when model pair or filters change
+    useEffect(() => {
+        setVisibleCount(batchSize);
+    }, [modelA, modelB, selectedCategory, selectedDate, debouncedSearch, batchSize]);
 
     if (!isClient) return null;
 
@@ -226,13 +272,24 @@ export default function ComparePage() {
         <main className="min-h-screen bg-background font-sans text-foreground">
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
-                <header className="mb-6">
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
-                        Model Comparison
-                    </h1>
-                    <p className="text-muted-foreground text-sm md:text-base mt-1">
-                        Side-by-side analysis of model behavior, refusal rates, and disagreements.
-                    </p>
+                <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
+                            Model Comparison
+                        </h1>
+                        <p className="text-muted-foreground text-sm md:text-base mt-1">
+                            Side-by-side analysis of model behavior, refusal rates, and disagreements.
+                        </p>
+                    </div>
+                    <button
+                        onClick={handleShare}
+                        title="Copy shareable link"
+                        className="inline-flex items-center gap-2 text-sm font-medium border border-border rounded-lg px-3 py-2 hover:bg-muted/40 transition-all text-muted-foreground hover:text-foreground flex-shrink-0"
+                        aria-label={copied ? 'Link copied!' : 'Copy comparison link to clipboard'}
+                    >
+                        {copied ? <Check className="h-4 w-4 text-green-600" /> : <Share2 className="h-4 w-4" />}
+                        {copied ? 'Copied!' : 'Share'}
+                    </button>
                 </header>
 
                 {/* Filters Bar */}
@@ -271,7 +328,7 @@ export default function ComparePage() {
                                                     setSearchKeyword(suggestion);
                                                     setShowSuggestions(false);
                                                 }}
-                                                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-[#f0f0f0] hover:text-[#1a1a1a] transition-colors flex items-center gap-2"
+                                                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
                                             >
                                                 <Search className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                                                 {suggestion}
@@ -438,7 +495,12 @@ export default function ComparePage() {
                                         className="h-10 w-10 rounded-lg object-contain bg-card border border-border"
                                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
-                                    <h2 className="text-xl font-bold truncate pr-8 text-foreground">{modelA}</h2>
+                                    <div className="flex-1 min-w-0">
+                                        <h2 className="text-xl font-bold truncate text-foreground">{modelA}</h2>
+                                        <Link href={`/models/${modelA}`} className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1 mt-0.5">
+                                            View profile <ExternalLink className="h-3 w-3" />
+                                        </Link>
+                                    </div>
                                 </div>
                                 {statsA && (
                                     <div className="grid grid-cols-2 gap-4">
@@ -470,7 +532,12 @@ export default function ComparePage() {
                                         className="h-10 w-10 rounded-lg object-contain bg-card border border-border"
                                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
-                                    <h2 className="text-xl font-bold truncate pr-8 text-foreground">{modelB}</h2>
+                                    <div className="flex-1 min-w-0">
+                                        <h2 className="text-xl font-bold truncate text-foreground">{modelB}</h2>
+                                        <Link href={`/models/${modelB}`} className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1 mt-0.5">
+                                            View profile <ExternalLink className="h-3 w-3" />
+                                        </Link>
+                                    </div>
                                 </div>
                                 {statsB && (
                                     <div className="grid grid-cols-2 gap-4">
@@ -496,7 +563,11 @@ export default function ComparePage() {
                             <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-foreground">
                                 Side-by-Side Censorship Profile
                             </h3>
-                            <div className="h-[400px] w-full">
+                            <div
+                                className="h-[400px] w-full"
+                                role="img"
+                                aria-label={`Radar chart comparing ${modelA} and ${modelB} across ${radarData.length} content categories. ${radarData.map(d => `${d.subject}: ${modelA.split('/').pop()} ${d.A.toFixed(0)}% vs ${modelB.split('/').pop()} ${d.B.toFixed(0)}%`).join('. ')}`}
+                            >
                                 <ResponsiveContainer width="100%" height="100%">
                                     <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                                         <PolarGrid stroke="hsl(var(--border))" />
@@ -571,8 +642,32 @@ export default function ComparePage() {
                                 </div>
                             ) : (
                                 <div className="grid gap-4">
-                                    {disagreements.slice(0, 50).map((diff, idx) => (
-                                        <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-[#f5f5f5] transition-colors">
+                                    {/* Batch size + results count */}
+                                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                        <span>
+                                            Showing {Math.min(visibleCount, disagreements.length)} of {disagreements.length} disagreements
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-xs font-semibold uppercase tracking-wider">Per page:</label>
+                                            <select
+                                                value={batchSize}
+                                                onChange={e => {
+                                                    const v = Number(e.target.value);
+                                                    setBatchSize(v);
+                                                    setVisibleCount(v);
+                                                }}
+                                                className="text-xs bg-background border border-border rounded px-2 py-1 text-foreground focus:ring-2 focus:ring-primary"
+                                            >
+                                                <option value={10}>10</option>
+                                                <option value={20}>20</option>
+                                                <option value={50}>50</option>
+                                                <option value={100}>100</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {disagreements.slice(0, visibleCount).map((diff, idx) => (
+                                        <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-muted/40 transition-colors">
                                             <div className="bg-muted/30 p-3 border-b border-border flex justify-between items-center">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
@@ -644,9 +739,17 @@ export default function ComparePage() {
                                             </div>
                                         </div>
                                     ))}
-                                    {disagreements.length > 50 && (
-                                        <div className="text-center text-muted-foreground text-sm py-4">
-                                            ...and {disagreements.length - 50} more
+                                    {visibleCount < disagreements.length && (
+                                        <div className="flex flex-col items-center gap-2 pt-2 pb-4">
+                                            <button
+                                                onClick={() => setVisibleCount(v => v + batchSize)}
+                                                className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+                                            >
+                                                Load {Math.min(batchSize, disagreements.length - visibleCount)} more
+                                            </button>
+                                            <span className="text-xs text-muted-foreground">
+                                                {disagreements.length - visibleCount} remaining
+                                            </span>
                                         </div>
                                     )}
                                     {disagreements.length === 0 && (

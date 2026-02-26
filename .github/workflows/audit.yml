@@ -144,6 +144,9 @@ jobs:
         if: ${{ inputs.skip_collection != 'true' }}
         run: python scripts/compress_data.py
 
+      - name: Generate Semantic Clusters
+        run: python3 src/cluster_analysis_simple.py
+
       - name: Generate All Reports & Visuals
         env:
           SKIP_LLM_ANALYSIS: ${{ inputs.skip_llm_analysis }}
