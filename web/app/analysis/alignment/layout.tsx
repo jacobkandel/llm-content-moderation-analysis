@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Model Alignment — Moderation Bias',
+    title: 'Model Alignment | Moderation Bias',
     description: 'Cross-model alignment analysis showing where LLMs agree and disagree on content moderation decisions. Identifies consensus and outlier behaviors.',
     openGraph: {
-        title: 'Model Alignment — Moderation Bias',
+        title: 'Model Alignment | Moderation Bias',
         description: 'Cross-model alignment analysis showing where LLMs agree and disagree.',
     },
 };

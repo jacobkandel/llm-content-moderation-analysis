@@ -1,7 +1,23 @@
 import Link from 'next/link';
 import { ArrowRight, BarChart2, Zap, RefreshCw, ChevronRight } from 'lucide-react';
+import fs from 'fs';
+import path from 'path';
 
-export default function HomePage() {
+export default async function HomePage() {
+  let modelsData: { id: string; display_name: string; provider: string }[] = [];
+  try {
+    const modelsPath = path.join(process.cwd(), 'public', 'models.json');
+    modelsData = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
+  } catch (error) {
+    console.error('Failed to load models for homepage:', error);
+  }
+
+  const hardcodedCategories = [
+    'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
+    'false-positive-control', 'harassment', 'hate-speech', 'health-misinformation',
+    'incitement-to-violence', 'paternalism', 'political', 'self-harm', 'weapons'
+  ];
+
   return (
     <main className="flex flex-col">
       {/* ── Hero ── */}
@@ -136,6 +152,50 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+      {/* ── Internal Link Directory (SEO) ── */}
+      <section className="bg-muted/10 py-16 border-t border-border mt-auto">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-[#800000]" />
+                Explore Models
+              </h3>
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                {modelsData.map((m) => (
+                  <li key={m.id}>
+                    <Link
+                      href={`/models/${m.id}`}
+                      className="hover:text-foreground hover:underline underline-offset-2 transition-colors"
+                    >
+                      {m.display_name} <span className="opacity-50">({m.provider})</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-[#800000]" />
+                Explore Categories
+              </h3>
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                {hardcodedCategories.map((cat) => (
+                  <li key={cat}>
+                    <Link
+                      href={`/categories/${cat}`}
+                      className="hover:text-foreground hover:underline underline-offset-2 transition-colors capitalize"
+                    >
+                      {cat.replace(/-/g, ' ')}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
   );
 }
