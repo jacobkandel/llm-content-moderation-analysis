@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Copy, Check } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef } from 'react';
+import { sanitizeSearchInput } from '@/lib/utils';
 
 interface Question {
     id: string;
@@ -27,7 +28,7 @@ export default function QuestionsModal({ isOpen, onClose, questions }: Questions
     // Filter questions based on search
     const filteredQuestions = useMemo(() => {
         if (!search) return questions;
-        const lowerSearch = search.toLowerCase();
+        const lowerSearch = sanitizeSearchInput(search).toLowerCase();
         return questions.filter(q =>
             q.text.toLowerCase().includes(lowerSearch) ||
             q.category.toLowerCase().includes(lowerSearch)

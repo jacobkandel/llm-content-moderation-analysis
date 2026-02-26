@@ -14,6 +14,7 @@ import {
     Cpu,
     Layers
 } from 'lucide-react';
+import { sanitizeSearchInput } from '@/lib/utils';
 
 interface CommandItem {
     id: string;
@@ -149,7 +150,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
     const allCommands = [...staticCommands, ...modelCommands, ...categoryCommands];
 
     const filteredCommands = allCommands.filter(cmd => {
-        const searchLower = search.toLowerCase();
+        const searchLower = sanitizeSearchInput(search).toLowerCase();
         return (
             cmd.title.toLowerCase().includes(searchLower) ||
             cmd.description?.toLowerCase().includes(searchLower) ||

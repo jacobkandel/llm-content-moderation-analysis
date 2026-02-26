@@ -11,6 +11,7 @@ import Papa from 'papaparse';
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { getLogoUrl } from '@/lib/provider-logos';
 import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
+import { sanitizeSearchInput } from '@/lib/utils';
 
 // --- Types for precomputed data ---
 type CompareModelStats = {
@@ -237,7 +238,10 @@ export default function ComparePage() {
         let filtered = fullData;
         if (selectedCategory !== 'all') filtered = filtered.filter(d => d.category === selectedCategory);
         if (selectedDate !== 'all') filtered = filtered.filter(d => d.timestamp?.startsWith(selectedDate));
-        if (debouncedSearch) filtered = filtered.filter(d => d.prompt?.toLowerCase().includes(debouncedSearch.toLowerCase()));
+        if (debouncedSearch) {
+            const cleanSearch = sanitizeSearchInput(debouncedSearch).toLowerCase();
+            filtered = filtered.filter(d => d.prompt?.toLowerCase().includes(cleanSearch));
+        }
 
         const mapA = new Map<string, AuditRow>();
         filtered.filter(d => d.model === modelA && d.prompt).forEach(d => mapA.set(d.prompt!, d));

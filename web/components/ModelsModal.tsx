@@ -6,6 +6,7 @@ import { X, Search, Calendar, Box } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
+import { sanitizeSearchInput } from '@/lib/utils';
 
 interface ModelInfo {
     id: string;
@@ -27,7 +28,7 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
     // Filter models based on search
     const filteredModels = useMemo(() => {
         if (!search) return models;
-        const lowerSearch = search.toLowerCase();
+        const lowerSearch = sanitizeSearchInput(search).toLowerCase();
         return models.filter(m =>
             m.name.toLowerCase().includes(lowerSearch)
         );
