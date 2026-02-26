@@ -108,7 +108,7 @@ export function GlobalSidebar() {
                 {/* Main Navigation */}
                 <nav aria-label="Sidebar Navigation" className={cn("p-4 space-y-1 flex-1", isCollapsed && "px-2")}>
                     {mainNavItems.map((item) => {
-                        const isActive = pathname === item.href;
+                        const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
                         return (
                             <Link
                                 key={item.name}
@@ -143,7 +143,7 @@ export function GlobalSidebar() {
 
                         <div className="space-y-1">
                             {analysisCategories.map((category) => {
-                                const hasActiveItem = category.items.some(item => pathname === item.href);
+                                const hasActiveItem = category.items.some(item => pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href)));
                                 const isExpanded = expandedCategory === category.title || (isAnalysisPage && hasActiveItem);
 
                                 if (isCollapsed) {
@@ -153,7 +153,7 @@ export function GlobalSidebar() {
                                     return (
                                         <div key={category.title} className="space-y-1">
                                             {category.items.map(item => {
-                                                const isActive = pathname === item.href;
+                                                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
                                                 return (
                                                     <Link
                                                         key={item.name}
@@ -193,7 +193,7 @@ export function GlobalSidebar() {
                                         {isExpanded && (
                                             <div className="ml-4 mt-1 space-y-0.5">
                                                 {category.items.map((item) => {
-                                                    const isActive = pathname === item.href;
+                                                    const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
                                                     return (
                                                         <Link
                                                             key={item.name}

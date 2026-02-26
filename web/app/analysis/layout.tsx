@@ -11,7 +11,7 @@ export default function AnalysisLayout({ children }: { children: React.ReactNode
         <Suspense>
             <AnalysisProvider>
                 <div className="w-full">
-                    <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
+                    <div className="flex items-center justify-between flex-wrap gap-2 mb-1 sticky top-14 z-30 bg-background/95 backdrop-blur shrink-0 py-2 border-b border-border shadow-sm">
                         <FilterBar />
                         <LastUpdatedBadge />
                     </div>

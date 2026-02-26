@@ -13,7 +13,8 @@ import { MainContentWrapper } from "@/components/layout/MainContentWrapper";
 import { BrandBar } from "@/components/layout/BrandBar";
 import { NavBar } from "@/components/layout/NavBar";
 import { FocusManager } from "@/components/layout/FocusManager";
-
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { BackToTop } from "@/components/ui/BackToTop";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -102,6 +103,7 @@ export default function RootLayout({
                 <BrandBar />
                 <NavBar />
                 <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 md:px-8 lg:px-12">
+                  <Breadcrumbs />
                   {children}
                 </main>
                 <Footer />
@@ -109,6 +111,7 @@ export default function RootLayout({
             </SidebarProvider>
             <Analytics />
             <SpeedInsights />
+            <BackToTop />
           </ToastProvider>
         </ThemeProvider>
       </body>

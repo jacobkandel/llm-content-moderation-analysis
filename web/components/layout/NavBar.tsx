@@ -64,7 +64,7 @@ export function NavBar() {
                         <div className="hidden md:flex items-center gap-1">
                             {navItems.map((item) => {
                                 if (item.dropdown) {
-                                    const isActive = item.dropdown.some(sub => pathname === sub.href);
+                                    const isActive = item.dropdown.some(sub => pathname === sub.href || (sub.href !== '/' && pathname.startsWith(sub.href)));
                                     return (
                                         <div
                                             key={item.name}
@@ -85,35 +85,39 @@ export function NavBar() {
 
                                             <div className="absolute left-0 top-full pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50">
                                                 <div className="bg-popover border border-border rounded-md shadow-md p-1">
-                                                    {item.dropdown.map(sub => (
-                                                        <Link
-                                                            key={sub.href}
-                                                            href={sub.href}
-                                                            className={cn(
-                                                                "flex items-center gap-2 px-3 py-2 text-sm rounded-sm transition-colors",
-                                                                pathname === sub.href
-                                                                    ? "bg-[#800000]/8 text-[#800000] font-medium"
-                                                                    : "text-popover-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
-                                                            )}
-                                                        >
-                                                            <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-[#800000]" : "text-popover-foreground")} />
-                                                            {sub.title}
-                                                        </Link>
-                                                    ))}
+                                                    {item.dropdown.map(sub => {
+                                                        const isChildActive = pathname === sub.href || (sub.href !== '/' && pathname.startsWith(sub.href));
+                                                        return (
+                                                            <Link
+                                                                key={sub.href}
+                                                                href={sub.href}
+                                                                className={cn(
+                                                                    "flex items-center gap-2 px-3 py-2 text-sm rounded-sm transition-colors",
+                                                                    isChildActive
+                                                                        ? "bg-[#800000]/8 text-[#800000] font-medium"
+                                                                        : "text-popover-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
+                                                                )}
+                                                            >
+                                                                <sub.icon className={cn("h-4 w-4", isChildActive ? "text-[#800000]" : "text-popover-foreground")} />
+                                                                {sub.title}
+                                                            </Link>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>
                                     );
                                 }
 
-                                const isActive = pathname === item.href;
+                                const isItemActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+
                                 return (
                                     <Link
                                         key={item.name}
                                         href={item.href}
                                         className={cn(
                                             "flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                                            isActive ? "text-[#800000] bg-[#800000]/8 font-semibold" : "text-muted-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
+                                            isItemActive ? "text-[#800000] bg-[#800000]/8 font-semibold" : "text-muted-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
                                         )}
                                     >
                                         <item.icon className="h-4 w-4" />
@@ -135,20 +139,23 @@ export function NavBar() {
             {isMobileMenuOpen && (
                 <nav aria-label="Mobile Navigation" className="md:hidden border-t border-border bg-background p-4 space-y-4">
                     {/* Mobile-only: Home link */}
-                    {mobileOnlyItems.map((item) => (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className={cn(
-                                "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
-                                pathname === item.href ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
-                            )}
-                        >
-                            <item.icon className="h-4 w-4" />
-                            {item.name}
-                        </Link>
-                    ))}
+                    {mobileOnlyItems.map((item) => {
+                        const isMobileActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={cn(
+                                    "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
+                                    isMobileActive ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
+                                )}
+                            >
+                                <item.icon className="h-4 w-4" />
+                                {item.name}
+                            </Link>
+                        );
+                    })}
                     {navItems.map((item) => (
                         <div key={item.name} className="space-y-2">
                             {item.dropdown ? (
@@ -172,17 +179,22 @@ export function NavBar() {
                                     </div>
                                 </>
                             ) : (
-                                <Link
-                                    href={item.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className={cn(
-                                        "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
-                                        pathname === item.href ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
-                                    )}
-                                >
-                                    <item.icon className="h-4 w-4" />
-                                    {item.name}
-                                </Link>
+                                (() => {
+                                    const isItemActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                                    return (
+                                        <Link
+                                            href={item.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className={cn(
+                                                "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
+                                                isItemActive ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
+                                            )}
+                                        >
+                                            <item.icon className="h-4 w-4" />
+                                            {item.name}
+                                        </Link>
+                                    );
+                                })()
                             )}
                         </div>
                     ))}
