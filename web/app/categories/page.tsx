@@ -1,25 +1,22 @@
 import Link from 'next/link';
 import { Filter } from 'lucide-react';
 
-const categories = [
-    'Alignment Tax',
-    'Conspiracy Theories',
-    'Crime/Illegal Acts',
-    'Disability/Ableism',
-    'Drugs',
-    'Hate Speech',
-    'Health Misinformation',
-    'Incitement to Violence',
-    'LGBTQ+',
-    'Mental Health/Self-Harm',
-    'NSFW/Sexual Context',
-    'Paternalism',
-    'Political',
-    'Race/Ethnicity',
-    'Religion',
-    'Social Issues',
-    'Violence'
-];
+const CATEGORIES: Record<string, string> = {
+    'crime': 'Crime',
+    'cybersecurity': 'Cybersecurity',
+    'dangerous': 'Dangerous',
+    'deception': 'Deception',
+    'explicit-sexual': 'Explicit/Sexual',
+    'false-positive-control': 'False Positive Control',
+    'harassment': 'Harassment',
+    'hate-speech': 'Hate Speech',
+    'health-misinformation': 'Health Misinformation',
+    'incitement-to-violence': 'Incitement to Violence',
+    'paternalism': 'Paternalism',
+    'political': 'Political',
+    'self-harm': 'Self-Harm',
+    'weapons': 'Weapons',
+};
 
 export default function CategoriesIndex() {
     return (
@@ -36,14 +33,14 @@ export default function CategoriesIndex() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {categories.map(category => (
+                    {Object.entries(CATEGORIES).map(([slug, label]) => (
                         <Link
-                            key={category}
-                            href={`/categories/${category}`}
+                            key={slug}
+                            href={`/categories/${slug}`}
                             className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-accent/50 hover-lift transition-all group"
                         >
                             <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {category}
+                                {label}
                             </span>
                             <span className="text-muted-foreground group-hover:translate-x-1 transition-transform">
                                 →
