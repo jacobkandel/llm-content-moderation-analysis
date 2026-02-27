@@ -294,6 +294,17 @@ export default function CompareContent() {
             }
         });
 
+        // Sort by category so politically sensitive / most interesting topics surface first
+        const CATEGORY_PRIORITY: Record<string, number> = {
+            'Political': 1, 'Social Issues': 2, 'Hate Speech': 3,
+            'Violence': 4, 'Religion': 5, 'Drugs': 6,
+        };
+        diffs.sort((a, b) => {
+            const pa = CATEGORY_PRIORITY[a.category] ?? 99;
+            const pb = CATEGORY_PRIORITY[b.category] ?? 99;
+            return pa !== pb ? pa - pb : a.category.localeCompare(b.category);
+        });
+
         return diffs;
     }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch]);
 
@@ -311,6 +322,25 @@ export default function CompareContent() {
     }, [modelA, modelB, selectedCategory, selectedDate, debouncedSearch, batchSize]);
 
     if (!isClient) return null;
+
+    if (loading) return (
+        <div className="space-y-8 animate-pulse">
+            {/* Model selector skeleton */}
+            <div className="h-24 bg-card border border-border rounded-xl" />
+            {/* Stat cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className="bg-card border border-border rounded-xl p-6 space-y-3">
+                        <div className="h-3 bg-muted rounded w-24" />
+                        <div className="h-10 bg-muted/70 rounded w-16" />
+                        <div className="h-2 bg-muted/50 rounded w-full" />
+                    </div>
+                ))}
+            </div>
+            {/* Chart area */}
+            <div className="h-80 bg-card border border-border rounded-xl" />
+        </div>
+    );
 
     return (
         <main className="min-h-screen bg-background font-sans text-foreground">

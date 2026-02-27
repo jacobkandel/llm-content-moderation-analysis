@@ -36,7 +36,11 @@ export default function AuditPage() {
     const columns = useMemo<ColumnDef<AuditRow>[]>(() => [
         {
             accessorKey: 'timestamp',
-            header: ({ column }) => <SortableHeader column={column} title="Date" />,
+            header: ({ column }) => (
+                <span title="When this audit run was executed">
+                    <SortableHeader column={column} title="Date" />
+                </span>
+            ),
             cell: ({ row }) => {
                 const date = new Date(row.getValue('timestamp'));
                 return <span>{date.toLocaleDateString()}</span>;
@@ -44,13 +48,17 @@ export default function AuditPage() {
         },
         {
             accessorKey: 'model',
-            header: ({ column }) => <SortableHeader column={column} title="Model" />,
+            header: ({ column }) => (
+                <span title="The LLM that was tested">
+                    <SortableHeader column={column} title="Model" />
+                </span>
+            ),
             cell: ({ row }) => <span className="font-medium text-xs md:text-sm">{row.getValue('model')}</span>
         },
         {
             accessorKey: 'category',
             header: ({ column }) => (
-                <div className="hidden lg:block">
+                <div className="hidden lg:block" title="Topic category of the test prompt">
                     <SortableHeader column={column} title="Category" />
                 </div>
             ),
@@ -58,7 +66,11 @@ export default function AuditPage() {
         },
         {
             id: 'source',
-            header: () => <span className="hidden lg:inline">Source</span>,
+            header: () => (
+                <span className="hidden lg:inline" title="Whether the prompt was hand-written by researchers or AI-generated">
+                    Source
+                </span>
+            ),
             cell: ({ row }) => {
                 const source = getPromptSource(row.original.prompt_id);
                 return (
@@ -70,7 +82,9 @@ export default function AuditPage() {
         },
         {
             accessorKey: 'prompt',
-            header: 'Prompt',
+            header: () => (
+                <span title="The exact text sent to the model as the user message">Prompt</span>
+            ),
             cell: ({ row }) => {
                 const val = row.getValue('prompt') as string;
                 if (!val) return <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />;

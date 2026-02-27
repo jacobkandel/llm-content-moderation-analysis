@@ -18,7 +18,13 @@ const routeNames: Record<string, string> = {
     'compare': 'Compare Models',
     'audit': 'Raw Audit Log',
     'categories': 'Categories',
-    'models': 'Models'
+    'models': 'Models',
+    // Technical sub-pages
+    'technical': 'Technical',
+    'methodology': 'Methodology',
+    'about': 'About',
+    // Dynamic segments
+    'v1': 'API v1',
 };
 
 export function Breadcrumbs() {
