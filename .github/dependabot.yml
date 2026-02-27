@@ -29,13 +29,3 @@ updates:
       web-dependencies:
         patterns:
           - "*"
-
-  # Mobile App (npm)
-  - package-ecosystem: "npm"
-    directory: "/mobile"
-    schedule:
-      interval: "weekly"
-    groups:
-      mobile-dependencies:
-        patterns:
-          - "*"
