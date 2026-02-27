@@ -64,12 +64,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  serverExternalPackages: ['better-sqlite3'],
-  experimental: {
-    sri: {
-      algorithm: 'sha256'
-    }
-  }
+  serverExternalPackages: ['better-sqlite3']
 };
 
 export default withBundleAnalyzer(nextConfig);
