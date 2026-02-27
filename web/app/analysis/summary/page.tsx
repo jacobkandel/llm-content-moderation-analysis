@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import KeyMetrics from '@/components/KeyMetrics';
 import RestrictivenessScale from '@/components/RestrictivenessScale';
@@ -12,7 +12,11 @@ import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function SummaryPage() {
-    const { loading, stats, efficiencyData, filteredAuditData, timelineDates, loadFullDetails, precomputedPrompts, precomputedLongitudinal } = useAnalysis();
+    const { loading, stats, efficiencyData, filteredAuditData, timelineDates, loadFullDetails, precomputedPrompts, precomputedLongitudinal, ensurePrompts } = useAnalysis();
+
+    useEffect(() => {
+        ensurePrompts();
+    }, [ensurePrompts]);
 
     // Calculate metrics
     const totalCases = stats?.prompts.length || 0;

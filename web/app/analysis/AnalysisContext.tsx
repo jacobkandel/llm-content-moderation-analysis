@@ -237,7 +237,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         if (loaded.current.prompts) return;
         loaded.current.prompts = true;
         try {
-            const r = await fetch('/prompts_list.json');
+            const r = await fetch('/prompts_list.json.gz');
             if (r.ok) {
                 const data = await r.json();
                 if (data?.length) setPrecomputedPrompts(data);
