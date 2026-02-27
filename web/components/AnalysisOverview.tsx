@@ -9,8 +9,35 @@ interface AnalysisOverviewProps {
 }
 
 export default function AnalysisOverview({ title, description, importance, metrics }: AnalysisOverviewProps) {
+    // Generate JSON-LD Schema
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: title,
+        description: description,
+        author: {
+            '@type': 'Organization',
+            name: 'Moderation Bias'
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'Moderation Bias',
+            logo: {
+                '@type': 'ImageObject',
+                url: 'https://moderationbias.com/og-image.jpeg'
+            }
+        },
+        mainEntityOfPage: {
+            '@type': 'WebPage'
+        }
+    };
+
     return (
-        <div className="bg-card border border-border rounded-xl p-6 mb-8">
+        <section className="bg-card border border-border rounded-xl p-6 mb-8">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <div className="flex items-start gap-3">
                 <div className="p-2 bg-muted rounded-lg flex-shrink-0">
                     <Info className="h-5 w-5 text-foreground" />
@@ -41,6 +68,6 @@ export default function AnalysisOverview({ title, description, importance, metri
                     )}
                 </div>
             </div>
-        </div>
+        </section>
     );
 }
