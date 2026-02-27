@@ -6,9 +6,11 @@ interface AnalysisOverviewProps {
     description: string;
     importance: string;
     metrics?: string[];
+    as?: 'h1' | 'h2';
 }
 
-export default function AnalysisOverview({ title, description, importance, metrics }: AnalysisOverviewProps) {
+export default function AnalysisOverview({ title, description, importance, metrics, as = 'h1' }: AnalysisOverviewProps) {
+    const HeadingTag = as;
     // Generate JSON-LD Schema
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -43,7 +45,7 @@ export default function AnalysisOverview({ title, description, importance, metri
                     <Info className="h-5 w-5 text-foreground" />
                 </div>
                 <div className="flex-1">
-                    <h2 className="text-lg font-bold text-foreground mb-2">{title}</h2>
+                    <HeadingTag className="text-lg font-bold text-foreground mb-2">{title}</HeadingTag>
                     <p className="text-muted-foreground leading-relaxed mb-3">
                         {description}
                     </p>

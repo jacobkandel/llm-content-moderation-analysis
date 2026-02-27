@@ -242,6 +242,12 @@ export default function ConsensusPage() {
                 </div>
             </div>
 
+            <AnalysisOverview
+                title="Consensus Evaluation Breakdown"
+                description="This section details the specific prompts where models strongly disagree..."
+                importance="Identifying consensus failure points..."
+                as="h2"
+            />
             <RelatedPages
                 title="Reliability & Consistency"
                 description="Do models flag the same content consistently over time? Check Fleiss' Kappa scores for internal consistency."

@@ -123,8 +123,37 @@ export default async function ModelPage({ params }: { params: Promise<{ modelId:
 
     const logoUrl = getLogoUrl(id);
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://moderationbias.com/'
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Models',
+                item: 'https://moderationbias.com/models'
+            },
+            {
+                '@type': 'ListItem',
+                position: 3,
+                name: modelInfo.display_name,
+                item: `https://moderationbias.com/models/${id}`
+            }
+        ]
+    };
+
     return (
         <main className="max-w-4xl mx-auto py-12 px-6 space-y-10">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             {/* Back link */}
             <Link href="/compare" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <ArrowLeft className="h-3.5 w-3.5" />

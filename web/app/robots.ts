@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/private/', '/api/'],
+            disallow: ['/private/', '/api/', '/*.json$'],
         },
         sitemap: 'https://moderationbias.com/sitemap.xml',
     };

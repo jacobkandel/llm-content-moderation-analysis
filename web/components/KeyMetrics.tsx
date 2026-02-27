@@ -87,9 +87,9 @@ export default function KeyMetrics({
     return (
         <div className="mb-8">
             <div className="mb-4">
-                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    Key Metrics
-                </h2>
+                <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+                    Analysis Summary
+                </h1>
                 <p className="text-sm text-muted-foreground mt-1">
                     High-level overview of the analysis dataset
                 </p>
