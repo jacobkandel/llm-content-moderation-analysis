@@ -80,7 +80,7 @@ export function AuditWizard({ data }: AuditWizardProps) {
 
     if (step === 'start') {
         return (
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
+            <div className="bg-card p-8 rounded-2xl shadow-sm border border-border text-center">
                 <div className="w-16 h-16 bg-muted text-primary rounded-full flex items-center justify-center mx-auto mb-4">
                     <Play className="w-8 h-8 ml-1" />
                 </div>
@@ -100,7 +100,7 @@ export function AuditWizard({ data }: AuditWizardProps) {
 
     if (step === 'auditing' && currentItem) {
         return (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
                 <div className="bg-muted/30 px-6 py-3 border-b border-border flex justify-between items-center">
                     <span className="font-mono text-xs font-bold text-muted-foreground uppercase tracking-wider">
                         Audit Progress
@@ -120,8 +120,8 @@ export function AuditWizard({ data }: AuditWizardProps) {
                         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Model Response ({currentItem.model?.split('/').pop()})</h4>
                         <div className="bg-muted/30 p-4 rounded-lg text-muted-foreground text-sm leading-relaxed italic border border-border">
                             {currentItem.verdict === 'REFUSAL' || currentItem.verdict === 'hard refusal' ?
-                                <span className="flex items-center gap-2 text-[#A4343A] not-italic font-medium"><XCircle className="w-4 h-4" /> Model Refused</span> :
-                                <span className="flex items-center gap-2 text-[#275D38] not-italic font-medium"><CheckCircle className="w-4 h-4" /> Model Complied</span>
+                                <span className="flex items-center gap-2 text-refusal not-italic font-medium"><XCircle className="w-4 h-4" /> Model Refused</span> :
+                                <span className="flex items-center gap-2 text-safe not-italic font-medium"><CheckCircle className="w-4 h-4" /> Model Complied</span>
                             }
                         </div>
                     </div>
@@ -131,17 +131,17 @@ export function AuditWizard({ data }: AuditWizardProps) {
                         <div className="flex gap-4 w-full max-w-md">
                             <button
                                 onClick={() => handleVote('unsafe')}
-                                className="flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-[#A4343A]/30 hover:bg-[#A4343A]/5 transition-all group"
+                                className="flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-refusal/30 hover:bg-refusal/5 transition-all group"
                             >
-                                <XCircle className="w-8 h-8 text-muted-foreground group-hover:text-[#A4343A] transition-colors" />
-                                <span className="font-bold text-muted-foreground group-hover:text-[#A4343A]">Unsafe / Refuse</span>
+                                <XCircle className="w-8 h-8 text-muted-foreground group-hover:text-refusal transition-colors" />
+                                <span className="font-bold text-muted-foreground group-hover:text-refusal">Unsafe / Refuse</span>
                             </button>
                             <button
                                 onClick={() => handleVote('safe')}
-                                className="flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-[#275D38]/30 hover:bg-[#275D38]/5 transition-all group"
+                                className="flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-safe/30 hover:bg-safe/5 transition-all group"
                             >
-                                <CheckCircle className="w-8 h-8 text-muted-foreground group-hover:text-[#275D38] transition-colors" />
-                                <span className="font-bold text-muted-foreground group-hover:text-[#275D38]">Safe / Allow</span>
+                                <CheckCircle className="w-8 h-8 text-muted-foreground group-hover:text-safe transition-colors" />
+                                <span className="font-bold text-muted-foreground group-hover:text-safe">Safe / Allow</span>
                             </button>
                         </div>
                     </div>
@@ -158,18 +158,18 @@ export function AuditWizard({ data }: AuditWizardProps) {
                         kappa < 0.6 ? 'Moderate Agreement' :
                             kappa < 0.8 ? 'Substantial Agreement' : 'Almost Perfect Agreement';
 
-        const color = !kappa ? 'text-slate-400' : kappa < 0.4 ? 'text-amber-500' : 'text-green-500';
+        const color = !kappa ? 'text-muted-foreground/70' : kappa < 0.4 ? 'text-amber-500' : 'text-green-500';
 
         return (
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center animate-in fade-in zoom-in duration-300">
+            <div className="bg-card p-8 rounded-2xl shadow-sm border border-border text-center animate-in fade-in zoom-in duration-300">
                 <h3 className="text-xl font-bold mb-6">Audit Complete</h3>
 
                 <div className="mb-8">
-                    <div className="text-sm text-slate-500 mb-1">Your Cohen's Kappa Score</div>
+                    <div className="text-sm text-muted-foreground mb-1">Your Cohen's Kappa Score</div>
                     <div className={`text-6xl font-black ${color} mb-2`}>
                         {kappa?.toFixed(3)}
                     </div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm font-medium">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-foreground/80 text-sm font-medium">
                         {interpretation}
                     </div>
                 </div>

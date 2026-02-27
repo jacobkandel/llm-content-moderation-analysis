@@ -66,7 +66,7 @@ export default function ChartDownloadButton({ chartId, chartTitle, format = 'png
         <button
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors border border-border disabled:opacity-50 disabled:cursor-not-allowed"
             title={`Download chart as ${format.toUpperCase()}`}
         >
             <Download className={`w-4 h-4 ${downloading ? 'animate-bounce' : ''}`} />

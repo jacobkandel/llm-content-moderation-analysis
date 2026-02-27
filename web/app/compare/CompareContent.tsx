@@ -8,12 +8,20 @@ import { Calendar, Users, X, ChevronDown, Filter, Search, Download, RefreshCw, S
 import { TooltipHover } from '@/components/ui/TooltipHover';
 
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import Papa from 'papaparse';
 
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { getLogoUrl } from '@/lib/provider-logos';
 import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
 import { sanitizeSearchInput } from '@/lib/utils';
+
+// Type for p-value significance rows (from p_values.csv)
+type PValueRow = {
+    'Model A': string;
+    'Model B': string;
+    'P-Value': string | number;
+    'Significant': 'YES' | 'NO';
+    'McNemar Statistic'?: string | number;
+};
 
 // --- Types for precomputed data ---
 type CompareModelStats = {
@@ -58,8 +66,8 @@ function VerdictBadge({ verdict }: { verdict: string | null | undefined }) {
     return (
         <span
             className={`inline-block text-xs font-bold px-3 py-1 rounded-full ${isAllowed
-                ? 'bg-[#275D38] text-white'
-                : 'bg-[#A4343A] text-white'
+                ? 'bg-safe text-white'
+                : 'bg-refusal text-white'
                 }`}
         >
             {isAllowed ? '✓ ALLOWED' : '✕ REMOVED'}
@@ -87,7 +95,7 @@ export default function CompareContent() {
     const [isClient, setIsClient] = useState(false);
     const [showStats, setShowStats] = useState(false);
     const [highlightDiffs, setHighlightDiffs] = useState(false);
-    const [pValues, setPValues] = useState<any[]>([]);
+    const [pValues, setPValues] = useState<PValueRow[]>([]);
     const [copied, setCopied] = useState(false);
 
     const handleShare = useCallback(() => {
@@ -143,10 +151,11 @@ export default function CompareContent() {
                 setLoading(false);
             });
 
-        // Load pairwise significance data (small file)
+        // Load pairwise significance data (small file) — lazy-load papaparse to keep initial bundle small
         fetch('/assets/p_values.csv').then(async r => {
             if (r.ok) {
                 const text = await r.text();
+                const Papa = (await import('papaparse')).default;
                 Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setPValues(res.data) });
             }
         }).catch(() => { });
@@ -284,7 +293,7 @@ export default function CompareContent() {
 
     return (
         <main className="min-h-screen bg-background font-sans text-foreground">
-            <div className="max-w-7xl mx-auto space-y-8">
+            <div className="max-w-7xl mx-auto space-y-8 px-2 sm:px-0">
                 {/* Header */}
                 <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
                     <div>
@@ -314,7 +323,7 @@ export default function CompareContent() {
                             id="model-a-select"
                             value={modelA}
                             onChange={(e) => setModelA(e.target.value)}
-                            className="w-full relative z-10 appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
+                            className="w-full relative z-10 appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-brand font-medium"
                         >
                             {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
@@ -329,7 +338,7 @@ export default function CompareContent() {
                         }}
                         aria-label="Swap models"
                         title="Swap Model A and Model B"
-                        className="hidden md:flex items-center justify-center p-3 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors mt-5 focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="flex items-center justify-center p-3 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors md:mt-5 focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                         <ArrowLeftRight className="h-4 w-4" />
                     </button>
@@ -340,7 +349,7 @@ export default function CompareContent() {
                             id="model-b-select"
                             value={modelB}
                             onChange={(e) => setModelB(e.target.value)}
-                            className="w-full relative z-10 appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-[#800000] font-medium"
+                            className="w-full relative z-10 appearance-none bg-background border border-border text-foreground rounded-lg p-3 pr-8 focus:ring-2 focus:ring-brand font-medium"
                         >
                             {(compareData?.models || []).map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
@@ -397,7 +406,7 @@ export default function CompareContent() {
                         </div>
 
                         {/* Category */}
-                        <div className="w-48">
+                        <div className="w-full sm:w-48">
                             <label htmlFor="filter-category" className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Category</label>
                             <div className="relative">
                                 <Filter className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -414,7 +423,7 @@ export default function CompareContent() {
                         </div>
 
                         {/* Date */}
-                        <div className="w-48">
+                        <div className="w-full sm:w-48">
                             <label htmlFor="filter-date" className="block text-xs font-semibold text-muted-foreground uppercase mb-1">Date</label>
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -422,7 +431,7 @@ export default function CompareContent() {
                                     id="filter-date"
                                     value={selectedDate}
                                     onChange={e => setSelectedDate(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-[#800000] text-foreground relative z-10"
+                                    className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-brand text-foreground relative z-10"
                                 >
                                     <option value="all">All Dates</option>
                                     {(compareData?.dates || []).slice().reverse().map(d => <option key={d} value={d}>{d}</option>)}
@@ -445,7 +454,7 @@ export default function CompareContent() {
                     <>
                         {/* Advanced Stats (collapsed by default) */}
                         {(() => {
-                            const pairResult = pValues.find((row: any) =>
+                            const pairResult = pValues.find((row) =>
                                 (row['Model A'] === modelA && row['Model B'] === modelB) ||
                                 (row['Model A'] === modelB && row['Model B'] === modelA)
                             );
@@ -462,7 +471,7 @@ export default function CompareContent() {
                                             Advanced Stats
                                             {pairResult && (
                                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${pairResult['Significant'] === 'YES'
-                                                    ? 'bg-[#275D38]/10 text-[#275D38]'
+                                                    ? 'bg-safe/10 text-safe'
                                                     : 'bg-muted text-muted-foreground'
                                                     }`}>
                                                     {pairResult['Significant'] === 'YES' ? 'Significant' : 'Not Significant'}
@@ -480,14 +489,14 @@ export default function CompareContent() {
                                                     <div>
                                                         <span className="text-xs text-muted-foreground uppercase tracking-wider">P-Value (McNemar's)</span>
                                                         <div className="text-2xl font-black font-mono text-foreground mt-1">
-                                                            {parseFloat(pairResult['P-Value']).toExponential(2)}
+                                                            {parseFloat(String(pairResult['P-Value'])).toExponential(2)}
                                                         </div>
                                                     </div>
                                                     <div>
                                                         <span className="text-xs text-muted-foreground uppercase tracking-wider">Result</span>
                                                         <div className="mt-2">
                                                             {pairResult['Significant'] === 'YES'
-                                                                ? <span className="text-sm bg-[#275D38]/10 text-[#275D38] dark:text-[#9CAF88] px-3 py-1.5 rounded-full font-bold">✓ Statistically Significant</span>
+                                                                ? <span className="text-sm bg-safe/10 text-safe dark:text-[#9CAF88] px-3 py-1.5 rounded-full font-bold">✓ Statistically Significant</span>
                                                                 : <span className="text-sm bg-muted text-muted-foreground px-3 py-1.5 rounded-full">Not Significant</span>
                                                             }
                                                         </div>
@@ -508,7 +517,7 @@ export default function CompareContent() {
                         {/* Comparison Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Card A */}
-                            <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#800000] relative overflow-hidden">
+                            <div className="bg-card rounded-xl border border-border p-6 border-t border-t-brand relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     <img src={getProviderLogo(modelA)} alt={`${modelA.split('/').pop() || modelA} logo`} width={128} height={128} className="h-32 w-32 object-contain" />
                                 </div>
@@ -533,7 +542,7 @@ export default function CompareContent() {
                                                 label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>}
                                                 tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
                                             />
-                                            <div className={`text-2xl font-bold ${statsA.refusalRate > 50 ? 'text-[#A4343A]' : 'text-[#275D38]'}`}>
+                                            <div className={`text-2xl font-bold ${statsA.refusalRate > 50 ? 'text-refusal' : 'text-safe'}`}>
                                                 {statsA.refusalRate.toFixed(1)}%
                                             </div>
                                         </div>
@@ -551,7 +560,7 @@ export default function CompareContent() {
                             </div>
 
                             {/* Card B */}
-                            <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#275D38] relative overflow-hidden">
+                            <div className="bg-card rounded-xl border border-border p-6 border-t border-t-safe relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     <img src={getProviderLogo(modelB)} alt={`${modelB.split('/').pop() || modelB} logo`} width={128} height={128} className="h-32 w-32 object-contain" />
                                 </div>
@@ -576,7 +585,7 @@ export default function CompareContent() {
                                                 label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>}
                                                 tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
                                             />
-                                            <div className={`text-2xl font-bold ${statsB.refusalRate > 50 ? 'text-[#A4343A]' : 'text-[#275D38]'}`}>
+                                            <div className={`text-2xl font-bold ${statsB.refusalRate > 50 ? 'text-refusal' : 'text-safe'}`}>
                                                 {statsB.refusalRate.toFixed(1)}%
                                             </div>
                                         </div>
@@ -771,8 +780,8 @@ export default function CompareContent() {
                                                     {/* Side-by-Side Responses */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         {/* Model A Response */}
-                                                        <div className={`rounded-lg border ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
-                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
+                                                        <div className={`rounded-lg border ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
+                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10' : 'border-refusal/30 bg-refusal/10'}`}>
                                                                 <div className="flex items-center gap-2">
                                                                     <img
                                                                         src={getProviderLogo(modelA)}
@@ -782,7 +791,7 @@ export default function CompareContent() {
                                                                     />
                                                                     <span className="font-bold text-sm text-foreground">{modelA?.split('/')[1] || modelA}</span>
                                                                 </div>
-                                                                <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
+                                                                <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'bg-safe text-white' : 'bg-refusal text-white'}`}>
                                                                     {diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
                                                                 </span>
                                                             </div>
@@ -792,8 +801,8 @@ export default function CompareContent() {
                                                         </div>
 
                                                         {/* Model B Response */}
-                                                        <div className={`rounded-lg border ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
-                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
+                                                        <div className={`rounded-lg border ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
+                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10' : 'border-refusal/30 bg-refusal/10'}`}>
                                                                 <div className="flex items-center gap-2">
                                                                     <img
                                                                         src={getProviderLogo(modelB)}
@@ -803,7 +812,7 @@ export default function CompareContent() {
                                                                     />
                                                                     <span className="font-bold text-sm text-foreground">{modelB?.split('/')[1] || modelB}</span>
                                                                 </div>
-                                                                <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
+                                                                <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'bg-safe text-white' : 'bg-refusal text-white'}`}>
                                                                     {diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
                                                                 </span>
                                                             </div>

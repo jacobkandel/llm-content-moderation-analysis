@@ -1,82 +1,60 @@
-// Typography and Design System Constants
-// Use these constants throughout the application for consistency
+/**
+ * Design System — single source of truth for reusable Tailwind class strings.
+ * Import these in components instead of writing class strings inline.
+ *
+ * Color tokens (text-brand, bg-safe, text-refusal, etc.) live in globals.css.
+ */
+
+// ─── Typography ─────────────────────────────────────────────────────────────
 
 export const typography = {
-    // Page Titles
-    pageTitle: "text-2xl font-bold text-slate-900",
+    pageTitle: 'text-2xl md:text-3xl font-bold tracking-tight text-foreground',
+    sectionHeading: 'text-lg font-bold text-foreground',
+    subsectionHeading: 'text-base font-semibold text-foreground',
+    label: 'text-xs font-semibold text-muted-foreground uppercase tracking-wide',
+    bodyText: 'text-sm text-foreground',
+    bodyTextMuted: 'text-sm text-muted-foreground',
+    metricLarge: 'text-5xl font-black text-brand',
+    metricMedium: 'text-3xl font-bold text-foreground',
+    mono: 'font-mono text-xs text-muted-foreground',
+} as const;
 
-    // Section Headings
-    sectionHeading: "text-lg font-bold text-slate-900",
-    subsectionHeading: "text-base font-semibold text-slate-700",
-
-    // Body Text
-    bodyText: "text-sm text-slate-700",
-    bodyTextSecondary: "text-sm text-slate-500",
-    bodyTextSmall: "text-xs text-slate-600",
-
-    // Labels
-    label: "text-xs font-semibold text-slate-500 uppercase tracking-wide",
-    labelLarge: "text-sm font-semibold text-slate-600 uppercase tracking-wide",
-
-    // Metrics/Numbers
-    metricLarge: "text-5xl font-black text-primary",
-    metricMedium: "text-3xl font-bold text-slate-900",
-    metricSmall: "text-2xl font-bold text-slate-700",
-};
-
-export const colors = {
-    // Primary
-    primary: "primary",
-    primaryLight: "primary/10",
-    primaryDark: "primary/90",
-
-    // Success/Safe
-    success: "[#275D38]", // Forest
-    successLight: "[#275D38]/10",
-    successText: "[#275D38]",
-
-    // Error/Unsafe
-    error: "[#A4343A]", // Brick
-    errorLight: "[#A4343A]/10",
-    errorText: "[#A4343A]",
-
-    // Warning
-    warning: "[#EAAA00]", // Goldenrod
-    warningLight: "[#EAAA00]/10",
-    warningText: "[#CC8A00]", // Darker Goldenrod
-
-    // Neutral
-    textPrimary: "foreground",
-    textSecondary: "muted-foreground",
-    textTertiary: "muted-foreground",
-    bgPrimary: "background",
-    bgSecondary: "muted",
-    border: "border",
-};
-
-export const spacing = {
-    cardPadding: "p-6",
-    sectionGap: "space-y-6",
-    itemGap: "gap-4",
-};
+// ─── Components ─────────────────────────────────────────────────────────────
 
 export const components = {
     // Cards
-    card: "bg-white p-6 rounded-2xl shadow-sm border border-slate-200",
-    cardHover: "bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow",
-
-    // Info Box (used in AnalysisOverview)
-    infoBox: "bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm",
+    card: 'bg-card rounded-2xl border border-border shadow-sm p-6',
+    cardHover: 'bg-card rounded-2xl border border-border shadow-sm p-6 hover:shadow-md hover:border-brand/30 transition-all',
 
     // Buttons
-    buttonPrimary: "px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm",
-    buttonSecondary: "px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium text-sm",
-};
+    buttonPrimary: 'inline-flex items-center gap-2 px-4 py-2 bg-brand text-white font-medium text-sm rounded-lg hover:bg-brand-dark transition-colors',
+    buttonSecondary: 'inline-flex items-center gap-2 px-4 py-2 bg-muted text-foreground font-medium text-sm rounded-lg hover:bg-accent transition-colors',
+    buttonGhost: 'inline-flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors text-sm',
 
-// Icon sizes (used for lucide-react icons)
+    // Badges
+    badgeSafe: 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-safe text-white',
+    badgeRefusal: 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-refusal text-white',
+    badgeMuted: 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground',
+
+    // Inputs
+    input: 'w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-brand focus:outline-none',
+    select: 'w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground appearance-none focus:ring-2 focus:ring-brand focus:outline-none',
+} as const;
+
+// ─── Spacing ────────────────────────────────────────────────────────────────
+
+export const spacing = {
+    cardPadding: 'p-6',
+    sectionGap: 'space-y-6',
+    itemGap: 'gap-4',
+    pageWrapper: 'max-w-7xl mx-auto px-4 md:px-8 lg:px-12',
+} as const;
+
+// ─── Icon Sizes ─────────────────────────────────────────────────────────────
+
 export const iconSizes = {
-    small: "w-4 h-4",
-    medium: "w-5 h-5",
-    large: "w-6 h-6",
-    xlarge: "w-8 h-8",
-};
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6',
+    xl: 'w-8 h-8',
+} as const;

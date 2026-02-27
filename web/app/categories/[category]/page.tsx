@@ -112,7 +112,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             </Link>
 
             <header className="space-y-2">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#800000]">Category Analysis</p>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">Category Analysis</p>
                 <h1 className="text-3xl md:text-4xl font-black text-foreground">{label}</h1>
                 <p className="text-muted-foreground max-w-2xl leading-relaxed">
                     Refusal rates across all evaluated LLMs for <strong>{label}</strong> prompts. Higher rates indicate the model is more likely to refuse or restrict this type of content.
@@ -135,7 +135,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                                     <span className="text-sm text-foreground w-44 truncate flex-shrink-0">{name}</span>
                                     <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-[#800000] rounded-full"
+                                            className="h-full bg-brand rounded-full"
                                             style={{ width: `${(rate / maxRate) * 100}%` }}
                                             role="progressbar"
                                             aria-valuenow={Math.round(rate)}
@@ -165,7 +165,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             <div className="flex flex-wrap gap-3 pt-2">
                 <Link
                     href="/compare"
-                    className="inline-flex items-center gap-2 bg-[#800000] text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-[#9a0000] transition-all hover:scale-105 active:scale-95"
+                    className="inline-flex items-center gap-2 bg-brand text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-brand-dark transition-all hover:scale-105 active:scale-95"
                 >
                     Compare Models <ArrowRight className="h-4 w-4" />
                 </Link>

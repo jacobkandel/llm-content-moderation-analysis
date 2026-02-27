@@ -65,11 +65,11 @@ export default function VerdictPieChart({ data, title = 'Verdict Distribution' }
     const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+        <div className="bg-card dark:bg-card rounded-xl border border-border dark:border-border p-4 shadow-sm">
+            <h3 className="text-lg font-bold text-foreground dark:text-foreground/10 mb-2 flex items-center gap-2">
                 <span>🎯</span> {title}
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground/70 mb-4">
                 {total.toLocaleString()} total verdicts
             </p>
             <div className="h-[250px]">

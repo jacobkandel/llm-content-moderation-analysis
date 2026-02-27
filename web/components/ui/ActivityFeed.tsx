@@ -43,12 +43,12 @@ export function ActivityFeed({ data, maxItems = 10 }: ActivityFeedProps) {
 
     if (recentItems.length === 0) {
         return (
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+            <div className="bg-card dark:bg-card rounded-xl border border-border dark:border-border p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                     <Activity className="h-5 w-5 text-primary" />
-                    <h3 className="font-bold text-slate-800 dark:text-white">Recent Activity</h3>
+                    <h3 className="font-bold text-foreground dark:text-foreground">Recent Activity</h3>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground/70 text-center py-8">
                     No recent activity
                 </p>
             </div>
@@ -56,13 +56,13 @@ export function ActivityFeed({ data, maxItems = 10 }: ActivityFeedProps) {
     }
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
+        <div className="bg-card dark:bg-card rounded-xl border border-border dark:border-border p-4 shadow-sm">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Activity className="h-5 w-5 text-primary" />
-                    <h3 className="font-bold text-slate-800 dark:text-white">Recent Activity</h3>
+                    <h3 className="font-bold text-foreground dark:text-foreground">Recent Activity</h3>
                 </div>
-                <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                <span className="text-xs text-muted-foreground/70 dark:text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     Live
                 </span>
@@ -87,10 +87,10 @@ export function ActivityFeed({ data, maxItems = 10 }: ActivityFeedProps) {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2">
-                                    <span className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                                    <span className="text-sm font-medium text-foreground dark:text-foreground truncate">
                                         {item.model?.split('/')[1] || item.model || 'Unknown'}
                                     </span>
-                                    <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                                    <span className="text-xs text-muted-foreground/70 dark:text-muted-foreground whitespace-nowrap">
                                         {formatTimeAgo(item.timestamp)}
                                     </span>
                                 </div>
@@ -100,8 +100,8 @@ export function ActivityFeed({ data, maxItems = 10 }: ActivityFeedProps) {
                                     </span>
                                     {item.category && (
                                         <>
-                                            <span className="text-slate-300 dark:text-slate-600">•</span>
-                                            <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                            <span className="text-muted-foreground/50 dark:text-muted-foreground">•</span>
+                                            <span className="text-xs text-muted-foreground dark:text-muted-foreground/70 truncate">
                                                 {item.category}
                                             </span>
                                         </>

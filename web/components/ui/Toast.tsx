@@ -70,14 +70,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                         >
                             {icons[toast.type]}
                             <div className="flex-1 min-w-0">
-                                <p className="font-medium text-slate-900 dark:text-white">{toast.title}</p>
+                                <p className="font-medium text-foreground dark:text-foreground">{toast.title}</p>
                                 {toast.message && (
-                                    <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{toast.message}</p>
+                                    <p className="text-sm text-muted-foreground dark:text-muted-foreground/50 mt-1">{toast.message}</p>
                                 )}
                             </div>
                             <button
                                 onClick={() => removeToast(toast.id)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                className="text-muted-foreground/70 hover:text-muted-foreground dark:hover:text-foreground"
                                 aria-label="Dismiss notification"
                             >
                                 <X className="h-4 w-4" />

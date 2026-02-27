@@ -4,7 +4,7 @@ export default function ModelLogo({ provider, name, className = "h-6 w-6" }: { p
     const url = getLogoUrl(name || provider);
 
     return (
-        <div className={`relative ${className} shrink-0 bg-white rounded-full overflow-hidden border border-slate-100`}>
+        <div className={`relative ${className} shrink-0 bg-card rounded-full overflow-hidden border border-border/50`}>
             <img
                 src={url}
                 alt={`${provider} logo`}

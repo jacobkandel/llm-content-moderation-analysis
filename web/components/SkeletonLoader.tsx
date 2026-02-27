@@ -4,8 +4,8 @@ export default function SkeletonLoader() {
     return (
         <div className="animate-pulse space-y-6">
             {/* Header skeleton */}
-            <div className="h-8 bg-slate-200 rounded w-1/3" />
-            <div className="h-4 bg-slate-100 rounded w-2/3" />
+            <div className="h-8 bg-muted rounded w-1/3" />
+            <div className="h-4 bg-muted rounded w-2/3" />
 
             {/* Metrics cards skeleton */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
@@ -39,18 +39,18 @@ export default function SkeletonLoader() {
                 </div>
 
                 <div className="mt-8 space-y-3">
-                    <div className="h-4 bg-slate-200 rounded w-1/3" />
+                    <div className="h-4 bg-muted rounded w-1/3" />
                     <div className="flex gap-2">
-                        <div className="h-3 w-2 bg-slate-200 rounded" />
-                        <div className="h-3 bg-slate-100 rounded flex-1" />
+                        <div className="h-3 w-2 bg-muted rounded" />
+                        <div className="h-3 bg-muted rounded flex-1" />
                     </div>
                     <div className="flex gap-2">
-                        <div className="h-3 w-2 bg-slate-200 rounded" />
-                        <div className="h-3 bg-slate-100 rounded flex-1" />
+                        <div className="h-3 w-2 bg-muted rounded" />
+                        <div className="h-3 bg-muted rounded flex-1" />
                     </div>
                     <div className="flex gap-2">
-                        <div className="h-3 w-2 bg-slate-200 rounded" />
-                        <div className="h-3 bg-slate-100 rounded flex-1" />
+                        <div className="h-3 w-2 bg-muted rounded" />
+                        <div className="h-3 bg-muted rounded flex-1" />
                     </div>
                 </div>
             </div>

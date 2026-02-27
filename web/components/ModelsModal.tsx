@@ -131,7 +131,7 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
                                             >
                                                 <div className="p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors group flex items-center justify-between">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-border overflow-hidden shrink-0">
+                                                        <div className="w-10 h-10 bg-card rounded-lg flex items-center justify-center border border-border overflow-hidden shrink-0">
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                                             <img
                                                                 src={getLogoUrl(model.name)}

@@ -77,7 +77,7 @@ export function NavBar() {
                                             <button
                                                 className={cn(
                                                     "flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                                                    isActive ? "text-[#800000] bg-[#800000]/8 font-semibold" : "text-muted-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
+                                                    isActive ? "text-brand bg-brand/8 font-semibold" : "text-muted-foreground hover:text-accent-foreground hover:bg-accent"
                                                 )}
                                             >
                                                 <item.icon className="h-4 w-4" />
@@ -96,11 +96,11 @@ export function NavBar() {
                                                                 className={cn(
                                                                     "flex items-center gap-2 px-3 py-2 text-sm rounded-sm transition-colors",
                                                                     isChildActive
-                                                                        ? "bg-[#800000]/8 text-[#800000] font-medium"
-                                                                        : "text-popover-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
+                                                                        ? "bg-brand/8 text-brand font-medium"
+                                                                        : "text-popover-foreground hover:text-accent-foreground hover:bg-accent"
                                                                 )}
                                                             >
-                                                                <sub.icon className={cn("h-4 w-4", isChildActive ? "text-[#800000]" : "text-popover-foreground")} />
+                                                                <sub.icon className={cn("h-4 w-4", isChildActive ? "text-brand" : "text-popover-foreground")} />
                                                                 {sub.title}
                                                             </Link>
                                                         );
@@ -119,7 +119,7 @@ export function NavBar() {
                                         href={item.href}
                                         className={cn(
                                             "flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                                            isItemActive ? "text-[#800000] bg-[#800000]/8 font-semibold" : "text-muted-foreground hover:text-[#1a1a1a] hover:bg-[#f0f0f0]"
+                                            isItemActive ? "text-brand bg-brand/8 font-semibold" : "text-muted-foreground hover:text-accent-foreground hover:bg-accent"
                                         )}
                                     >
                                         <item.icon className="h-4 w-4" />
@@ -150,7 +150,7 @@ export function NavBar() {
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={cn(
                                     "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
-                                    isMobileActive ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
+                                    isMobileActive ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
                                 )}
                             >
                                 <item.icon className="h-4 w-4" />
@@ -171,7 +171,7 @@ export function NavBar() {
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                                 className={cn(
                                                     "flex items-center gap-2 px-2 py-2 text-sm rounded-md",
-                                                    pathname === sub.href ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
+                                                    pathname === sub.href ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
                                                 )}
                                             >
                                                 <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-foreground")} />
@@ -189,7 +189,7 @@ export function NavBar() {
                                             onClick={() => setIsMobileMenuOpen(false)}
                                             className={cn(
                                                 "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
-                                                isItemActive ? "bg-[#800000]/8 text-[#800000]" : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]"
+                                                isItemActive ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
                                             )}
                                         >
                                             <item.icon className="h-4 w-4" />

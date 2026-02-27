@@ -16,7 +16,7 @@ const UCHICAGO_PALETTE = [
 ];
 
 export function SemanticClustersView({ clusters }: { clusters: Cluster[] }) {
-    if (clusters.length === 0) return <div className="p-8 text-center text-slate-500">No cluster data available.</div>;
+    if (clusters.length === 0) return <div className="p-8 text-center text-muted-foreground">No cluster data available.</div>;
     const pieData = clusters.map((c, i) => ({ name: `Cluster ${i + 1}`, value: c.size, keywords: c.keywords.join(', ') }));
 
     return (

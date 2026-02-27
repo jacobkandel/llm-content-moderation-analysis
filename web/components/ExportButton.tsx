@@ -103,25 +103,25 @@ export default function ExportButton({
             </button>
 
             {showMenu && !isExporting && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-xl border border-border py-2 z-50">
                     <button
                         onClick={exportToPNG}
-                        className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-3 text-slate-700"
+                        className="w-full px-4 py-2 text-left hover:bg-muted/30 flex items-center gap-3 text-foreground/80"
                     >
                         <Image className="h-4 w-4 text-primary" />
                         <div>
                             <div className="font-medium">Export as PNG</div>
-                            <div className="text-xs text-slate-400">Dashboard screenshot</div>
+                            <div className="text-xs text-muted-foreground/70">Dashboard screenshot</div>
                         </div>
                     </button>
                     <button
                         onClick={exportToCSV}
-                        className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-3 text-slate-700"
+                        className="w-full px-4 py-2 text-left hover:bg-muted/30 flex items-center gap-3 text-foreground/80"
                     >
-                        <FileText className="h-4 w-4 text-[#275D38]" />
+                        <FileText className="h-4 w-4 text-safe" />
                         <div>
                             <div className="font-medium">Export as CSV</div>
-                            <div className="text-xs text-slate-400">Raw audit data</div>
+                            <div className="text-xs text-muted-foreground/70">Raw audit data</div>
                         </div>
                     </button>
                 </div>

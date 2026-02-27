@@ -118,7 +118,7 @@ export default function FilterBar() {
                         </button>
 
                         {modelDropdownOpen && (
-                            <div id="model-dropdown-menu" role="listbox" className="absolute top-full left-0 mt-1 w-full sm:w-80 bg-white dark:bg-zinc-900 border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                            <div id="model-dropdown-menu" role="listbox" className="absolute top-full left-0 mt-1 w-full sm:w-80 bg-card dark:bg-zinc-900 border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
                                 <div className="sticky top-0 bg-popover border-b border-border px-3 py-2 flex items-center justify-between">
                                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                                         Select Models ({activeModelCount}/{allModels.length})

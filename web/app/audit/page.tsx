@@ -138,49 +138,47 @@ export default function AuditPage() {
     }, [data, pinnedPrompt]);
 
     return (
-        <main className="min-h-screen bg-background p-spacing-s md:p-spacing-m lg:p-spacing-l">
-            <div className="w-full max-w-7xl mx-auto space-y-spacing-m">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-foreground">Global Audit Log</h1>
-                        <p className="text-muted-foreground mt-1">
-                            {pinnedPrompt
-                                ? `Showing all models for the pinned prompt. `
-                                : `Full access to all ${data.length.toLocaleString()} audit records.`
-                            }
-                            {pinnedPrompt && (
-                                <button
-                                    onClick={() => setPinnedPrompt(null)}
-                                    className="text-primary font-bold hover:underline ml-1"
-                                >
-                                    Clear pin
-                                </button>
-                            )}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-                    {loading ? (
-                        <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-3">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            <p>Loading audit data...</p>
-                        </div>
-                    ) : (
-                        <DataTable
-                            columns={columns}
-                            data={filteredData}
-                            searchKey="prompt"
-                            exportFilename="moderation_audit_full"
-                            emptyState={{
-                                title: "No prompts found",
-                                description: "We couldn't find any prompts matching your search criteria. Try adjusting your filters.",
-                                icon: "search"
-                            }}
-                        />
-                    )}
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-foreground">Global Audit Log</h1>
+                    <p className="text-muted-foreground mt-1">
+                        {pinnedPrompt
+                            ? `Showing all models for the pinned prompt. `
+                            : `Full access to all ${data.length.toLocaleString()} audit records.`
+                        }
+                        {pinnedPrompt && (
+                            <button
+                                onClick={() => setPinnedPrompt(null)}
+                                className="text-primary font-bold hover:underline ml-1"
+                            >
+                                Clear pin
+                            </button>
+                        )}
+                    </p>
                 </div>
             </div>
-        </main>
+
+            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                {loading ? (
+                    <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-3">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p>Loading audit data...</p>
+                    </div>
+                ) : (
+                    <DataTable
+                        columns={columns}
+                        data={filteredData}
+                        searchKey="prompt"
+                        exportFilename="moderation_audit_full"
+                        emptyState={{
+                            title: "No prompts found",
+                            description: "We couldn't find any prompts matching your search criteria. Try adjusting your filters.",
+                            icon: "search"
+                        }}
+                    />
+                )}
+            </div>
+        </div>
     );
 }

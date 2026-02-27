@@ -1,75 +1,13 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs';
-import Database from 'better-sqlite3';
 
-// Try multiple possible paths for the database
-const possiblePaths = [
-    path.join(process.cwd(), '../audit.db'),
-    path.join(process.cwd(), 'audit.db'),
-    path.join(process.cwd(), '../../audit.db'),
-];
-
-const DB_PATH = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
-
+/**
+ * Server-side CSV export — originally backed by better-sqlite3.
+ * The DataTable component already handles client-side CSV export.
+ * Returning 501 until a proper persistence layer is wired in.
+ */
 export async function GET() {
-    try {
-        const db = new Database(DB_PATH, { readonly: true });
-
-        // Select all audit results for CSV export
-        const stmt = db.prepare(`
-            SELECT 
-                r.timestamp,
-                r.model_id as model,
-                r.run_id as case_id,
-                p.category,
-                r.verdict,
-                p.text as prompt,
-                r.response_text as response,
-                r.cost,
-                r.prompt_tokens,
-                r.completion_tokens,
-                r.human_verdict,
-                r.notes
-            FROM audit_results r
-            LEFT JOIN prompts p ON r.prompt_id = p.id
-            ORDER BY r.timestamp DESC
-        `);
-
-        const rows = stmt.all() as Record<string, unknown>[];
-        db.close();
-
-        if (!rows.length) {
-            return new NextResponse('No data available', { status: 404 });
-        }
-
-        // Convert to CSV
-        const headers = Object.keys(rows[0]);
-        const csvLines = [
-            headers.join(','),
-            ...rows.map(row =>
-                headers.map(h => {
-                    const val = row[h];
-                    if (val === null || val === undefined) return '';
-                    // Escape quotes and wrap in quotes if contains comma
-                    const str = String(val).replace(/"/g, '""');
-                    return str.includes(',') || str.includes('\n') ? `"${str}"` : str;
-                }).join(',')
-            )
-        ];
-        const csv = csvLines.join('\n');
-
-        // Return as downloadable CSV
-        return new NextResponse(csv, {
-            status: 200,
-            headers: {
-                'Content-Type': 'text/csv',
-                'Content-Disposition': `attachment; filename="audit_export_${new Date().toISOString().split('T')[0]}.csv"`,
-            },
-        });
-
-    } catch (error) {
-        console.error('Export Error:', error);
-        return NextResponse.json({ error: 'Failed to export data' }, { status: 500 });
-    }
+    return NextResponse.json(
+        { error: 'Server-side CSV export not yet implemented. Use the Export button in the Database view instead.' },
+        { status: 501 }
+    );
 }

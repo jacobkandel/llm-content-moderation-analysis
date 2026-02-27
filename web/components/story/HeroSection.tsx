@@ -46,7 +46,7 @@ export function HeroSection({ totalAudits, uniqueModels }: HeroSectionProps) {
     return (
         <section
             ref={ref}
-            className="min-h-screen bg-white dark:bg-[#222222] flex items-center justify-center text-foreground relative overflow-hidden transition-colors duration-500"
+            className="min-h-screen bg-card dark:bg-[#222222] flex items-center justify-center text-foreground relative overflow-hidden transition-colors duration-500"
         >
             {/* Animated background grid - subtle */}
             <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none">
@@ -72,7 +72,7 @@ export function HeroSection({ totalAudits, uniqueModels }: HeroSectionProps) {
                 >
                     We Tested Every Major AI Model
                     <br />
-                    <span className="text-[#800000] dark:text-[#A4343A] inline-block">for Content Moderation Bias</span>
+                    <span className="text-brand dark:text-refusal inline-block">for Content Moderation Bias</span>
                 </motion.h1>
 
                 {/* Giant animated number */}
@@ -82,7 +82,7 @@ export function HeroSection({ totalAudits, uniqueModels }: HeroSectionProps) {
                     transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
                     className="my-12 md:my-16"
                 >
-                    <div className="text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black text-[#800000] dark:text-[#A4343A] drop-shadow-sm break-all sm:break-normal leading-none tracking-tighter">
+                    <div className="text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black text-brand dark:text-refusal drop-shadow-sm break-all sm:break-normal leading-none tracking-tighter">
                         {count.toLocaleString()}
                     </div>
                     <p className="text-xl md:text-2xl text-muted-foreground mt-4">

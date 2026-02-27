@@ -136,9 +136,9 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
         // UChicago Orange: #FF671F
         if (rate < 0.6) return 'bg-[#FF671F]/40 text-[#A33600] dark:text-[#FFCCAA] hover:bg-[#FF671F]/50';
         // UChicago Brick: #A4343A
-        if (rate < 0.8) return 'bg-[#A4343A]/80 text-white hover:bg-[#A4343A]';
+        if (rate < 0.8) return 'bg-refusal/80 text-white hover:bg-refusal';
         // UChicago Maroon: #800000
-        return 'bg-[#800000] text-white font-bold hover:bg-[#600000]';
+        return 'bg-brand text-white font-bold hover:bg-[#600000]';
     };
 
     const getSeverity = (rate: number) => {
@@ -262,7 +262,7 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                         {m && typeof m === 'string' ? (m.split('/').pop() || m) : 'Unknown'}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        Avg Refusal: <span className={avgRate > 0.5 ? 'text-[#800000] font-bold' : 'text-foreground'}>{(avgRate * 100).toFixed(1)}%</span>
+                                        Avg Refusal: <span className={avgRate > 0.5 ? 'text-brand font-bold' : 'text-foreground'}>{(avgRate * 100).toFixed(1)}%</span>
                                     </p>
                                 </div>
                                 {isExpanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
@@ -300,8 +300,8 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#00843D]/30 rounded border border-[#00843D]"></div> Safe</div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#FFC72C]/30 rounded border border-[#FFC72C]"></div> Low</div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#FF671F]/40 rounded border border-[#FF671F]"></div> Medium</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#A4343A]/80 rounded border border-[#A4343A]"></div> High</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#800000] rounded"></div> Critical</div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-refusal/80 rounded border border-refusal"></div> High</div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-brand rounded"></div> Critical</div>
             </div>
 
             {/* Modal for cell details */}
@@ -342,7 +342,7 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                     <div className="flex justify-between items-center mb-2">
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${['safe', 'ALLOWED', 'Authorized'].includes(entry.verdict)
                                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
-                                            : 'bg-[#800000] text-white'
+                                            : 'bg-brand text-white'
                                             }`}>
                                             {entry.verdict}
                                         </span>

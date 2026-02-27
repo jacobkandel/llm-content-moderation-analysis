@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { GlobalSidebar } from "@/components/ui/GlobalSidebar";
+
 import { Footer } from "@/components/ui/Footer";
 import SkipLink from "@/components/SkipLink";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/ui/Toast";
-import { CommandPalette } from "@/components/ui/CommandPalette";
+
 import JsonLd from "@/components/JsonLd";
 import { SidebarProvider } from "@/components/providers/SidebarProvider";
 import { MainContentWrapper } from "@/components/layout/MainContentWrapper";
@@ -87,11 +87,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://www.google.com" />
-      </head>
+
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex min-h-screen bg-background text-foreground overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex min-h-screen bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"

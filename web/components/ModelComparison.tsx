@@ -170,14 +170,14 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
                                     <div className="flex items-center gap-3">
                                         <div className="flex-1 h-2 bg-muted rounded-full max-w-[100px] overflow-hidden">
                                             <div
-                                                className={`h-full rounded-full ${row.refusalRate > 50 ? 'bg-[#A4343A]' :
-                                                    row.refusalRate > 30 ? 'bg-[#EAAA00]' : 'bg-[#275D38]'
+                                                className={`h-full rounded-full ${row.refusalRate > 50 ? 'bg-refusal' :
+                                                    row.refusalRate > 30 ? 'bg-[#EAAA00]' : 'bg-safe'
                                                     }`}
                                                 style={{ width: `${Math.max(row.refusalRate, 5)}%` }}
                                             ></div>
                                         </div>
-                                        <span className={`font-bold ${row.refusalRate > 50 ? 'text-[#A4343A]' :
-                                            row.refusalRate > 30 ? 'text-[#CC8A00]' : 'text-[#275D38]'
+                                        <span className={`font-bold ${row.refusalRate > 50 ? 'text-refusal' :
+                                            row.refusalRate > 30 ? 'text-[#CC8A00]' : 'text-safe'
                                             }`}>
                                             {row.refusalRate.toFixed(1)}%
                                         </span>

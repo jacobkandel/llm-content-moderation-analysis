@@ -14,7 +14,7 @@ export default function ScrollIndicator() {
                 repeat: Infinity,
                 repeatType: 'reverse'
             }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-400 z-20"
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground/70 z-20"
         >
             <span className="text-[10px] uppercase tracking-[0.2em]">Scroll to Discover</span>
             <ChevronDown className="h-6 w-6 animate-bounce" />

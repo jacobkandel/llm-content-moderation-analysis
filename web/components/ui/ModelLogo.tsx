@@ -16,7 +16,7 @@ export function ModelLogo({ modelId, className }: ModelLogoProps) {
     const styles: Record<string, { bg: string; text: string; icon: any; initial: string }> = {
         openai: {
             bg: 'bg-[#9CAF88]', // Light Forest
-            text: 'text-[#275D38]', // Forest
+            text: 'text-safe', // Forest
             icon: Zap,
             initial: 'O'
         },

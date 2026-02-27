@@ -174,7 +174,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                     </>
                 )}
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#800000] mb-1">{modelInfo.provider}</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand mb-1">{modelInfo.provider}</p>
                     <h1 className="text-3xl font-black text-foreground">{modelInfo.display_name}</h1>
                     <p className="text-sm text-muted-foreground mt-1">
                         {modelInfo.tier} tier · {modelInfo.id}
@@ -205,7 +205,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                         value: modelInfo.cost_per_m_out ? `$${modelInfo.cost_per_m_out}` : '—',
                     },
                 ].map(({ label, value, sub, accent, trend }) => (
-                    <div key={label} className={`rounded-xl border p-4 ${accent ? 'border-[#800000]/30 bg-[#800000]/5' : 'border-border bg-card'}`}>
+                    <div key={label} className={`rounded-xl border p-4 ${accent ? 'border-brand/30 bg-brand/5' : 'border-border bg-card'}`}>
                         {label === 'Refusal Rate' ? (
                             <TooltipHover
                                 label={<p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{label}</p>}
@@ -215,7 +215,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
                         )}
                         <div className="flex items-center gap-2">
-                            <p className={`text-2xl font-black ${accent ? 'text-[#800000]' : 'text-foreground'}`}>{value}</p>
+                            <p className={`text-2xl font-black ${accent ? 'text-brand' : 'text-foreground'}`}>{value}</p>
                             {trend !== null && trend !== undefined ? (
                                 <span className={`text-xs font-semibold flex items-center gap-0.5 ${trend > 0 ? 'text-red-500' : trend < 0 ? 'text-green-600' : 'text-muted-foreground'
                                     }`}>
@@ -242,7 +242,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                                 </div>
                                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-[#800000] rounded-full transition-all"
+                                        className="h-full bg-brand rounded-full transition-all"
                                         style={{ width: `${Math.min(rate!, 100)}%` }}
                                         role="progressbar"
                                         aria-valuenow={Math.round(rate!)}
@@ -261,7 +261,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
             <div className="flex flex-wrap gap-3 pt-2">
                 <Link
                     href={`/compare?modelA=${encodeURIComponent(id)}`}
-                    className="inline-flex items-center gap-2 bg-[#800000] text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-[#9a0000] transition-all hover:scale-105 active:scale-95"
+                    className="inline-flex items-center gap-2 bg-brand text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-brand-dark transition-all hover:scale-105 active:scale-95"
                 >
                     Compare {modelInfo.display_name}
                     <ArrowRight className="h-4 w-4" />

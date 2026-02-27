@@ -7,7 +7,7 @@ export default function ComparePage() {
         <Suspense fallback={
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <RefreshCw className="h-8 w-8 animate-spin text-[#800000]" />
+                    <RefreshCw className="h-8 w-8 animate-spin text-brand" />
                     <p className="text-muted-foreground animate-pulse">Initializing comparison tool...</p>
                 </div>
             </div>

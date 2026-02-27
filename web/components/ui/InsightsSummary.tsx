@@ -44,7 +44,7 @@ export function InsightsSummary({ data }: InsightsSummaryProps) {
         if (passRate >= 90) {
             results.push({
                 type: 'success',
-                icon: <CheckCircle className="h-5 w-5 text-[#275D38]" />,
+                icon: <CheckCircle className="h-5 w-5 text-safe" />,
                 title: 'Excellent Safety Rate',
                 description: `${passRate.toFixed(1)}% of prompts are passing moderation across all models.`
             });
@@ -79,7 +79,7 @@ export function InsightsSummary({ data }: InsightsSummaryProps) {
             const best = modelRates[0];
             results.push({
                 type: 'success',
-                icon: <TrendingUp className="h-5 w-5 text-[#275D38]" />,
+                icon: <TrendingUp className="h-5 w-5 text-safe" />,
                 title: `Top Performer: ${best.model}`,
                 description: `${best.rate.toFixed(1)}% pass rate across ${best.total} tests.`
             });
@@ -89,7 +89,7 @@ export function InsightsSummary({ data }: InsightsSummaryProps) {
             if (worst.rate < 70 && worst.model !== best.model) {
                 results.push({
                     type: 'warning',
-                    icon: <TrendingDown className="h-5 w-5 text-[#A4343A]" />,
+                    icon: <TrendingDown className="h-5 w-5 text-refusal" />,
                     title: `Needs Attention: ${worst.model}`,
                     description: `Only ${worst.rate.toFixed(1)}% pass rate. May require policy adjustments.`
                 });
@@ -154,8 +154,8 @@ export function InsightsSummary({ data }: InsightsSummaryProps) {
                     <Sparkles className="h-5 w-5 text-primary dark:text-primary/80" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-slate-900 dark:text-white">AI Insights</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Automated analysis of your data</p>
+                    <h3 className="font-bold text-foreground dark:text-foreground">AI Insights</h3>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground/70">Automated analysis of your data</p>
                 </div>
             </div>
 
@@ -166,14 +166,14 @@ export function InsightsSummary({ data }: InsightsSummaryProps) {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="flex items-start gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg shadow-sm"
+                        className="flex items-start gap-3 p-3 bg-card dark:bg-card rounded-lg shadow-sm"
                     >
                         {insight.icon}
                         <div>
-                            <div className="font-medium text-sm text-slate-900 dark:text-white">
+                            <div className="font-medium text-sm text-foreground dark:text-foreground">
                                 {insight.title}
                             </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            <div className="text-xs text-muted-foreground dark:text-muted-foreground/70 mt-0.5">
                                 {insight.description}
                             </div>
                         </div>

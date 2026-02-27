@@ -23,22 +23,22 @@ export default async function HomePage() {
       {/* ── Hero ── */}
       <section className="relative bg-card rounded-2xl overflow-hidden border border-border shadow-sm">
         {/* Maroon accent strip */}
-        <div className="h-1.5 w-full bg-[#800000]" aria-hidden />
+        <div className="h-1.5 w-full bg-brand" aria-hidden />
 
-        <div className="px-8 md:px-16 py-16 md:py-24">
+        <div className="px-4 md:px-8 lg:px-16 py-12 md:py-24">
           {/* Eyebrow */}
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#800000] mb-6">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand mb-6">
             Open-Source AI Research
           </p>
 
           {/* Headline — left-aligned, editorial */}
-          <h1 className="text-4xl md:text-[3.75rem] font-black leading-[1.1] tracking-tight text-foreground mb-6 max-w-3xl">
+          <h1 className="text-3xl sm:text-4xl md:text-[3.75rem] font-black leading-[1.1] tracking-tight text-foreground mb-6 max-w-3xl">
             See How AI Models Differ in{' '}
-            <span className="text-[#800000]">Censorship and Bias</span>
+            <span className="text-brand">Censorship and Bias</span>
           </h1>
 
           {/* Subtext */}
-          <p className="text-lg text-[#555] max-w-2xl mb-10 leading-relaxed">
+          <p className="text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
             We run identical prompts through every major LLM and measure exactly which models
             refuse — and which ones don't.
           </p>
@@ -47,7 +47,7 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Link
               href="/compare"
-              className="group inline-flex items-center gap-2 bg-[#800000] text-white font-bold text-sm px-7 py-3.5 rounded-lg shadow-sm hover:bg-[#555] transition-all duration-200 hover:scale-105 active:scale-95"
+              className="group inline-flex items-center gap-2 bg-brand text-white font-bold text-sm px-7 py-3.5 rounded-lg shadow-sm hover:bg-brand/80 transition-all duration-200 hover:scale-105 active:scale-95"
             >
               Compare Models
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -74,10 +74,10 @@ export default async function HomePage() {
             ] as const).map(({ icon: Icon, value, label, desc }) => (
               <div
                 key={label}
-                className="flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-card hover:border-[#800000]/30 hover:shadow-md transition-all"
+                className="flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-card hover:border-brand/30 hover:shadow-md transition-all"
               >
-                <div className="h-12 w-12 rounded-xl bg-[#800000]/10 flex items-center justify-center mb-4">
-                  <Icon className="h-6 w-6 text-[#800000]" />
+                <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center mb-4">
+                  <Icon className="h-6 w-6 text-brand" />
                 </div>
                 <div className="text-3xl font-black text-foreground mb-1">{value}</div>
                 <div className="text-sm font-bold text-foreground mb-1">{label}</div>
@@ -118,12 +118,12 @@ export default async function HomePage() {
             ] as const).map(({ step, title, body }) => (
               <div
                 key={step}
-                className="relative bg-card border border-border rounded-2xl p-6 hover:border-[#800000]/30 hover:shadow-md transition-all"
+                className="relative bg-card border border-border rounded-2xl p-6 hover:border-brand/30 hover:shadow-md transition-all"
               >
-                <div className="text-5xl font-black text-[#800000]/10 absolute top-4 right-5 select-none">
+                <div className="text-5xl font-black text-brand/10 absolute top-4 right-5 select-none">
                   {step}
                 </div>
-                <div className="h-8 w-8 rounded-lg bg-[#800000] text-white text-sm font-bold flex items-center justify-center mb-4">
+                <div className="h-8 w-8 rounded-lg bg-brand text-white text-sm font-bold flex items-center justify-center mb-4">
                   {step}
                 </div>
                 <h3 className="font-bold text-base text-foreground mb-2">{title}</h3>
@@ -145,7 +145,7 @@ export default async function HomePage() {
           </p>
           <Link
             href="/compare"
-            className="group inline-flex items-center gap-2 bg-[#800000] text-white font-bold text-base px-8 py-4 rounded-xl shadow-lg hover:bg-[#9a0000] transition-all duration-200 hover:scale-105 active:scale-95"
+            className="group inline-flex items-center gap-2 bg-brand text-white font-bold text-base px-8 py-4 rounded-xl shadow-lg hover:bg-brand-dark transition-all duration-200 hover:scale-105 active:scale-95"
           >
             Compare Models
             <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -158,7 +158,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-[#800000]" />
+                <div className="h-2 w-2 rounded-full bg-brand" />
                 Explore Models
               </h3>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
@@ -176,7 +176,7 @@ export default async function HomePage() {
             </div>
             <div>
               <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-[#800000]" />
+                <div className="h-2 w-2 rounded-full bg-brand" />
                 Explore Categories
               </h3>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">

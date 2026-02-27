@@ -32,7 +32,7 @@ export function ExpandableText({ text, maxLines = 3, className = "" }: Expandabl
                         e.stopPropagation();
                         setIsExpanded(!isExpanded);
                     }}
-                    className="mt-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#800000] hover:text-[#550000] transition-colors"
+                    className="mt-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand hover:text-[#550000] transition-colors"
                 >
                     {isExpanded ? (
                         <><ChevronUp className="w-3 h-3" /> Show Less</>

@@ -42,7 +42,7 @@ export default function ShareButton({ title, url, text }: ShareButtonProps) {
         <div className="relative inline-block">
             <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors border border-border"
                 title="Share this insight"
             >
                 <Share2 className="w-4 h-4" />
@@ -58,10 +58,10 @@ export default function ShareButton({ title, url, text }: ShareButtonProps) {
                     />
 
                     {/* Menu */}
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20">
+                    <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border py-2 z-20">
                         <button
                             onClick={handleTwitterShare}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground/80 hover:bg-muted/30 transition-colors"
                         >
                             <Twitter className="w-4 h-4 text-blue-400" />
                             Share on Twitter
@@ -69,17 +69,17 @@ export default function ShareButton({ title, url, text }: ShareButtonProps) {
 
                         <button
                             onClick={handleLinkedInShare}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground/80 hover:bg-muted/30 transition-colors"
                         >
                             <Linkedin className="w-4 h-4 text-blue-600" />
                             Share on LinkedIn
                         </button>
 
-                        <div className="border-t border-slate-200 my-1" />
+                        <div className="border-t border-border my-1" />
 
                         <button
                             onClick={handleCopyLink}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground/80 hover:bg-muted/30 transition-colors"
                         >
                             {copied ? (
                                 <>
@@ -88,7 +88,7 @@ export default function ShareButton({ title, url, text }: ShareButtonProps) {
                                 </>
                             ) : (
                                 <>
-                                    <LinkIcon className="w-4 h-4 text-slate-400" />
+                                    <LinkIcon className="w-4 h-4 text-muted-foreground/70" />
                                     Copy link
                                 </>
                             )}

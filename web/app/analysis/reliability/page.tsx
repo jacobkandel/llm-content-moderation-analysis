@@ -65,7 +65,7 @@ export default function ReliabilityPage() {
     }, [filteredAuditData, hasFilters, precomputedReliability]);
 
     if (loading) return <SkeletonLoader />;
-    if (!stats) return <div className="p-8 text-center text-slate-500">No data available for reliability analysis.</div>;
+    if (!stats) return <div className="p-8 text-center text-muted-foreground">No data available for reliability analysis.</div>;
 
     const getScoreColor = (s: number) => {
         if (s >= 0.81) return 'text-foreground';

@@ -254,10 +254,10 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
                             transition={{ duration: 0.15 }}
                             className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-lg z-50"
                         >
-                            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
+                            <div className="bg-card rounded-xl shadow-2xl border border-border overflow-hidden">
                                 {/* Search Input */}
-                                <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
-                                    <Search className="h-5 w-5 text-slate-400" />
+                                <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+                                    <Search className="h-5 w-5 text-muted-foreground/70" />
                                     <input
                                         ref={inputRef}
                                         type="text"
@@ -265,9 +265,9 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         onKeyDown={handleKeyDown}
-                                        className="flex-1 bg-transparent text-slate-900 placeholder-slate-400 outline-none text-base"
+                                        className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base"
                                     />
-                                    <kbd className="px-2 py-1 text-xs font-mono text-slate-400 bg-slate-100 rounded">
+                                    <kbd className="px-2 py-1 text-xs font-mono text-muted-foreground/70 bg-muted rounded">
                                         ESC
                                     </kbd>
                                 </div>
@@ -275,7 +275,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
                                 {/* Commands List */}
                                 <div className="max-h-[300px] overflow-y-auto py-2">
                                     {filteredCommands.length === 0 ? (
-                                        <div className="px-4 py-8 text-center text-slate-500">
+                                        <div className="px-4 py-8 text-center text-muted-foreground">
                                             No commands found
                                         </div>
                                     ) : (
@@ -316,13 +316,13 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="px-4 py-2 border-t border-slate-200 flex items-center gap-4 text-xs text-slate-400">
+                                <div className="px-4 py-2 border-t border-border flex items-center gap-4 text-xs text-muted-foreground/70">
                                     <span className="flex items-center gap-1">
-                                        <kbd className="px-1.5 py-0.5 bg-slate-100 rounded">↑↓</kbd>
+                                        <kbd className="px-1.5 py-0.5 bg-muted rounded">↑↓</kbd>
                                         navigate
                                     </span>
                                     <span className="flex items-center gap-1">
-                                        <kbd className="px-1.5 py-0.5 bg-slate-100 rounded">↵</kbd>
+                                        <kbd className="px-1.5 py-0.5 bg-muted rounded">↵</kbd>
                                         select
                                     </span>
                                 </div>
