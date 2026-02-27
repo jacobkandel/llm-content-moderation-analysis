@@ -81,27 +81,7 @@ export default function RestrictivenessScale({ models, onModelClick }: Restricti
                 })}
             </div>
 
-            {/* Monochrome Legend */}
-            <div className="mt-6 pt-4 border-t border-border">
-                <div className="flex flex-wrap gap-4 text-xs">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-foreground/20" />
-                        <span className="text-muted-foreground">Permissive (&lt;10%)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-foreground/40" />
-                        <span className="text-muted-foreground">Moderate (10-30%)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-foreground/70" />
-                        <span className="text-muted-foreground">Restrictive (30-60%)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-foreground" />
-                        <span className="text-muted-foreground">Very Restrictive (&gt;60%)</span>
-                    </div>
-                </div>
-            </div>
+
         </div>
     );
 }

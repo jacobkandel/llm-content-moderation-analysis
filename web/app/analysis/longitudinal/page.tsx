@@ -9,8 +9,19 @@ import { useRouter } from 'next/navigation';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
-// Monochrome shades for lines
-const MONO_SHADES = ['#000000', '#333333', '#666666', '#999999', '#AAAAAA', '#CCCCCC'];
+// Distinct categorical colors for the lines
+const CHART_COLORS = [
+    '#2563eb', // blue-600
+    '#dc2626', // red-600
+    '#16a34a', // green-600
+    '#d97706', // amber-600
+    '#9333ea', // purple-600
+    '#0891b2', // cyan-600
+    '#c026d3', // fuchsia-600
+    '#ea580c', // orange-600
+    '#4f46e5', // indigo-600
+    '#059669', // emerald-600
+];
 
 export default function LongitudinalPage() {
     const { filteredAuditData, dateRange, setDateRange, loading, ensureAuditData, precomputedLongitudinal, selectedModels } = useAnalysis();
@@ -95,34 +106,19 @@ export default function LongitudinalPage() {
                 </div>
                 <ResponsiveContainer width="100%" height="90%">
                     <LineChart
-                        data={longitudinalData.chartData}
-                        onClick={(data: any) => {
-                            if (data && typeof data.activeLabel === 'string') {
-                                // The activeLabel is the date string (e.g., "2024-03-24")
-                                setDateRange({ start: data.activeLabel, end: data.activeLabel });
-                                // Navigate to the Evidence Locker to see the filtered table
-                                router.push(`/analysis/evidence?from=${data.activeLabel}&to=${data.activeLabel}`);
-                            }
-                        }}
-                        style={{ cursor: 'pointer' }}
-                    >
+                        data={longitudinalData.chartData}        >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" />
                         <YAxis unit="%" />
                         <RechartsTooltip />
                         <Legend />
                         {longitudinalData.activeModels.map((m: string, i: number) => (
-                            <Line key={m} type="monotone" dataKey={m} stroke={MONO_SHADES[i % MONO_SHADES.length]} strokeWidth={2} dot={false} connectNulls />
+                            <Line key={m} type="monotone" dataKey={m} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} connectNulls />
                         ))}
                     </LineChart>
                 </ResponsiveContainer>
             </div>
 
-            <RelatedPages
-                title="Evidence Locker"
-                description="Ready to see the raw data? Dive into the interactive evidence locker to explore every single prompt and verdict."
-                href="/analysis/evidence"
-            />
         </div>
     );
 }

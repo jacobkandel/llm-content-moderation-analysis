@@ -18,6 +18,7 @@ const navItems = [
         dropdown: [
             { title: 'Summary', href: '/analysis/summary', icon: FileText },
             { title: 'Reliability', href: '/analysis/reliability', icon: Shield },
+            { title: 'Longitudinal Analysis', href: '/analysis/longitudinal', icon: TrendingUp },
             { title: 'Model Stability', href: '/analysis/drift', icon: TrendingUp },
             { title: 'Significance', href: '/analysis/significance', icon: Scale },
             { title: 'Political Compass', href: '/analysis/political', icon: Compass },
