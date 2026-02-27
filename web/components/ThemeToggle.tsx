@@ -14,7 +14,7 @@ export function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <button className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+            <button className="p-2.5 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
                 <Sun className="h-5 w-5" />
                 <span className="sr-only">Toggle theme</span>
             </button>
@@ -23,7 +23,7 @@ export function ThemeToggle() {
 
     return (
         <button
-            className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="p-2.5 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         >
             {theme === "dark" ? (

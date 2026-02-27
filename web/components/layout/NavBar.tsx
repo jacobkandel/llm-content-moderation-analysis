@@ -57,7 +57,7 @@ export function NavBar() {
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-                            className="md:hidden p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
+                            className="md:hidden p-3 -ml-2 rounded-md hover:bg-accent hover:text-accent-foreground"
                         >
                             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                         </button>
@@ -139,68 +139,70 @@ export function NavBar() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <nav aria-label="Mobile Navigation" className="md:hidden border-t border-border bg-background p-4 space-y-4">
-                    {/* Mobile-only: Home link */}
-                    {mobileOnlyItems.map((item) => {
-                        const isMobileActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={cn(
-                                    "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
-                                    isMobileActive ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
-                                )}
-                            >
-                                <item.icon className="h-4 w-4" />
-                                {item.name}
-                            </Link>
-                        );
-                    })}
-                    {navItems.map((item) => (
-                        <div key={item.name} className="space-y-2">
-                            {item.dropdown ? (
-                                <>
-                                    <div className="font-semibold text-sm px-2 text-muted-foreground">{item.name}</div>
-                                    <div className="pl-4 space-y-1">
-                                        {item.dropdown.map(sub => (
+                <div className="md:hidden border-t border-border bg-background">
+                    <nav aria-label="Mobile Navigation" className="p-4 space-y-4 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+                        {/* Mobile-only: Home link */}
+                        {mobileOnlyItems.map((item) => {
+                            const isMobileActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={cn(
+                                        "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
+                                        isMobileActive ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
+                                    )}
+                                >
+                                    <item.icon className="h-4 w-4" />
+                                    {item.name}
+                                </Link>
+                            );
+                        })}
+                        {navItems.map((item) => (
+                            <div key={item.name} className="space-y-2">
+                                {item.dropdown ? (
+                                    <>
+                                        <div className="font-semibold text-sm px-2 text-muted-foreground">{item.name}</div>
+                                        <div className="pl-4 space-y-1">
+                                            {item.dropdown.map(sub => (
+                                                <Link
+                                                    key={sub.href}
+                                                    href={sub.href}
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                    className={cn(
+                                                        "flex items-center gap-2 px-2 py-2 text-sm rounded-md",
+                                                        pathname === sub.href ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
+                                                    )}
+                                                >
+                                                    <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-foreground")} />
+                                                    {sub.title}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    (() => {
+                                        const isItemActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                                        return (
                                             <Link
-                                                key={sub.href}
-                                                href={sub.href}
+                                                href={item.href}
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                                 className={cn(
-                                                    "flex items-center gap-2 px-2 py-2 text-sm rounded-md",
-                                                    pathname === sub.href ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
+                                                    "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
+                                                    isItemActive ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
                                                 )}
                                             >
-                                                <sub.icon className={cn("h-4 w-4", pathname === sub.href ? "text-accent-foreground" : "text-foreground")} />
-                                                {sub.title}
+                                                <item.icon className="h-4 w-4" />
+                                                {item.name}
                                             </Link>
-                                        ))}
-                                    </div>
-                                </>
-                            ) : (
-                                (() => {
-                                    const isItemActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-                                    return (
-                                        <Link
-                                            href={item.href}
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className={cn(
-                                                "flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md",
-                                                isItemActive ? "bg-brand/8 text-brand" : "hover:bg-accent hover:text-accent-foreground"
-                                            )}
-                                        >
-                                            <item.icon className="h-4 w-4" />
-                                            {item.name}
-                                        </Link>
-                                    );
-                                })()
-                            )}
-                        </div>
-                    ))}
-                </nav>
+                                        );
+                                    })()
+                                )}
+                            </div>
+                        ))}
+                    </nav>
+                </div>
             )}
         </nav>
     );

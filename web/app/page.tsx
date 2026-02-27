@@ -47,14 +47,14 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Link
               href="/compare"
-              className="group inline-flex items-center gap-2 bg-brand text-white font-bold text-sm px-7 py-3.5 rounded-lg shadow-sm hover:bg-brand/80 transition-all duration-200 hover:scale-105 active:scale-95"
+              className="group inline-flex w-full sm:w-auto justify-center items-center gap-2 bg-brand text-white font-bold text-sm px-7 py-3.5 rounded-lg shadow-sm hover:bg-brand/80 transition-all duration-200 hover:scale-105 active:scale-95"
             >
               Compare Models
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               href="/about"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors mt-0.5 py-3.5"
+              className="inline-flex w-full sm:w-auto justify-center items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors sm:mt-0.5 py-3.5"
             >
               More about the project <ChevronRight className="h-4 w-4" />
             </Link>
