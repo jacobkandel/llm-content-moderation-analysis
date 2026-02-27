@@ -59,9 +59,9 @@ export default function PaternalismPage() {
             </div>
 
             <RelatedPages
-                title="Censorship Triggers"
-                description="What words or topics automatically trigger a refusal? Discover the hidden rules guiding AI moderation."
-                href="/analysis/triggers"
+                title="Alignment Tax"
+                description="Explore the trade-off between model safety and helpfulness on the Pareto frontier."
+                href="/analysis/alignment"
             />
         </div>
     );

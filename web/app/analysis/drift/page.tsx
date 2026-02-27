@@ -29,9 +29,9 @@ export default function DriftPage() {
             <ModelDrift data={driftData} />
 
             <RelatedPages
-                title="Political Compass"
-                description="Do these models exhibit ideological bias? See how they score on standard political compass questions."
-                href="/analysis/political"
+                title="Statistical Significance"
+                description="Are these refusal rate differences real, or just statistical noise? Explore pairwise p-values and significance testing."
+                href="/analysis/significance"
             />
         </div>
     );

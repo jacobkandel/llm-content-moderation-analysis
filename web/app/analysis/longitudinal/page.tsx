@@ -119,6 +119,11 @@ export default function LongitudinalPage() {
                 </ResponsiveContainer>
             </div>
 
+            <RelatedPages
+                title="Model Stability (Drift)"
+                description="How much do these models change over time? Track refusal rate shifts to see if policies are becoming stricter or more lenient."
+                href="/analysis/drift"
+            />
         </div>
     );
 }

@@ -101,9 +101,9 @@ export default function AlignmentPage() {
             </div>
 
             <RelatedPages
-                title="Council Consensus"
-                description="When do models agree? Discover prompts where the entire AI 'council' reaches a unanimous moderation verdict."
-                href="/analysis/consensus"
+                title="Behavior Clusters"
+                description="Which models behave similarly? See how models group together based on their moderation policies and rules."
+                href="/analysis/clusters"
             />
         </div>
     );

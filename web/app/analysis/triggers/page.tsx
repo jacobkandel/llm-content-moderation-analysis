@@ -55,9 +55,9 @@ export default function TriggersPage() {
             </div>
 
             <RelatedPages
-                title="Longitudinal Analysis"
-                description="How often do these triggers change? Track refusal rates over time to see model policy drift."
-                href="/analysis/longitudinal"
+                title="Council Consensus"
+                description="When do models agree? Discover prompts where the entire AI 'council' reaches a unanimous moderation verdict."
+                href="/analysis/consensus"
             />
         </div>
     );

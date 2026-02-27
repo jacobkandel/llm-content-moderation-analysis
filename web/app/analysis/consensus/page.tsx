@@ -249,9 +249,9 @@ export default function ConsensusPage() {
                 as="h2"
             />
             <RelatedPages
-                title="Reliability & Consistency"
-                description="Do models flag the same content consistently over time? Check Fleiss' Kappa scores for internal consistency."
-                href="/analysis/reliability"
+                title="Raw Database"
+                description="Explore every single prompt and verdict in our dataset. Filter, search, and export the raw audit logs."
+                href="/audit"
             />
         </div >
     );

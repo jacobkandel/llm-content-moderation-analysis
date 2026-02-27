@@ -117,7 +117,7 @@ export function DataTable<TData, TValue>({
             {/* Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 {searchKey && (
-                    <div className="relative w-full max-w-sm">
+                    <div className="relative w-full sm:max-w-sm">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <input
                             data-search-input
@@ -131,7 +131,7 @@ export function DataTable<TData, TValue>({
                     </div>
                 )}
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     {/* Column Visibility */}
                     <div className="relative">
                         <button

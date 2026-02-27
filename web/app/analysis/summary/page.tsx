@@ -142,9 +142,9 @@ export default function SummaryPage() {
             </div>
 
             <RelatedPages
-                title="Statistical Significance"
-                description="Are these refusal rate differences real, or just statistical noise? Explore pairwise p-values and significance testing."
-                href="/analysis/significance"
+                title="Model Reliability"
+                description="Are models consistent with their own rulings? Discover which models give the same answer to the same prompt."
+                href="/analysis/reliability"
             />
         </div>
     );

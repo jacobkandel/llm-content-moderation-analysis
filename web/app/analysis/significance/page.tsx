@@ -213,9 +213,9 @@ export default function SignificancePage() {
             </div>
 
             <RelatedPages
-                title="Behavior Clusters"
-                description="Which models behave similarly? See how models group together based on their moderation policies and rules."
-                href="/analysis/clusters"
+                title="Political Compass"
+                description="Do these models exhibit ideological bias? See how they score on standard political compass questions."
+                href="/analysis/political"
             />
         </div>
     );

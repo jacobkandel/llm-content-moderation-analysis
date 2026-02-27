@@ -165,9 +165,9 @@ export default function ReliabilityPage() {
             )}
 
             <RelatedPages
-                title="Model Stability (Drift)"
-                description="How much do these models change over time? Track refusal rate shifts to see if policies are becoming stricter or more lenient."
-                href="/analysis/drift"
+                title="Longitudinal Analysis"
+                description="How are content moderation policies evolving? Track the trajectory of refusal rates over time."
+                href="/analysis/longitudinal"
             />
         </div>
     );

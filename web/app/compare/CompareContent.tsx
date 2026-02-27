@@ -679,7 +679,7 @@ export default function CompareContent() {
                                 </button>
                             </div>
                             <div
-                                className="h-[400px] w-full"
+                                className="h-[300px] sm:h-[400px] w-full"
                                 role="img"
                                 aria-label={`Radar chart comparing ${modelA} and ${modelB} across ${displayRadarData.length} content categories. ${displayRadarData.map(d => `${d.subject}: ${modelA.split('/').pop()} ${d.A.toFixed(0)}% vs ${modelB.split('/').pop()} ${d.B.toFixed(0)}%`).join('. ')}`}
                             >
@@ -839,8 +839,8 @@ export default function CompareContent() {
                                                     {/* Side-by-Side Responses */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         {/* Model A Response */}
-                                                        <div className={`rounded-lg border ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
-                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10' : 'border-refusal/30 bg-refusal/10'}`}>
+                                                        <div className={`rounded-lg border group/resp ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
+                                                            <div className={`sticky top-14 z-10 px-3 py-2 flex justify-between items-center border-b rounded-t-lg backdrop-blur-md ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10/80 supports-[backdrop-filter]:bg-safe/5/80' : 'border-refusal/30 bg-refusal/10/80 supports-[backdrop-filter]:bg-refusal/5/80'}`}>
                                                                 <div className="flex items-center gap-2">
                                                                     <img
                                                                         src={getProviderLogo(modelA)}
@@ -860,8 +860,8 @@ export default function CompareContent() {
                                                         </div>
 
                                                         {/* Model B Response */}
-                                                        <div className={`rounded-lg border ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
-                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10' : 'border-refusal/30 bg-refusal/10'}`}>
+                                                        <div className={`rounded-lg border group/resp ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
+                                                            <div className={`sticky top-14 z-10 px-3 py-2 flex justify-between items-center border-b rounded-t-lg backdrop-blur-md ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10/80 supports-[backdrop-filter]:bg-safe/5/80' : 'border-refusal/30 bg-refusal/10/80 supports-[backdrop-filter]:bg-refusal/5/80'}`}>
                                                                 <div className="flex items-center gap-2">
                                                                     <img
                                                                         src={getProviderLogo(modelB)}
