@@ -90,6 +90,7 @@ export default function CompareContent() {
     const disagreeRef = useRef<HTMLDivElement>(null);
 
     // --- UI state ---
+    // Priority: URL params > localStorage > curated default pair > first two models
     const [modelA, setModelA] = useState<string>(searchParams.get('modelA') || '');
     const [modelB, setModelB] = useState<string>(searchParams.get('modelB') || '');
     const [isClient, setIsClient] = useState(false);
@@ -133,17 +134,33 @@ export default function CompareContent() {
             .then(r => r.json())
             .then((data: CompareData) => {
                 setCompareData(data);
-                // Prefer URL params, fall back to first two models
-                if (urlModelA && data.models.includes(urlModelA)) {
-                    setModelA(urlModelA);
-                } else if (data.models.length > 0) {
-                    setModelA(data.models[0]);
-                }
-                if (urlModelB && data.models.includes(urlModelB)) {
-                    setModelB(urlModelB);
-                } else if (data.models.length > 1) {
-                    setModelB(data.models[1]);
-                }
+
+                const urlModelA = searchParams.get('modelA');
+                const urlModelB = searchParams.get('modelB');
+
+                // Restore from localStorage (URL params take priority)
+                const savedA = localStorage.getItem('compare_modelA');
+                const savedB = localStorage.getItem('compare_modelB');
+
+                // Curated interesting default pair
+                const PREFERRED_A = ['openai/gpt-4o', 'openai/gpt-4o-mini', 'openai/gpt-4-turbo'];
+                const PREFERRED_B = ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-opus', 'anthropic/claude-3-haiku'];
+                const defaultA = PREFERRED_A.find(m => data.models.includes(m)) ?? data.models[0];
+                const defaultB = PREFERRED_B.find(m => data.models.includes(m)) ?? data.models[1];
+
+                const resolveA = urlModelA && data.models.includes(urlModelA)
+                    ? urlModelA
+                    : savedA && data.models.includes(savedA)
+                        ? savedA
+                        : defaultA;
+                const resolveB = urlModelB && data.models.includes(urlModelB)
+                    ? urlModelB
+                    : savedB && data.models.includes(savedB)
+                        ? savedB
+                        : defaultB;
+
+                setModelA(resolveA ?? '');
+                setModelB(resolveB ?? '');
                 setLoading(false);
             })
             .catch(err => {
@@ -161,11 +178,15 @@ export default function CompareContent() {
         }).catch(() => { });
     }, []);
 
-    // Sync model selection → URL (skip initial mount to avoid replacing on load)
+    // Sync model selection → URL + localStorage
     const isInitialMount = useRef(true);
     useEffect(() => {
         if (isInitialMount.current) { isInitialMount.current = false; return; }
         if (!modelA && !modelB) return;
+        // Persist to localStorage so the pair is restored on next visit
+        if (modelA) localStorage.setItem('compare_modelA', modelA);
+        if (modelB) localStorage.setItem('compare_modelB', modelB);
+        // Keep URL in sync for shareability
         const params = new URLSearchParams();
         if (modelA) params.set('modelA', modelA);
         if (modelB) params.set('modelB', modelB);
@@ -356,6 +377,14 @@ export default function CompareContent() {
                         <ChevronDown className="absolute right-3 top-9 h-4 w-4 text-muted-foreground pointer-events-none z-20" />
                     </div>
                 </div>
+
+                {/* Same-model warning */}
+                {modelA && modelB && modelA === modelB && (
+                    <div role="alert" className="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl text-sm text-amber-800 dark:text-amber-300">
+                        <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                        <span>You've selected the same model for both A and B. Pick two different models to see a meaningful comparison.</span>
+                    </div>
+                )}
 
                 {/* Filters Bar */}
                 <div className="bg-card p-4 rounded-xl border border-border">
