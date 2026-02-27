@@ -33,17 +33,18 @@ export function ColorblindToggle() {
         <button
             onClick={toggleColorblind}
             className={`p-2 rounded-md transition-colors flex items-center gap-2 text-sm font-medium ${isColorblind
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'hover:bg-accent hover:text-accent-foreground'
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'hover:bg-accent hover:text-accent-foreground'
                 }`}
             title={isColorblind ? "Disable Colorblind Mode" : "Enable Colorblind Mode"}
+            aria-label={isColorblind ? "Disable Colorblind Mode" : "Enable Colorblind Mode"}
         >
             {isColorblind ? (
                 <EyeOff className="h-5 w-5" />
             ) : (
                 <Eye className="h-5 w-5" />
             )}
-            <span className="lg:hidden">Colorblind</span>
+            <span className="sr-only lg:not-sr-only">Colorblind</span>
         </button>
     );
 }

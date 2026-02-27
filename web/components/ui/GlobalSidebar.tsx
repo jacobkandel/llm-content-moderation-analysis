@@ -229,6 +229,7 @@ export function GlobalSidebar() {
                             isCollapsed && "justify-center px-2"
                         )}
                         title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                        aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                     >
                         {isCollapsed ? <ChevronRight className="h-5 w-5" /> : (
                             <>

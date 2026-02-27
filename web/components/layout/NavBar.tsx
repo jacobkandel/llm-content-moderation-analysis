@@ -56,6 +56,7 @@ export function NavBar() {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                             className="md:hidden p-2 rounded-md hover:bg-accent hover:text-accent-foreground"
                         >
                             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

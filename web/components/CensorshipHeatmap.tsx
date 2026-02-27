@@ -316,7 +316,7 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                 <span className="hidden md:inline text-muted-foreground">×</span>
                                 <span className="text-muted-foreground md:text-foreground">{selectedCell.category}</span>
                             </h4>
-                            <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted">
+                            <button aria-label="Close modal" onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
