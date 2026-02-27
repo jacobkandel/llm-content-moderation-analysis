@@ -2,8 +2,8 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import Image from 'next/image';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
+import { TooltipHover } from '@/components/ui/TooltipHover';
 
 interface ModelData {
     name: string;
@@ -88,7 +88,7 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
                         >
                             {/* Provider Logo */}
                             <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-muted/20 border border-border flex items-center justify-center overflow-hidden">
-                                <Image
+                                <img
                                     src={getLogoUrl(model.name)}
                                     alt={getProviderName(model.name)}
                                     width={32}
@@ -115,7 +115,10 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
                                 >
                                     {model.rate}%
                                 </span>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Refusal Rate</p>
+                                <TooltipHover
+                                    label={<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Refusal Rate</p>}
+                                    tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
+                                />
                             </div>
                         </motion.div>
                     ))}

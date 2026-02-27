@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getLogoUrl } from '@/lib/provider-logos';
 
@@ -103,7 +102,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                             return (
                                 <div key={id} className="flex items-center gap-3">
                                     <span className="text-xs text-muted-foreground w-5 text-right flex-shrink-0">{idx + 1}</span>
-                                    {logoUrl && <Image src={logoUrl} width={20} height={20} alt="" className="object-contain flex-shrink-0" aria-hidden="true" />}
+                                    {logoUrl && <img src={logoUrl} width={20} height={20} alt="" className="object-contain flex-shrink-0" aria-hidden="true" />}
                                     <span className="text-sm text-foreground w-44 truncate flex-shrink-0">{name}</span>
                                     <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
                                         <div

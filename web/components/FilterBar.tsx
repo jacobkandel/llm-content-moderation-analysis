@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { Calendar, Users, X, ChevronDown, Filter, Search, Download, RefreshCw } from 'lucide-react';
-import Image from 'next/image';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 
 export default function FilterBar() {
@@ -159,7 +158,7 @@ export default function FilterBar() {
                                                         </svg>
                                                     )}
                                                 </div>
-                                                <Image
+                                                <img
                                                     src={getLogoUrl(model)}
                                                     alt=""
                                                     width={16}

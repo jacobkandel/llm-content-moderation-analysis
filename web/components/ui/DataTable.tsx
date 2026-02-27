@@ -185,9 +185,9 @@ export function DataTable<TData, TValue>({
 
             {/* Table */}
             <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden text-card-foreground">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-muted/50 text-muted-foreground font-medium">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[800px]">
+                    <table className="w-full text-sm text-left relative min-w-max">
+                        <thead className="bg-muted/50 text-muted-foreground font-medium sticky top-0 z-10 shadow-sm">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id} className="border-b border-border">
                                     {renderExpanded && <th className="w-10 px-2" />}
@@ -207,7 +207,7 @@ export function DataTable<TData, TValue>({
                                     <Fragment key={row.id}>
                                         <tr
                                             data-state={row.getIsSelected() && 'selected'}
-                                            className={`border-b border-border transition-colors hover:bg-muted/50 ${renderExpanded ? 'cursor-pointer' : ''
+                                            className={`border-b border-border transition-colors hover:bg-muted/50 even:bg-muted/10 ${renderExpanded ? 'cursor-pointer' : ''
                                                 } ${row.getIsExpanded() ? 'bg-muted/50' : ''}`}
                                             onClick={() => renderExpanded && row.toggleExpanded()}
                                         >

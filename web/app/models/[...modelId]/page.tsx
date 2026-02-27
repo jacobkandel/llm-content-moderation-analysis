@@ -4,6 +4,7 @@ import path from 'path';
 import Link from 'next/link';
 import { getLogoUrl } from '@/lib/provider-logos';
 import { ArrowLeft, ArrowRight, BarChart2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TooltipHover } from '@/components/ui/TooltipHover';
 
 interface ModelInfo {
     id: string;
@@ -134,8 +135,7 @@ export default async function ModelPage({ params }: { params: Promise<{ modelId:
             <header className="flex items-start gap-5">
                 {logoUrl && (
                     <>
-                        {/* @ts-expect-error - React 19 types mismatch with next/image */}
-                        <Image src={logoUrl} alt={`${modelInfo.display_name} logo by ${modelInfo.provider}`} width={56} height={56} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" unoptimized />
+                        <img src={logoUrl} alt={`${modelInfo.display_name} logo by ${modelInfo.provider}`} width={56} height={56} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" />
                     </>
                 )}
                 <div>
@@ -171,7 +171,14 @@ export default async function ModelPage({ params }: { params: Promise<{ modelId:
                     },
                 ].map(({ label, value, sub, accent, trend }) => (
                     <div key={label} className={`rounded-xl border p-4 ${accent ? 'border-[#800000]/30 bg-[#800000]/5' : 'border-border bg-card'}`}>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
+                        {label === 'Refusal Rate' ? (
+                            <TooltipHover
+                                label={<p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{label}</p>}
+                                tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
+                            />
+                        ) : (
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
+                        )}
                         <div className="flex items-center gap-2">
                             <p className={`text-2xl font-black ${accent ? 'text-[#800000]' : 'text-foreground'}`}>{value}</p>
                             {trend !== null && trend !== undefined ? (

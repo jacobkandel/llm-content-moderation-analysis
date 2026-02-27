@@ -4,6 +4,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { useState, useEffect, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, Line } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
+import { useRouter } from 'next/navigation';
 
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
@@ -12,8 +13,9 @@ import { RelatedPages } from '@/components/ui/RelatedPages';
 const MONO_SHADES = ['#000000', '#333333', '#666666', '#999999', '#AAAAAA', '#CCCCCC'];
 
 export default function LongitudinalPage() {
-    const { filteredAuditData, dateRange, loading, ensureAuditData, precomputedLongitudinal, selectedModels } = useAnalysis();
+    const { filteredAuditData, dateRange, setDateRange, loading, ensureAuditData, precomputedLongitudinal, selectedModels } = useAnalysis();
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+    const router = useRouter();
 
     // Load CSV only when filters are active
     useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
@@ -84,13 +86,26 @@ export default function LongitudinalPage() {
                     <h3 className="text-lg font-bold text-foreground">Refusal Rate Over Time</h3>
                     <div className="flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground font-medium uppercase text-xs">Filter by Date:</span>
-                        {(dateRange.start || dateRange.end) && (
-                            <span className="text-xs text-muted-foreground italic">Global filtered applied via Dashboard Header</span>
+                        {(dateRange.start || dateRange.end) ? (
+                            <span className="text-xs text-muted-foreground italic">Global filter applied</span>
+                        ) : (
+                            <span className="text-xs text-muted-foreground italic">Click any point to filter evidence by date</span>
                         )}
                     </div>
                 </div>
                 <ResponsiveContainer width="100%" height="90%">
-                    <LineChart data={longitudinalData.chartData}>
+                    <LineChart
+                        data={longitudinalData.chartData}
+                        onClick={(data: any) => {
+                            if (data && typeof data.activeLabel === 'string') {
+                                // The activeLabel is the date string (e.g., "2024-03-24")
+                                setDateRange({ start: data.activeLabel, end: data.activeLabel });
+                                // Navigate to the Evidence Locker to see the filtered table
+                                router.push(`/analysis/evidence?from=${data.activeLabel}&to=${data.activeLabel}`);
+                            }
+                        }}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" />
                         <YAxis unit="%" />

@@ -51,8 +51,7 @@ export default function PaternalismPage() {
                             </ResponsiveContainer>
                         ) : (
                             <>
-                                {/* @ts-expect-error - React 19 types mismatch with next/image */}
-                                <Image src="/paternalism.png" alt="Paternalism Chart" fill className="object-contain hover:scale-105 transition-transform duration-500" unoptimized />
+                                <img src="/paternalism.png" alt="Paternalism Chart" className="object-contain hover:scale-105 transition-transform duration-500 w-full h-full" />
                             </>
                         )}
                     </div>

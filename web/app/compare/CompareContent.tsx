@@ -3,7 +3,9 @@
 import { useEffect, useState, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, Users, X, ChevronDown, Filter, Search, Download, RefreshCw, Share2, Check, Info, AlertTriangle, ArrowLeftRight, ExternalLink, CheckCircle } from 'lucide-react';
+import { TooltipHover } from '@/components/ui/TooltipHover';
 
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import Papa from 'papaparse';
@@ -84,6 +86,7 @@ export default function CompareContent() {
     const [modelB, setModelB] = useState<string>(searchParams.get('modelB') || '');
     const [isClient, setIsClient] = useState(false);
     const [showStats, setShowStats] = useState(false);
+    const [highlightDiffs, setHighlightDiffs] = useState(false);
     const [pValues, setPValues] = useState<any[]>([]);
     const [copied, setCopied] = useState(false);
 
@@ -214,9 +217,16 @@ export default function CompareContent() {
             subject: cat,
             A: statsForA.categoryRates[cat] || 0,
             B: statsForB.categoryRates[cat] || 0,
+            diff: Math.abs((statsForA.categoryRates[cat] || 0) - (statsForB.categoryRates[cat] || 0)),
             fullMark: 100,
         }));
     }, [compareData, modelA, modelB]);
+
+    // Apply "Highlight Differences" filter
+    const displayRadarData = useMemo(() => {
+        if (!highlightDiffs) return radarData;
+        return radarData.filter(d => d.diff > 10);
+    }, [radarData, highlightDiffs]);
 
     // Disagreement count from precomputed pairwise data
     const disagreementCount = useMemo(() => {
@@ -500,8 +510,7 @@ export default function CompareContent() {
                             {/* Card A */}
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#800000] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    {/* @ts-expect-error - React 19 types mismatch with next/image */}
-                                    <Image src={getProviderLogo(modelA)} alt={`${modelA.split('/').pop() || modelA} logo`} width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
+                                    <img src={getProviderLogo(modelA)} alt={`${modelA.split('/').pop() || modelA} logo`} width={128} height={128} className="h-32 w-32 object-contain" />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
@@ -520,13 +529,19 @@ export default function CompareContent() {
                                 {statsA && (
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-muted/50 p-4 rounded-lg">
-                                            <div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>
+                                            <TooltipHover
+                                                label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>}
+                                                tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
+                                            />
                                             <div className={`text-2xl font-bold ${statsA.refusalRate > 50 ? 'text-[#A4343A]' : 'text-[#275D38]'}`}>
                                                 {statsA.refusalRate.toFixed(1)}%
                                             </div>
                                         </div>
                                         <div className="bg-muted/50 p-4 rounded-lg">
-                                            <div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Avg Verbosity</div>
+                                            <TooltipHover
+                                                label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Avg Verbosity</div>}
+                                                tooltipText="The average length of the model's response in characters. A higher verbosity generally indicates a more detailed (and helpful) response."
+                                            />
                                             <div className="text-2xl font-bold text-foreground">
                                                 {statsA.avgVerbosity} <span className="text-sm font-normal text-muted-foreground">chars</span>
                                             </div>
@@ -538,8 +553,7 @@ export default function CompareContent() {
                             {/* Card B */}
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#275D38] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    {/* @ts-expect-error - React 19 types mismatch with next/image */}
-                                    <Image src={getProviderLogo(modelB)} alt={`${modelB.split('/').pop() || modelB} logo`} width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
+                                    <img src={getProviderLogo(modelB)} alt={`${modelB.split('/').pop() || modelB} logo`} width={128} height={128} className="h-32 w-32 object-contain" />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
@@ -558,13 +572,19 @@ export default function CompareContent() {
                                 {statsB && (
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-muted/50 p-4 rounded-lg">
-                                            <div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>
+                                            <TooltipHover
+                                                label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>}
+                                                tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
+                                            />
                                             <div className={`text-2xl font-bold ${statsB.refusalRate > 50 ? 'text-[#A4343A]' : 'text-[#275D38]'}`}>
                                                 {statsB.refusalRate.toFixed(1)}%
                                             </div>
                                         </div>
                                         <div className="bg-muted/50 p-4 rounded-lg">
-                                            <div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Avg Verbosity</div>
+                                            <TooltipHover
+                                                label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Avg Verbosity</div>}
+                                                tooltipText="The average length of the model's response in characters. A higher verbosity generally indicates a more detailed (and helpful) response."
+                                            />
                                             <div className="text-2xl font-bold text-foreground">
                                                 {statsB.avgVerbosity} <span className="text-sm font-normal text-muted-foreground">chars</span>
                                             </div>
@@ -576,47 +596,64 @@ export default function CompareContent() {
 
                         {/* Radar Chart */}
                         <div className="bg-card rounded-xl border border-border p-6">
-                            <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-foreground">
-                                Side-by-Side Censorship Profile
-                            </h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
+                                    Side-by-Side Censorship Profile
+                                </h3>
+                                <button
+                                    onClick={() => setHighlightDiffs(!highlightDiffs)}
+                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${highlightDiffs
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                                        }`}
+                                >
+                                    {highlightDiffs ? '✓ Highlighting Differences > 10%' : 'Highlight Differences > 10%'}
+                                </button>
+                            </div>
                             <div
                                 className="h-[400px] w-full"
                                 role="img"
-                                aria-label={`Radar chart comparing ${modelA} and ${modelB} across ${radarData.length} content categories. ${radarData.map(d => `${d.subject}: ${modelA.split('/').pop()} ${d.A.toFixed(0)}% vs ${modelB.split('/').pop()} ${d.B.toFixed(0)}%`).join('. ')}`}
+                                aria-label={`Radar chart comparing ${modelA} and ${modelB} across ${displayRadarData.length} content categories. ${displayRadarData.map(d => `${d.subject}: ${modelA.split('/').pop()} ${d.A.toFixed(0)}% vs ${modelB.split('/').pop()} ${d.B.toFixed(0)}%`).join('. ')}`}
                             >
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                                        <PolarGrid stroke="hsl(var(--border))" />
-                                        <PolarAngleAxis dataKey="subject" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                                        <Radar
-                                            name={modelA}
-                                            dataKey="A"
-                                            stroke="#800000"
-                                            strokeWidth={2}
-                                            fill="#800000"
-                                            fillOpacity={0.3}
-                                        />
-                                        <Radar
-                                            name={modelB}
-                                            dataKey="B"
-                                            stroke="#275D38"
-                                            strokeWidth={2}
-                                            fill="#275D38"
-                                            fillOpacity={0.3}
-                                        />
-                                        <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
-                                        <Tooltip
-                                            contentStyle={{
-                                                borderRadius: '8px',
-                                                border: '1px solid hsl(var(--border))',
-                                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                                                backgroundColor: 'hsl(var(--popover))',
-                                                color: 'hsl(var(--popover-foreground))'
-                                            }}
-                                        />
-                                    </RadarChart>
-                                </ResponsiveContainer>
+                                {displayRadarData.length === 0 ? (
+                                    <div className="h-full w-full flex items-center justify-center border border-dashed border-border rounded-xl bg-muted/10 text-muted-foreground text-sm">
+                                        These models agree closely. No category differs by more than 10%.
+                                    </div>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={displayRadarData}>
+                                            <PolarGrid stroke="hsl(var(--border))" />
+                                            <PolarAngleAxis dataKey="subject" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
+                                            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                                            <Radar
+                                                name={modelA}
+                                                dataKey="A"
+                                                stroke="#800000"
+                                                strokeWidth={2}
+                                                fill="#800000"
+                                                fillOpacity={0.3}
+                                            />
+                                            <Radar
+                                                name={modelB}
+                                                dataKey="B"
+                                                stroke="#275D38"
+                                                strokeWidth={2}
+                                                fill="#275D38"
+                                                fillOpacity={0.3}
+                                            />
+                                            <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    borderRadius: '8px',
+                                                    border: '1px solid hsl(var(--border))',
+                                                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                                                    backgroundColor: 'hsl(var(--popover))',
+                                                    color: 'hsl(var(--popover-foreground))'
+                                                }}
+                                            />
+                                        </RadarChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </div>
 
@@ -682,79 +719,103 @@ export default function CompareContent() {
                                         </div>
                                     </div>
 
-                                    {disagreements.slice(0, visibleCount).map((diff, idx) => (
-                                        <div key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-muted/40 transition-colors">
-                                            <div className="bg-muted/30 p-3 border-b border-border flex justify-between items-center">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
-                                                        {diff.category}
-                                                    </span>
-                                                    {(() => {
-                                                        const source = getPromptSource(diff.rowA?.prompt_id || diff.rowB?.prompt_id);
-                                                        return (
-                                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getSourceBadgeClass(source)}`}>
-                                                                {source}
-                                                            </span>
-                                                        );
-                                                    })()}
+                                    {disagreements.slice(0, visibleCount).map((diff, idx) => {
+                                        const diffId = `diff-${diff.rowA?.prompt_id || diff.rowB?.prompt_id || idx}`;
+                                        return (
+                                            <div id={diffId} key={idx} className="bg-card rounded-lg border border-border overflow-hidden hover:bg-muted/40 transition-colors scroll-mt-24 relative group">
+                                                <div className="bg-muted/30 p-3 border-b border-border flex justify-between items-center">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
+                                                            {diff.category}
+                                                        </span>
+                                                        {(() => {
+                                                            const source = getPromptSource(diff.rowA?.prompt_id || diff.rowB?.prompt_id);
+                                                            return (
+                                                                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getSourceBadgeClass(source)}`}>
+                                                                    {source}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                                <div className="p-4 space-y-4">
+                                                    {/* Prompt */}
+                                                    <div>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prompt</p>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    const url = new URL(window.location.href);
+                                                                    url.hash = diffId;
+                                                                    navigator.clipboard.writeText(url.toString());
+
+                                                                    // Show visual feedback
+                                                                    const btn = e.currentTarget;
+                                                                    const originalHtml = btn.innerHTML;
+                                                                    btn.innerHTML = '<span class="text-[10px] text-green-600 font-bold">Copied!</span>';
+                                                                    setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+                                                                }}
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                                                                title="Copy link to this disagreement"
+                                                            >
+                                                                <ExternalLink className="h-3 w-3" />
+                                                                <span className="sr-only">Copy link</span>
+                                                            </button>
+                                                        </div>
+                                                        <div className="text-sm text-foreground font-mono bg-muted/50 p-3 rounded border border-border max-h-32 overflow-y-auto">
+                                                            {diff.prompt || <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Side-by-Side Responses */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {/* Model A Response */}
+                                                        <div className={`rounded-lg border ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
+                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
+                                                                <div className="flex items-center gap-2">
+                                                                    <img
+                                                                        src={getProviderLogo(modelA)}
+                                                                        alt={`${modelA.split('/').pop() || modelA} logo`}
+                                                                        className="h-5 w-5 rounded object-contain"
+                                                                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                                    />
+                                                                    <span className="font-bold text-sm text-foreground">{modelA?.split('/')[1] || modelA}</span>
+                                                                </div>
+                                                                <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
+                                                                    {diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="p-3 space-y-2">
+                                                                {(() => { const p = parseResponseText(diff.rowA.response); return (<><VerdictBadge verdict={p.verdict} /><p className="text-sm text-foreground leading-relaxed max-h-36 overflow-y-auto">{p.reason}</p></>); })()}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Model B Response */}
+                                                        <div className={`rounded-lg border ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
+                                                            <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
+                                                                <div className="flex items-center gap-2">
+                                                                    <img
+                                                                        src={getProviderLogo(modelB)}
+                                                                        alt={`${modelB.split('/').pop() || modelB} logo`}
+                                                                        className="h-5 w-5 rounded object-contain"
+                                                                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                                    />
+                                                                    <span className="font-bold text-sm text-foreground">{modelB?.split('/')[1] || modelB}</span>
+                                                                </div>
+                                                                <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
+                                                                    {diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="p-3 space-y-2">
+                                                                {(() => { const p = parseResponseText(diff.rowB.response); return (<><VerdictBadge verdict={p.verdict} /><p className="text-sm text-foreground leading-relaxed max-h-36 overflow-y-auto">{p.reason}</p></>); })()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="p-4 space-y-4">
-                                                {/* Prompt */}
-                                                <div>
-                                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Prompt</p>
-                                                    <div className="text-sm text-foreground font-mono bg-muted/50 p-3 rounded border border-border max-h-32 overflow-y-auto">
-                                                        {diff.prompt || <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />}
-                                                    </div>
-                                                </div>
-
-                                                {/* Side-by-Side Responses */}
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {/* Model A Response */}
-                                                    <div className={`rounded-lg border ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
-                                                        <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
-                                                            <div className="flex items-center gap-2">
-                                                                <img
-                                                                    src={getProviderLogo(modelA)}
-                                                                    alt={`${modelA.split('/').pop() || modelA} logo`}
-                                                                    className="h-5 w-5 rounded object-contain"
-                                                                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                                                />
-                                                                <span className="font-bold text-sm text-foreground">{modelA?.split('/')[1] || modelA}</span>
-                                                            </div>
-                                                            <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
-                                                                {diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="p-3 space-y-2">
-                                                            {(() => { const p = parseResponseText(diff.rowA.response); return (<><VerdictBadge verdict={p.verdict} /><p className="text-sm text-foreground leading-relaxed max-h-36 overflow-y-auto">{p.reason}</p></>); })()}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Model B Response */}
-                                                    <div className={`rounded-lg border ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/5' : 'border-[#A4343A]/30 bg-[#A4343A]/5'}`}>
-                                                        <div className={`px-3 py-2 flex justify-between items-center border-b ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-[#275D38]/30 bg-[#275D38]/10' : 'border-[#A4343A]/30 bg-[#A4343A]/10'}`}>
-                                                            <div className="flex items-center gap-2">
-                                                                <img
-                                                                    src={getProviderLogo(modelB)}
-                                                                    alt={`${modelB.split('/').pop() || modelB} logo`}
-                                                                    className="h-5 w-5 rounded object-contain"
-                                                                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                                                />
-                                                                <span className="font-bold text-sm text-foreground">{modelB?.split('/')[1] || modelB}</span>
-                                                            </div>
-                                                            <span className={`text-xs font-bold px-2 py-1 rounded ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'bg-[#275D38] text-white' : 'bg-[#A4343A] text-white'}`}>
-                                                                {diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'ALLOWED' : 'REMOVED'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="p-3 space-y-2">
-                                                            {(() => { const p = parseResponseText(diff.rowB.response); return (<><VerdictBadge verdict={p.verdict} /><p className="text-sm text-foreground leading-relaxed max-h-36 overflow-y-auto">{p.reason}</p></>); })()}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     {visibleCount < disagreements.length && (
                                         <div className="flex flex-col items-center gap-2 pt-2 pb-4">
                                             <button
