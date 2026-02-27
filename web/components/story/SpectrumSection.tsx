@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { TooltipHover } from '@/components/ui/TooltipHover';
+import Link from 'next/link';
 
 interface ModelData {
     name: string;
@@ -83,43 +84,47 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, amount: 0.8 }}
-                            transition={{ duration: 0.4, delay: idx * 0.05 }}
-                            className="flex items-center gap-spacing-s bg-card p-spacing-s rounded-2xl border border-border hover:bg-muted/50 transition-all hover-lift shadow-sm group"
+                            className="block"
                         >
-                            {/* Provider Logo */}
-                            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-muted/20 border border-border flex items-center justify-center overflow-hidden">
-                                <img
-                                    src={getLogoUrl(model.name)}
-                                    alt={getProviderName(model.name)}
-                                    width={32}
-                                    height={32}
-                                    className="object-contain opacity-90"
-                                />
-                            </div>
+                            <Link
+                                href={`/models/${model.name}`}
+                                className="flex items-center gap-spacing-s bg-card p-spacing-s rounded-2xl border border-border hover:bg-muted/50 transition-all hover-lift shadow-sm group"
+                            >
+                                {/* Provider Logo */}
+                                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-muted/20 border border-border flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src={getLogoUrl(model.name)}
+                                        alt={getProviderName(model.name)}
+                                        width={32}
+                                        height={32}
+                                        className="object-contain opacity-90"
+                                    />
+                                </div>
 
-                            {/* Model info */}
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-lg text-foreground truncate">
-                                    {model.displayName}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    {getProviderName(model.name)}
-                                </p>
-                            </div>
+                                {/* Model info */}
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-bold text-lg text-foreground truncate group-hover:text-primary transition-colors">
+                                        {model.displayName}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        {getProviderName(model.name)}
+                                    </p>
+                                </div>
 
-                            {/* Percentage */}
-                            <div className="flex-shrink-0 text-right min-w-[100px]">
-                                <span
-                                    className="text-3xl font-black tabular-nums transition-colors duration-500"
-                                    style={{ color: getRateColor(model.rate) }}
-                                >
-                                    {model.rate}%
-                                </span>
-                                <TooltipHover
-                                    label={<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Refusal Rate</p>}
-                                    tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
-                                />
-                            </div>
+                                {/* Percentage */}
+                                <div className="flex-shrink-0 text-right min-w-[100px]">
+                                    <span
+                                        className="text-3xl font-black tabular-nums transition-colors duration-500"
+                                        style={{ color: getRateColor(model.rate) }}
+                                    >
+                                        {model.rate}%
+                                    </span>
+                                    <TooltipHover
+                                        label={<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Refusal Rate</p>}
+                                        tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
+                                    />
+                                </div>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>

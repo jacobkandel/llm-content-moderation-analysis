@@ -1,6 +1,7 @@
 'use client';
 
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
+import Link from 'next/link';
 
 interface ModelData {
     name: string;
@@ -40,11 +41,12 @@ export default function RestrictivenessScale({ models, onModelClick }: Restricti
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {sortedModels.map((model) => {
                     const pct = (model.refusalRate * 100).toFixed(0);
-                    return (
+
+                    const CardElement = (
                         <div
                             key={model.name}
-                            className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors cursor-pointer"
-                            onClick={() => onModelClick?.(model)}
+                            className={`flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors ${onModelClick || !model.name ? 'cursor-pointer' : ''}`}
+                            onClick={onModelClick ? () => onModelClick(model) : undefined}
                         >
                             {/* Provider Logo */}
                             <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center overflow-hidden">
@@ -77,6 +79,16 @@ export default function RestrictivenessScale({ models, onModelClick }: Restricti
                                 </span>
                             </div>
                         </div>
+                    );
+
+                    if (onModelClick) {
+                        return CardElement;
+                    }
+
+                    return (
+                        <Link key={model.name} href={`/models/${model.name}`} className="block">
+                            {CardElement}
+                        </Link>
                     );
                 })}
             </div>
