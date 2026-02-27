@@ -37,15 +37,21 @@ export async function generateStaticParams() {
     try {
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
         const models: ModelInfo[] = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
-        return models.map(m => ({ modelId: m.id.split('/') }));
+        return models.map(m => {
+            const [provider, ...rest] = m.id.split('/');
+            return {
+                provider,
+                model: rest.join('/')
+            };
+        });
     } catch {
         return [];
     }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ modelId: string[] }> }): Promise<Metadata> {
-    const { modelId } = await params;
-    const id = modelId.join('/');
+export async function generateMetadata({ params }: { params: Promise<{ provider: string, model: string }> }): Promise<Metadata> {
+    const { provider, model } = await params;
+    const id = `${provider}/${model}`;
     try {
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
         const models: ModelInfo[] = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
@@ -68,9 +74,9 @@ export async function generateMetadata({ params }: { params: Promise<{ modelId: 
     }
 }
 
-export default async function ModelPage({ params }: { params: Promise<{ modelId: string[] }> }) {
-    const { modelId } = await params;
-    const id = modelId.join('/');
+export default async function ModelPage({ params }: { params: Promise<{ provider: string, model: string }> }) {
+    const { provider, model } = await params;
+    const id = `${provider}/${model}`;
 
     let models: ModelInfo[] = [];
     let stats: ModelStats | null = null;

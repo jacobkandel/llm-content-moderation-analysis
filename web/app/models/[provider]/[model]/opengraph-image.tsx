@@ -6,8 +6,9 @@ export const runtime = 'edge';
 export const alt = 'Model Refusal Rate Analysis';
 export const size = { width: 1200, height: 630 };
 
-export default async function Image({ params }: { params: { modelId: string[] } }) {
-    const rawId = params.modelId.join('/');
+export default async function Image({ params }: { params: Promise<{ provider: string, model: string }> }) {
+    const { provider, model } = await params;
+    const rawId = `${provider}/${model}`;
 
     // Handle favicon fetch using the existing utility logic, but without importing 
     // the TS module which might fail in Edge runtime if it relies on node APIs
