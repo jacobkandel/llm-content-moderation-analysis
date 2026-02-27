@@ -13,10 +13,14 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { useSidebar } from '@/components/providers/SidebarProvider';
-import { Search } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 
 
-const mainNavItems: { name: string; href: string; icon: any }[] = [];
+const mainNavItems: { name: string; href: string; icon: any }[] = [
+    { name: 'Comparison', href: '/compare', icon: ArrowRightLeft },
+    { name: 'Models', href: '/models', icon: Box },
+    { name: 'Categories', href: '/categories', icon: Filter },
+];
 
 const analysisCategories = [
     {

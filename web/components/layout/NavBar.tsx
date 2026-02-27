@@ -5,13 +5,15 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard, FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Table, Info, Home
+    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Table, Info, Home, Box, Filter
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navItems = [
     { name: 'Comparison', href: '/compare', icon: ArrowRightLeft },
+    { name: 'Models', href: '/models', icon: Box },
+    { name: 'Categories', href: '/categories', icon: Filter },
     {
         name: 'Analysis',
         icon: FileText,
