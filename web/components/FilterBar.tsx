@@ -53,18 +53,18 @@ export default function FilterBar() {
             <div className="flex flex-col md:flex-row gap-4">
 
                 {/* Top Row on Mobile: Filters */}
-                <div className="flex flex-col sm:flex-row gap-3 flex-1 items-start sm:items-center">
+                <div className="flex flex-col md:flex-row flex-wrap gap-3 flex-1 items-start md:items-center w-full">
 
                     {/* Filter Label (Hidden on small mobile to save space, or keep) */}
-                    <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground">
+                    <div className="hidden md:flex items-center gap-1.5 text-muted-foreground flex-shrink-0">
                         <Filter className="h-4 w-4" />
                         <span className="text-xs font-bold uppercase tracking-wider">Filters</span>
                     </div>
 
-                    <div className="hidden sm:block h-5 w-px bg-border" />
+                    <div className="hidden md:block h-5 w-px bg-border flex-shrink-0" />
 
                     {/* Date Range - Stacked or Row */}
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex items-center gap-2 w-full md:w-auto flex-1 min-w-[280px]">
                         <div className="relative flex-1">
                             <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5" />
                             <input
@@ -90,17 +90,17 @@ export default function FilterBar() {
                         </div>
                     </div>
 
-                    <div className="hidden sm:block h-5 w-px bg-border" />
+                    <div className="hidden md:block h-5 w-px bg-border flex-shrink-0" />
 
                     {/* Model Multi-Select Dropdown */}
-                    <div className="relative w-full sm:w-auto" ref={dropdownRef}>
+                    <div className="relative w-full md:w-auto flex-1 min-w-[200px]" ref={dropdownRef}>
                         <button
                             aria-label={`Select models. Currently ${activeModelCount} selected.`}
                             aria-expanded={modelDropdownOpen}
                             aria-controls="model-dropdown-menu"
                             aria-haspopup="listbox"
                             onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
-                            className={`w-full sm:w-auto flex items-center justify-between gap-2 text-xs border rounded-lg px-3 py-1.5 hover:border-primary transition-colors ${activeModelCount > 0
+                            className={`w-full flex items-center justify-between gap-2 text-xs border rounded-lg px-3 py-1.5 hover:border-primary transition-colors ${activeModelCount > 0
                                 ? 'border-primary/50 bg-primary/20 text-primary'
                                 : 'border-border bg-card text-muted-foreground'
                                 }`}
@@ -118,7 +118,7 @@ export default function FilterBar() {
                         </button>
 
                         {modelDropdownOpen && (
-                            <div id="model-dropdown-menu" role="listbox" className="absolute top-full left-0 mt-1 w-full sm:w-80 bg-card dark:bg-zinc-900 border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                            <div id="model-dropdown-menu" role="listbox" className="absolute top-full left-0 md:right-auto mt-1 w-full md:w-80 bg-card dark:bg-zinc-900 border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
                                 <div className="sticky top-0 bg-popover border-b border-border px-3 py-2 flex items-center justify-between">
                                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                                         Select Models ({activeModelCount}/{allModels.length})
