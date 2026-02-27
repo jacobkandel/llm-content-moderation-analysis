@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { ColorblindToggle } from '@/components/ColorblindToggle';
 
 const navItems = [
     { name: 'Comparison', href: '/compare', icon: ArrowRightLeft },
@@ -132,7 +131,6 @@ export function NavBar() {
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2">
-                        <ColorblindToggle />
                         <ThemeToggle />
                     </div>
                 </div>

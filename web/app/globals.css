@@ -102,12 +102,7 @@
   /* Dark Green */
 }
 
-.colorblind:root {
-  --refusal: 217 91% 60%;
-  /* Bright Blue */
-  --safe: 32 95% 44%;
-  /* Dark Orange */
-}
+
 
 .dark {
   /* UChicago Dark Mode */
@@ -155,12 +150,7 @@
   /* Lighter Green */
 }
 
-.colorblind.dark {
-  --refusal: 217 91% 60%;
-  /* Bright Blue */
-  --safe: 32 95% 60%;
-  /* Lighter Orange */
-}
+
 
 
 body {

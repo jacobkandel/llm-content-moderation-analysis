@@ -17,7 +17,6 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { BackToTop } from "@/components/ui/BackToTop";
 import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegister";
 import { KeyboardShortcuts } from "@/components/ui/KeyboardShortcuts";
-import { OnboardingTour } from "@/components/ui/OnboardingTour";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -120,7 +119,6 @@ export default function RootLayout({
             <SpeedInsights />
             <BackToTop />
             <KeyboardShortcuts />
-            <OnboardingTour />
           </ToastProvider>
         </ThemeProvider>
       </body>
