@@ -69,9 +69,13 @@ export default function AboutPage() {
                             She helps bring Moderation Bias's research to the developers, researchers, and builders
                             who need it most.
                         </p>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 cursor-default">
+                            <a href="https://github.com/lydiakandel-byte" target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                                <Github className="h-4 w-4" /> GitHub
+                            </a>
                             <a href="https://www.linkedin.com/in/lydiakandel" target="_blank" rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                                 <Linkedin className="h-4 w-4" /> LinkedIn
                             </a>
                         </div>
