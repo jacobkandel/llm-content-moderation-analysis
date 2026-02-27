@@ -49,7 +49,7 @@ export default function FilterBar() {
     const totalRecords = filteredAuditData.length;
 
     return (
-        <div className="bg-background border border-border rounded-xl px-4 py-3 shadow-sm mb-6">
+        <div className="w-full">
             <div className="flex flex-col md:flex-row gap-4">
 
                 {/* Top Row on Mobile: Filters */}
