@@ -134,7 +134,7 @@ export default function ReliabilityPage() {
                                 <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center overflow-hidden">
                                     <img
                                         src={getLogoUrl(m.model)}
-                                        alt={getProviderName(m.model)}
+                                        alt={`${getProviderName(m.model)} logo`}
                                         className="w-6 h-6 object-contain"
                                         loading="lazy"
                                     />

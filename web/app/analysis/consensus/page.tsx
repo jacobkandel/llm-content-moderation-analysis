@@ -178,7 +178,7 @@ export default function ConsensusPage() {
                             <span className="text-xs text-muted-foreground w-5 font-mono">{i + 1}</span>
                             <img
                                 src={m.logo}
-                                alt={m.provider}
+                                alt={`${m.provider} logo`}
                                 className="w-5 h-5 rounded"
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />

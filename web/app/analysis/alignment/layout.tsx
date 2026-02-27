@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    alternates: {
+        canonical: '/analysis/alignment',
+    },
     twitter: {
         card: 'summary_large_image',
     },

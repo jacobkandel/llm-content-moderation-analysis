@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    alternates: {
+        canonical: '/analysis/summary',
+    },
     twitter: {
         card: 'summary_large_image',
     },
@@ -9,6 +12,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'Summary | Moderation Bias',
         description: 'High-level summary of LLM censorship patterns across all evaluated models.',
+            images: ['/assets/summary.png'],
     },
 };
 

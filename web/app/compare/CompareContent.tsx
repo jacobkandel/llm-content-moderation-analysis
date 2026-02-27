@@ -501,12 +501,12 @@ export default function CompareContent() {
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#800000] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     {/* @ts-expect-error - React 19 types mismatch with next/image */}
-                                    <Image src={getProviderLogo(modelA)} alt="" width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
+                                    <Image src={getProviderLogo(modelA)} alt={`${modelA.split('/').pop() || modelA} logo`} width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
                                         src={getProviderLogo(modelA)}
-                                        alt=""
+                                        alt={`${modelA.split('/').pop() || modelA} logo`}
                                         className="h-10 w-10 rounded-lg object-contain bg-card border border-border"
                                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
@@ -539,12 +539,12 @@ export default function CompareContent() {
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#275D38] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     {/* @ts-expect-error - React 19 types mismatch with next/image */}
-                                    <Image src={getProviderLogo(modelB)} alt="" width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
+                                    <Image src={getProviderLogo(modelB)} alt={`${modelB.split('/').pop() || modelB} logo`} width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
                                         src={getProviderLogo(modelB)}
-                                        alt=""
+                                        alt={`${modelB.split('/').pop() || modelB} logo`}
                                         className="h-10 w-10 rounded-lg object-contain bg-card border border-border"
                                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
@@ -716,7 +716,7 @@ export default function CompareContent() {
                                                             <div className="flex items-center gap-2">
                                                                 <img
                                                                     src={getProviderLogo(modelA)}
-                                                                    alt=""
+                                                                    alt={`${modelA.split('/').pop() || modelA} logo`}
                                                                     className="h-5 w-5 rounded object-contain"
                                                                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                                                 />
@@ -737,7 +737,7 @@ export default function CompareContent() {
                                                             <div className="flex items-center gap-2">
                                                                 <img
                                                                     src={getProviderLogo(modelB)}
-                                                                    alt=""
+                                                                    alt={`${modelB.split('/').pop() || modelB} logo`}
                                                                     className="h-5 w-5 rounded object-contain"
                                                                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                                                 />

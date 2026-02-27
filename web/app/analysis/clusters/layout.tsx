@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    alternates: {
+        canonical: '/analysis/clusters',
+    },
     twitter: {
         card: 'summary_large_image',
     },
@@ -9,6 +12,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'Behavior Clusters | Moderation Bias',
         description: 'Cluster analysis grouping LLMs by similar moderation behavior.',
+            images: ['/assets/clusters.png'],
     },
 };
 

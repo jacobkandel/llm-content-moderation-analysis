@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+    alternates: {
+        canonical: '/analysis/significance',
+    },
     twitter: {
         card: 'summary_large_image',
     },
@@ -9,6 +12,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'Statistical Significance | Moderation Bias',
         description: 'Pairwise statistical significance tests between LLM moderation behaviors.',
+            images: ['/assets/significance.png'],
     },
 };
 

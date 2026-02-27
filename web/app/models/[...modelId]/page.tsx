@@ -135,7 +135,7 @@ export default async function ModelPage({ params }: { params: Promise<{ modelId:
                 {logoUrl && (
                     <>
                         {/* @ts-expect-error - React 19 types mismatch with next/image */}
-                        <Image src={logoUrl} alt={modelInfo.provider} width={56} height={56} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" unoptimized />
+                        <Image src={logoUrl} alt={`${modelInfo.display_name} logo by ${modelInfo.provider}`} width={56} height={56} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" unoptimized />
                     </>
                 )}
                 <div>
