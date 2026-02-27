@@ -16,4 +16,9 @@ mistralai/ministral-8b,2026-01-18,2026-01-23,57.42,87.77,30.35,0.04,True
 qwen/qwen-plus,2026-01-18,2026-01-24,62.58,93.28,30.7,0.04,True
 01-ai/yi-34b-chat,2026-01-19,2026-01-24,0.0,0.0,0.0,0.5,False
 mistralai/mistral-medium,2026-01-19,2026-01-24,0.0,0.0,0.0,0.5,False
-x-ai/grok-3-mini,2026-01-27,2026-02-12,76.34,78.51,2.17,0.5,False
+x-ai/grok-3-mini,2026-01-27,2026-02-27,76.34,79.16,2.83,0.04,True
+openai/gpt-audio-mini,2026-02-12,2026-02-27,0.0,0.0,0.0,0.5,False
+google/gemini-2.5-flash-lite-preview-09-2025,2026-02-12,2026-02-27,67.31,67.56,0.25,0.5,False
+anthropic/claude-haiku-4.5,2026-02-12,2026-02-27,61.71,61.96,0.25,0.5,False
+mistralai/ministral-14b-2512,2026-02-12,2026-02-27,83.55,85.52,1.97,0.5,False
+qwen/qwen2.5-coder-7b-instruct,2026-02-12,2026-02-27,66.4,65.34,-1.06,0.5,False
