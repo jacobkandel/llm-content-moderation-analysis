@@ -16,9 +16,7 @@ import { useSidebar } from '@/components/providers/SidebarProvider';
 import { Search } from 'lucide-react';
 
 
-const mainNavItems = [
-    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-];
+const mainNavItems: { name: string; href: string; icon: any }[] = [];
 
 const analysisCategories = [
     {

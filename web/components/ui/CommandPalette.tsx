@@ -57,15 +57,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
     ];
 
     const staticCommands: CommandItem[] = [
-        // Overview
-        {
-            id: 'dashboard',
-            title: 'Dashboard Overview',
-            description: 'View moderation metrics and audit log',
-            icon: <LayoutDashboard className="h-4 w-4" />,
-            action: () => router.push('/dashboard'),
-            keywords: ['home', 'main', 'overview', 'dashboard']
-        },
+        // Compare
         {
             id: 'compare',
             title: 'Compare Models',
