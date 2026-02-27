@@ -500,7 +500,8 @@ export default function CompareContent() {
                             {/* Card A */}
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#800000] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    <img src={getProviderLogo(modelA)} alt="" className="h-32 w-32 object-contain" />
+                                    {/* @ts-expect-error - React 19 types mismatch with next/image */}
+                                    <Image src={getProviderLogo(modelA)} alt="" width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
@@ -537,7 +538,8 @@ export default function CompareContent() {
                             {/* Card B */}
                             <div className="bg-card rounded-xl border border-border p-6 border-t border-t-[#275D38] relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    <img src={getProviderLogo(modelB)} alt="" className="h-32 w-32 object-contain" />
+                                    {/* @ts-expect-error - React 19 types mismatch with next/image */}
+                                    <Image src={getProviderLogo(modelB)} alt="" width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
                                     <img

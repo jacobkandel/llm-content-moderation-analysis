@@ -50,7 +50,10 @@ export default function PaternalismPage() {
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <img src="/paternalism.png" alt="Paternalism Chart" className="object-contain w-full h-full hover:scale-105 transition-transform duration-500" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="text-muted-foreground text-sm">Chart not generated yet</span>'; }} />
+                            <>
+                                {/* @ts-expect-error - React 19 types mismatch with next/image */}
+                                <Image src="/paternalism.png" alt="Paternalism Chart" fill className="object-contain hover:scale-105 transition-transform duration-500" unoptimized />
+                            </>
                         )}
                     </div>
                 </div>

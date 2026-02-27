@@ -133,7 +133,10 @@ export default async function ModelPage({ params }: { params: Promise<{ modelId:
             {/* Header */}
             <header className="flex items-start gap-5">
                 {logoUrl && (
-                    <img src={logoUrl} alt={modelInfo.provider} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" />
+                    <>
+                        {/* @ts-expect-error - React 19 types mismatch with next/image */}
+                        <Image src={logoUrl} alt={modelInfo.provider} width={56} height={56} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" unoptimized />
+                    </>
                 )}
                 <div>
                     <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#800000] mb-1">{modelInfo.provider}</p>
