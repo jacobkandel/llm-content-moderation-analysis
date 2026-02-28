@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import dynamic from 'next/dynamic';
 const ModelDrift = dynamic(() => import('@/components/ModelDrift').then((mod) => mod.ModelDrift), { ssr: false });
@@ -9,6 +10,7 @@ import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function DriftPage() {
+    const router = useRouter();
     const { filteredDriftData: driftData, loading, ensureDrift } = useAnalysis();
     useEffect(() => { ensureDrift(); }, []);
 
@@ -26,7 +28,10 @@ export default function DriftPage() {
                     "Stability Score: Lower drift values indicate more stable, predictable moderation policies"
                 ]}
             />
-            <ModelDrift data={driftData} />
+            <ModelDrift
+                data={driftData}
+                onModelClick={(modelId: string) => router.push(`/models/${modelId}`)}
+            />
 
             <RelatedPages
                 title="Statistical Significance"

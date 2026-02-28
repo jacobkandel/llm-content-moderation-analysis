@@ -1,13 +1,16 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, Bar, Cell } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function PaternalismPage() {
+    const router = useRouter();
     const { filteredPaternalismData: paternalismData, loading, ensurePaternalism } = useAnalysis();
     useEffect(() => { ensurePaternalism(); }, []);
 
@@ -39,7 +42,7 @@ export default function PaternalismPage() {
                                     <XAxis type="number" domain={[0, 100]} unit="%" />
                                     <YAxis type="category" dataKey="model" width={120} tick={{ fontSize: 10 }} />
                                     <RechartsTooltip />
-                                    <Bar dataKey="refusal_rate" name="Refusal Rate">
+                                    <Bar dataKey="refusal_rate" name="Refusal Rate" onClick={(e: any) => { if (e?.id) router.push(`/models/${e.id}`) }} style={{ cursor: 'pointer' }}>
                                         {paternalismData.map((entry: any, index: number) => (
                                             <Cell
                                                 key={`cell-${index}`}
@@ -50,9 +53,9 @@ export default function PaternalismPage() {
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <>
-                                <img src="/paternalism.png" alt="Paternalism Chart" className="object-contain hover:scale-105 transition-transform duration-500 w-full h-full" />
-                            </>
+                            <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                                <EmptyState title="No paternalism data" description="Adjust your filters to see data." icon="search" />
+                            </div>
                         )}
                     </div>
                 </div>

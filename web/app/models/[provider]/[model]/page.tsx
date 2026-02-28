@@ -27,10 +27,26 @@ function getModelData() {
     const modelsPath = path.join(process.cwd(), 'public', 'models.json');
     const comparePath = path.join(process.cwd(), 'public', 'compare_data.json');
     const longitudinalPath = path.join(process.cwd(), 'public', 'longitudinal_data.json');
+
+    const driftPath = path.join(process.cwd(), 'public', 'drift_report.json');
+    const politicalPath = path.join(process.cwd(), 'public', 'political_compass.json');
+    const paternalismPath = path.join(process.cwd(), 'public', 'paternalism.json');
+    const consensusPath = path.join(process.cwd(), 'public', 'consensus_stats.json');
+
     const models: ModelInfo[] = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
     const compare = JSON.parse(fs.readFileSync(comparePath, 'utf8'));
     const longitudinal = JSON.parse(fs.readFileSync(longitudinalPath, 'utf8'));
-    return { models, compare, longitudinal };
+
+    let drift = [];
+    let political = [];
+    let paternalism = [];
+    let consensus: any = {};
+    try { drift = JSON.parse(fs.readFileSync(driftPath, 'utf8')); } catch { }
+    try { political = JSON.parse(fs.readFileSync(politicalPath, 'utf8')); } catch { }
+    try { paternalism = JSON.parse(fs.readFileSync(paternalismPath, 'utf8')); } catch { }
+    try { consensus = JSON.parse(fs.readFileSync(consensusPath, 'utf8')); } catch { }
+
+    return { models, compare, longitudinal, drift, political, paternalism, consensus };
 }
 
 export async function generateStaticParams() {
@@ -86,6 +102,11 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
     let modelInfo: ModelInfo | undefined;
 
     let compareData: any = null;
+    let driftData: any = null;
+    let politicalData: any = null;
+    let paternalismData: any = null;
+    let consensusData: any = null;
+
     try {
         const data = getModelData();
         models = data.models;
@@ -95,6 +116,11 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
         allModels = data.compare.models || [];
         longitudinalChart = Array.isArray(data.longitudinal.chartData) ? data.longitudinal.chartData : [];
         compareData = data.compare;
+
+        driftData = data.drift?.find((d: any) => d.model === id);
+        politicalData = data.political?.find((d: any) => d.model === id);
+        paternalismData = data.paternalism?.find((d: any) => d.model === id);
+        consensusData = data.consensus?.perModel?.find((d: any) => d.model === id);
     } catch { }
 
     if (!modelInfo) {
@@ -253,6 +279,105 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Analysis Deep Dives */}
+            {(consensusData || politicalData || driftData || (paternalismData && paternalismData.refusal_rate > 0)) && (
+                <section className="space-y-4">
+                    <h2 className="text-lg font-bold text-foreground">Analysis Deep Dives</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Consensus */}
+                        {consensusData && (
+                            <div className="bg-card border border-border rounded-xl p-5">
+                                <Link href="/analysis/consensus" className="text-xs font-bold text-muted-foreground hover:text-foreground uppercase tracking-wider mb-2 flex items-center gap-1 transition-colors group w-fit">
+                                    Council Consensus
+                                    <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all -ml-2 group-hover:ml-0" />
+                                </Link>
+                                <div className="flex justify-between items-end mb-1">
+                                    <h3 className="text-lg font-black text-foreground">Majority Agreement</h3>
+                                    <span className="text-xl font-bold text-brand">{consensusData.agreementRate.toFixed(1)}%</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-3">Model's alignment with the council decision.</p>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                    <div className="h-full bg-brand rounded-full" style={{ width: `${consensusData.agreementRate}%` }} />
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-3 font-mono">CAPP Score: {consensusData.kappa.toFixed(2)}</p>
+                            </div>
+                        )}
+
+                        {/* Political Compass */}
+                        {politicalData && (
+                            <div className="bg-card border border-border rounded-xl p-5">
+                                <Link href="/analysis/political" className="text-xs font-bold text-muted-foreground hover:text-foreground uppercase tracking-wider mb-2 flex items-center gap-1 transition-colors group w-fit">
+                                    Political Compass
+                                    <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all -ml-2 group-hover:ml-0" />
+                                </Link>
+                                <div className="flex flex-col gap-3 mt-3">
+                                    <div>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="text-muted-foreground">Econ <span className="text-[10px]">(Left &rarr; Right)</span></span>
+                                            <span className="font-semibold text-foreground">{politicalData.economic > 0 ? '+' : ''}{politicalData.economic.toFixed(1)}</span>
+                                        </div>
+                                        <div className="h-1.5 bg-muted rounded-full overflow-hidden relative">
+                                            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-border z-10 -ml-[1px]" />
+                                            <div className="absolute top-0 bottom-0 bg-blue-500 rounded-full" style={{ left: politicalData.economic < 0 ? `${50 + politicalData.economic * 5}%` : '50%', right: politicalData.economic > 0 ? `${50 - politicalData.economic * 5}%` : '50%' }} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="text-muted-foreground">Social <span className="text-[10px]">(Lib &rarr; Auth)</span></span>
+                                            <span className="font-semibold text-foreground">{politicalData.social > 0 ? '+' : ''}{politicalData.social.toFixed(1)}</span>
+                                        </div>
+                                        <div className="h-1.5 bg-muted rounded-full overflow-hidden relative">
+                                            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-border z-10 -ml-[1px]" />
+                                            <div className="absolute top-0 bottom-0 bg-red-500 rounded-full" style={{ left: politicalData.social < 0 ? `${50 + politicalData.social * 5}%` : '50%', right: politicalData.social > 0 ? `${50 - politicalData.social * 5}%` : '50%' }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Drift */}
+                        {driftData && (
+                            <div className="bg-card border border-border rounded-xl p-5">
+                                <Link href="/analysis/drift" className="text-xs font-bold text-muted-foreground hover:text-foreground uppercase tracking-wider mb-2 flex items-center gap-1 transition-colors group w-fit">
+                                    Model Stability (Drift)
+                                    <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all -ml-2 group-hover:ml-0" />
+                                </Link>
+                                <div className="flex justify-between items-end mb-1">
+                                    <h3 className="text-lg font-black text-foreground">Refusal Rate Change</h3>
+                                    <span className={`text-xl font-bold ${driftData.rate_change > 0 ? 'text-red-500' : driftData.rate_change < 0 ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                        {driftData.rate_change > 0 ? '+' : ''}{driftData.rate_change.toFixed(1)}%
+                                    </span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-3">Difference over the testing period.</p>
+                                <div className="flex justify-between text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
+                                    <span>Start: {driftData.start_refusal_rate}%</span>
+                                    <span>&rarr;</span>
+                                    <span>End: {driftData.end_refusal_rate}%</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Paternalism */}
+                        {paternalismData && paternalismData.refusal_rate > 0 && (
+                            <div className="bg-card border border-border rounded-xl p-5">
+                                <Link href="/analysis/paternalism" className="text-xs font-bold text-muted-foreground hover:text-foreground uppercase tracking-wider mb-2 flex items-center gap-1 transition-colors group w-fit">
+                                    Paternalism Audit
+                                    <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all -ml-2 group-hover:ml-0" />
+                                </Link>
+                                <div className="flex justify-between items-end mb-1">
+                                    <h3 className="text-lg font-black text-foreground">Persona Refusal Rate</h3>
+                                    <span className="text-xl font-bold text-foreground">{paternalismData.refusal_rate.toFixed(1)}%</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-3">Refusals for sensitive user personas.</p>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                    <div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.min(paternalismData.refusal_rate, 100)}%` }} />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </section>
             )}

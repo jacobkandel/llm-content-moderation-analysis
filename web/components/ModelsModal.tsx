@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Calendar, Box } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -23,16 +24,26 @@ interface ModelsModalProps {
 
 export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProps) {
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const parentRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+        return () => clearTimeout(handler);
+    }, [search]);
 
     // Filter models based on search
     const filteredModels = useMemo(() => {
-        if (!search) return models;
-        const lowerSearch = sanitizeSearchInput(search).toLowerCase();
+        if (!debouncedSearch) return models;
+        const lowerSearch = sanitizeSearchInput(debouncedSearch).toLowerCase();
         return models.filter(m =>
             m.name.toLowerCase().includes(lowerSearch)
         );
-    }, [models, search]);
+    }, [models, debouncedSearch]);
 
     // Virtualizer for performance
     const rowVirtualizer = useVirtualizer({
@@ -129,7 +140,13 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
                                                 }}
                                                 className="pb-3"
                                             >
-                                                <div className="p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors group flex items-center justify-between">
+                                                <button
+                                                    onClick={() => {
+                                                        onClose();
+                                                        router.push(`/models/${model.id}`);
+                                                    }}
+                                                    className="w-full text-left p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors group flex items-center justify-between"
+                                                >
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-10 h-10 bg-card rounded-lg flex items-center justify-center border border-border overflow-hidden shrink-0">
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -162,7 +179,7 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
                                                             {model.lastTested}
                                                         </span>
                                                     </div>
-                                                </div>
+                                                </button>
                                             </div>
                                         );
                                     })}

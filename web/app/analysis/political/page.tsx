@@ -1,15 +1,18 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ReferenceLine, Scatter, Cell } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#06b6d4', '#84cc16'];
 
 export default function PoliticalPage() {
+    const router = useRouter();
     const { filteredPoliticalData: politicalData, loading, ensurePolitical } = useAnalysis();
     useEffect(() => { ensurePolitical(); }, []);
 
@@ -62,23 +65,17 @@ export default function PoliticalPage() {
                                     <ReferenceLine x={0} stroke="#000" />
                                     <ReferenceLine y={0} stroke="#000" />
 
-                                    <Scatter name="Models" data={politicalData} fill="#800000">
+                                    <Scatter name="Models" data={politicalData} fill="#800000" onClick={(e: any) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
                                         {politicalData.map((entry: any, index: number) => (
-                                            <Cell key={`cell-${index}`} fill="#800000" stroke="hsl(var(--background))" strokeWidth={1} />
+                                            <Cell key={`cell-${index}`} fill="#800000" stroke="hsl(var(--background))" strokeWidth={1} style={{ cursor: 'pointer' }} />
                                         ))}
                                     </Scatter>
                                 </ScatterChart>
                             </ResponsiveContainer>
                         ) : (
-                            <img
-                                src="/political_compass.png"
-                                alt="AI Political Compass"
-                                className="object-contain w-full h-full hover:scale-105 transition-transform duration-500"
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="text-muted-foreground text-sm">Chart not generated yet</span>';
-                                }}
-                            />
+                            <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                                <EmptyState title="No political compass data" description="Adjust your filters to see data." icon="search" />
+                            </div>
                         )}
                     </div>
                 </div>

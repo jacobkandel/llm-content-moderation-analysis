@@ -113,7 +113,7 @@ export function DataTable<TData, TValue>({
     }, [table, exportFilename]);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-8">
             {/* Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 {searchKey && (

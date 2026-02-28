@@ -1,10 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { ResponsiveContainer, ScatterChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Scatter, Cell, Label } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 // No colors needed for monochrome design
 
@@ -35,6 +37,7 @@ const CustomLabel = (props: any) => {
 };
 
 export default function AlignmentPage() {
+    const router = useRouter();
     const { efficiencyData, loading } = useAnalysis();
 
     if (loading) return <SkeletonLoader />;
@@ -79,7 +82,7 @@ export default function AlignmentPage() {
                                 <Label value="Refusal Rate (%)" angle={-90} position="insideLeft" offset={-10} style={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
                             </YAxis>
                             <RechartsTooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-                            <Scatter name="Models" data={efficiencyData}>
+                            <Scatter name="Models" data={efficiencyData} onClick={(e: any) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
                                 {efficiencyData.map((e: any, index: number) => {
                                     // Maroon scale based on Refusal Rate
                                     let color = '#D6D6CE'; // Low refusal -> Light Gray
@@ -88,14 +91,14 @@ export default function AlignmentPage() {
                                     else if (e.refusalRate > 5) color = '#C16622'; // Med -> Dark Orange/Rust (Complimentary) or just Light Maroon
                                     else color = '#767676'; // Low -> Dark Gray
 
-                                    return <Cell key={`cell-${index}`} fill={color} stroke="hsl(var(--background))" strokeWidth={1} r={7} />;
+                                    return <Cell key={`cell-${index}`} fill={color} stroke="hsl(var(--background))" strokeWidth={1} r={7} style={{ cursor: 'pointer' }} />;
                                 })}
                             </Scatter>
                         </ScatterChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-muted-foreground">
-                        No efficiency data available — select models with cost data
+                    <div className="flex items-center justify-center h-full text-muted-foreground pt-12 pb-12">
+                        <EmptyState title="No alignment data" description="Select models with cost data to view." icon="search" />
                     </div>
                 )}
             </div>

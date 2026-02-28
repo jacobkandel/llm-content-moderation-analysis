@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { BarChart3, Users, Calendar, TrendingUp } from 'lucide-react';
 import QuestionsModal from './QuestionsModal';
 import ModelsModal from './ModelsModal';
@@ -71,6 +72,7 @@ export default function KeyMetrics({
 }: KeyMetricsProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
+    const router = useRouter();
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -120,6 +122,7 @@ export default function KeyMetrics({
                     icon={<BarChart3 className="w-6 h-6 text-foreground" />}
                     description="Total model evaluations"
                     trend="neutral"
+                    onClick={() => router.push('/audit')}
                 />
 
                 <MetricCard

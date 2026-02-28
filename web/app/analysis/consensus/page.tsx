@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { RelatedPages } from '@/components/ui/RelatedPages';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
     ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, Legend
@@ -14,6 +16,7 @@ import {
 const PIE_COLORS = ['#800000', '#767676', '#D6D6CE']; // Maroon, Dark Gray, Light Gray
 
 export default function ConsensusPage() {
+    const router = useRouter();
     const { filteredAuditData, loading, ensureAuditData, precomputedConsensus, selectedModels, dateRange } = useAnalysis();
 
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
@@ -144,8 +147,8 @@ export default function ConsensusPage() {
                         "Inter-Judge Reliability: Consistency across the council"
                     ]}
                 />
-                <div className="bg-card p-6 rounded-2xl border border-border text-center text-muted-foreground">
-                    Not enough multi-model data to compute consensus.
+                <div className="bg-card p-12 rounded-2xl border border-border flex items-center justify-center">
+                    <EmptyState title="Not enough data" description="Select multiple models to compute consensus." icon="search" />
                 </div>
             </div>
         );
@@ -174,7 +177,11 @@ export default function ConsensusPage() {
                 </p>
                 <div className="space-y-2">
                     {consensusStats.perModel.map((m: any, i: number) => (
-                        <div key={m.model} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                        <div
+                            key={m.model}
+                            className="flex items-center gap-3 py-2 border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer rounded -mx-2 px-2"
+                            onClick={() => router.push(`/models/${m.model}`)}
+                        >
                             <span className="text-xs text-muted-foreground w-5 font-mono">{i + 1}</span>
                             <img
                                 src={m.logo}

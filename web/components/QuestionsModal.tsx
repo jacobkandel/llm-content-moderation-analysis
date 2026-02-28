@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Copy, Check } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useRef } from 'react';
 import { sanitizeSearchInput } from '@/lib/utils';
 
 interface Question {
@@ -22,18 +21,27 @@ interface QuestionsModalProps {
 
 export default function QuestionsModal({ isOpen, onClose, questions }: QuestionsModalProps) {
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const parentRef = useRef<HTMLDivElement>(null);
 
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+        return () => clearTimeout(handler);
+    }, [search]);
+
     // Filter questions based on search
     const filteredQuestions = useMemo(() => {
-        if (!search) return questions;
-        const lowerSearch = sanitizeSearchInput(search).toLowerCase();
+        if (!debouncedSearch) return questions;
+        const lowerSearch = sanitizeSearchInput(debouncedSearch).toLowerCase();
         return questions.filter(q =>
             q.text.toLowerCase().includes(lowerSearch) ||
             q.category.toLowerCase().includes(lowerSearch)
         );
-    }, [questions, search]);
+    }, [questions, debouncedSearch]);
 
     // Virtualizer for performance
     const rowVirtualizer = useVirtualizer({
