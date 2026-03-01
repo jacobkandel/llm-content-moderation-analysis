@@ -561,7 +561,12 @@ def main():
                 (["anthropic", "claude", "haiku"], "anthropic/claude-3-haiku"),
                 (["x-ai", "grok", "mini"], "x-ai/grok-3-mini"),
                 (["mistralai", "ministral"], "mistralai/ministral-8b"),
-                (["qwen", "7b", "instruct"], "qwen/qwen-2.5-7b-instruct")
+                (["qwen", "7b", "instruct"], "qwen/qwen-2.5-7b-instruct"),
+                (["meta-llama", "llama-3.3", "70b", "free"], "meta-llama/llama-3.3-70b-instruct:free"),
+                (["mistral", "small-3.1", "24b", "free"], "mistralai/mistral-small-3.1-24b-instruct:free"),
+                (["gemma-3", "27b", "free"], "google/gemma-3-27b-it:free"),
+                (["hermes-3", "405b", "free"], "nousresearch/hermes-3-llama-3.1-405b:free"),
+                (["dolphin-mistral", "venice", "free"], "cognitivecomputations/dolphin-mistral-24b-venice-edition:free")
             ]
             
             for kw, fallback in patterns:
