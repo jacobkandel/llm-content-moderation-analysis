@@ -2,119 +2,60 @@ import { MetadataRoute } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-function getDataLastUpdated(): Date {
-    try {
-        const statsPath = path.join(process.cwd(), 'public', 'summary_stats.json');
-        const stats = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
-        if (stats.lastUpdated) return new Date(stats.lastUpdated);
-    } catch { }
-    return new Date('2026-02-12'); // fallback to last known date
-}
+const BASE_URL = 'https://moderationbias.com';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://moderationbias.com';
-    const dataDate = getDataLastUpdated();
-    const deployDate = new Date();
-
-    return [
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    const sitemapData: MetadataRoute.Sitemap = [
         {
-            url: baseUrl,
-            lastModified: deployDate,
+            url: BASE_URL,
+            lastModified: new Date(),
             changeFrequency: 'daily',
             priority: 1,
         },
         {
-            url: `${baseUrl}/analysis/summary`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/analysis/reliability`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/analysis/significance`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/analysis/drift`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/analysis/political`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/analysis/paternalism`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/analysis/alignment`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/analysis/clusters`,
-            lastModified: dataDate,
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/analysis/triggers`,
-            lastModified: dataDate,
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/analysis/consensus`,
-            lastModified: dataDate,
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/audit`,
-            lastModified: dataDate,
-            changeFrequency: 'weekly',
+            url: `${BASE_URL}/compare`,
+            lastModified: new Date(),
+            changeFrequency: 'daily',
             priority: 0.9,
         },
         {
-            url: `${baseUrl}/compare`,
-            lastModified: deployDate,
+            url: `${BASE_URL}/analysis/longitudinal`,
+            lastModified: new Date(),
             changeFrequency: 'weekly',
-            priority: 0.9,
+            priority: 0.8,
         },
-        // Per-model landing pages
-        ...(() => {
-            try {
-                const models: { id: string }[] = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'models.json'), 'utf8'));
-                return models.map(m => ({
-                    url: `${baseUrl}/models/${m.id}`,
-                    lastModified: dataDate,
-                    changeFrequency: 'weekly' as const,
-                    priority: 0.8,
-                }));
-            } catch { return []; }
-        })(),
-        // Category landing pages
-        ...['crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual', 'false-positive-control',
-            'harassment', 'hate-speech', 'health-misinformation', 'incitement-to-violence',
-            'paternalism', 'political', 'self-harm', 'weapons'].map(cat => ({
-                url: `${baseUrl}/categories/${cat}`,
-                lastModified: dataDate,
-                changeFrequency: 'weekly' as const,
-                priority: 0.7,
-            })),
+        {
+            url: `${BASE_URL}/models`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
+        {
+            url: `${BASE_URL}/about`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.5,
+        },
     ];
+
+    try {
+        const modelsPath = path.join(process.cwd(), 'public', 'models.json');
+        if (fs.existsSync(modelsPath)) {
+            const models = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
+            for (const model of models) {
+                if (model.id) {
+                    sitemapData.push({
+                        url: `${BASE_URL}/models/${model.id}`,
+                        lastModified: new Date(),
+                        changeFrequency: 'weekly',
+                        priority: 0.7,
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Failed to generate sitemap for models", e);
+    }
+
+    return sitemapData;
 }
