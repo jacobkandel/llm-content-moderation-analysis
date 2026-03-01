@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getLogoUrl } from '@/lib/provider-logos';
+import { CategoryPromptsTable } from './CategoryPromptsTable';
 
 const CATEGORIES: Record<string, string> = {
     'crime': 'Crime',
@@ -57,17 +58,28 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     // Load compare_data to get per-model category rates
     let modelRankings: { id: string; name: string; rate: number }[] = [];
     let models: any[] = [];
+    let categoryPrompts: any[] = [];
     try {
         const comparePath = path.join(process.cwd(), 'public', 'compare_data.json');
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
+        const promptsPath = path.join(process.cwd(), 'public', 'prompts_list.json');
 
-        const [compareFile, modelsFile] = await Promise.all([
+        const [compareFile, modelsFile, promptsFile] = await Promise.all([
             fs.promises.readFile(comparePath, 'utf8'),
-            fs.promises.readFile(modelsPath, 'utf8')
+            fs.promises.readFile(modelsPath, 'utf8'),
+            fs.promises.readFile(promptsPath, 'utf8').catch(() => '[]') // Handle missing file gracefully
         ]);
 
         const compare = JSON.parse(compareFile);
         models = JSON.parse(modelsFile);
+
+        try {
+            const allPrompts = JSON.parse(promptsFile);
+            categoryPrompts = allPrompts.filter((p: any) => p.category === label);
+        } catch {
+            // Ignore parse errors for prompts
+        }
+
         const modelMap = new Map(models.map((m: any) => [m.id, m]));
 
         modelRankings = compare.models
@@ -166,6 +178,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 </section>
             ) : (
                 <p className="text-muted-foreground text-sm">No per-category data available yet for this category.</p>
+            )}
+
+            {categoryPrompts.length > 0 && (
+                <CategoryPromptsTable prompts={categoryPrompts} />
             )}
 
             {/* CTAs */}
