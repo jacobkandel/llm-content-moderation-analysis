@@ -196,7 +196,6 @@ jobs:
           add-paths: |
             web/public/models.json
             data/trends.csv
-            docs/
             **/*.csv
             **/*.json
 
