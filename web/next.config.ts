@@ -2,7 +2,12 @@ import type { NextConfig } from "next";
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
-})
+});
+
+const withPwa = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+});
 
 const nextConfig: NextConfig = {
   images: {
@@ -70,4 +75,4 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['better-sqlite3']
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(withPwa(nextConfig));

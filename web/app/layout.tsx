@@ -40,6 +40,16 @@ export const metadata: Metadata = {
       'application/rss+xml': '/feed.xml',
     },
   },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ModAnalyst',
+  },
+  applicationName: 'ModAnalyst',
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     title: 'LLM Censorship Benchmark: Live Audit',
     description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
