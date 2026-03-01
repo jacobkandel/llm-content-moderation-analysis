@@ -118,7 +118,7 @@ export default function CompareContent() {
 
     // Pagination
     const [batchSize, setBatchSize] = useState(10);
-    const [visibleCount, setVisibleCount] = useState(10);
+    const [visibleCount, setVisibleCount] = useState(5);
 
     // Debounce search input (300ms)
     useEffect(() => {
@@ -228,16 +228,74 @@ export default function CompareContent() {
         return () => observer.disconnect();
     }, [compareData, loadFullData]);
 
-    // --- Computed values from precomputed data ---
+    // Load full data if any filters are applied
+    useEffect(() => {
+        if (selectedCategory !== 'all' || selectedDate !== 'all' || debouncedSearch !== '') {
+            loadFullData();
+        }
+    }, [selectedCategory, selectedDate, debouncedSearch, loadFullData]);
+
+    // --- Computed values for stats ---
+    const dynamicStats = useMemo(() => {
+        const hasFilters = selectedCategory !== 'all' || selectedDate !== 'all' || debouncedSearch !== '';
+        if (!hasFilters || !fullData) return null;
+
+        let filtered = fullData;
+        if (selectedCategory !== 'all') filtered = filtered.filter(d => d.category === selectedCategory);
+        if (selectedDate !== 'all') filtered = filtered.filter(d => d.timestamp?.startsWith(selectedDate));
+        if (debouncedSearch) {
+            const cleanSearch = sanitizeSearchInput(debouncedSearch).toLowerCase();
+            filtered = filtered.filter(d => d.prompt?.toLowerCase().includes(cleanSearch));
+        }
+
+        const calcStats = (model: string) => {
+            const modelData = filtered.filter(d => d.model === model);
+            if (modelData.length === 0) return { refusalRate: 0, avgVerbosity: 0 };
+
+            let refusals = 0;
+            let totalChars = 0;
+            let verbosityCount = 0;
+
+            modelData.forEach(d => {
+                const v = d.verdict?.toUpperCase();
+                if (v === 'REMOVED' || v === 'REFUSAL' || v === 'UNSAFE') {
+                    refusals++;
+                }
+
+                if (d.response) {
+                    let text = d.response;
+                    const parsed = parseResponseText(d.response);
+                    if (parsed.reason && parsed.reason !== text && parsed.reason !== 'No response recorded') {
+                        text = parsed.reason; // Use parsed reason if it's JSON
+                    }
+                    totalChars += text.length;
+                    verbosityCount++;
+                }
+            });
+
+            return {
+                refusalRate: (refusals / modelData.length) * 100,
+                avgVerbosity: verbosityCount > 0 ? Math.round(totalChars / verbosityCount) : 0,
+            };
+        };
+
+        return {
+            A: calcStats(modelA),
+            B: calcStats(modelB)
+        };
+    }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch]);
+
     const statsA = useMemo(() => {
+        if (dynamicStats) return dynamicStats.A;
         if (!compareData || !modelA) return null;
         return compareData.modelStats[modelA] || null;
-    }, [compareData, modelA]);
+    }, [compareData, modelA, dynamicStats]);
 
     const statsB = useMemo(() => {
+        if (dynamicStats) return dynamicStats.B;
         if (!compareData || !modelB) return null;
         return compareData.modelStats[modelB] || null;
-    }, [compareData, modelB]);
+    }, [compareData, modelB, dynamicStats]);
 
     // Radar chart from precomputed per-category rates
     const radarData = useMemo(() => {

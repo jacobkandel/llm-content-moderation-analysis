@@ -92,31 +92,70 @@ export default function LongitudinalPage() {
                 ]}
             />
 
-            <div className="bg-card p-6 rounded-2xl shadow-sm border border-border h-[500px]">
+            <div className="bg-card p-6 rounded-2xl shadow-sm border border-border flex flex-col h-[500px] md:h-[600px]">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h3 className="text-lg font-bold text-foreground">Refusal Rate Over Time</h3>
                     <div className="flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground font-medium uppercase text-xs">Filter by Date:</span>
                         {(dateRange.start || dateRange.end) ? (
-                            <span className="text-xs text-muted-foreground italic">Global filter applied</span>
+                            <button
+                                onClick={() => setDateRange({ start: '', end: '' })}
+                                className="text-xs text-brand hover:underline font-medium"
+                            >
+                                Clear Filter
+                            </button>
                         ) : (
                             <span className="text-xs text-muted-foreground italic">Click any point to filter evidence by date</span>
                         )}
                     </div>
                 </div>
-                <ResponsiveContainer width="100%" height="90%">
-                    <LineChart
-                        data={longitudinalData.chartData}        >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis unit="%" />
-                        <RechartsTooltip />
-                        <Legend />
-                        {longitudinalData.activeModels.map((m: string, i: number) => (
-                            <Line key={m} type="monotone" dataKey={m} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} connectNulls />
-                        ))}
-                    </LineChart>
-                </ResponsiveContainer>
+                <div className="flex-1 w-full overflow-x-auto overflow-y-hidden pb-4">
+                    <div className="min-w-[700px] h-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart
+                                data={longitudinalData.chartData}
+                                onClick={(data: any) => {
+                                    if (data && data.activePayload && data.activePayload.length > 0) {
+                                        const clickedDate = data.activePayload[0].payload.date;
+                                        setDateRange({ start: clickedDate, end: clickedDate });
+                                        router.push('/compare'); // Optionally take them to compare page to see evidence
+                                    }
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                                <XAxis
+                                    dataKey="date"
+                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                    tickMargin={10}
+                                    minTickGap={30}
+                                />
+                                <YAxis
+                                    unit="%"
+                                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                    axisLine={false}
+                                    tickLine={false}
+                                />
+                                <RechartsTooltip
+                                    contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--card))', color: 'hsl(var(--foreground))' }}
+                                />
+                                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                {longitudinalData.activeModels.map((m: string, i: number) => (
+                                    <Line
+                                        key={m}
+                                        type="monotone"
+                                        dataKey={m}
+                                        stroke={CHART_COLORS[i % CHART_COLORS.length]}
+                                        strokeWidth={3}
+                                        dot={{ r: 4, strokeWidth: 2 }}
+                                        activeDot={{ r: 6, strokeWidth: 0 }}
+                                        connectNulls
+                                    />
+                                ))}
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
             </div>
 
             <RelatedPages

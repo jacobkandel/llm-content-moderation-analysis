@@ -120,9 +120,6 @@ export default async function HomePage() {
                 key={step}
                 className="relative bg-card border border-border rounded-2xl p-6 hover:border-brand/30 hover:shadow-md transition-all"
               >
-                <div className="text-5xl font-black text-brand/10 absolute top-4 right-5 select-none">
-                  {step}
-                </div>
                 <div className="h-8 w-8 rounded-lg bg-brand text-white text-sm font-bold flex items-center justify-center mb-4">
                   {step}
                 </div>
