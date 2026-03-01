@@ -2,6 +2,7 @@
 
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ModelData {
     name: string;
@@ -50,12 +51,13 @@ export default function RestrictivenessScale({ models, onModelClick }: Restricti
                         >
                             {/* Provider Logo */}
                             <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center overflow-hidden">
-                                <img
+                                <Image
                                     src={getLogoUrl(model.name)}
                                     alt={getProviderName(model.name)}
                                     width={24}
                                     height={24}
                                     className="object-contain"
+                                    unoptimized
                                 />
                             </div>
 

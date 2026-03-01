@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Calendar, Box } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import Image from 'next/image';
 
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { sanitizeSearchInput } from '@/lib/utils';
@@ -149,19 +150,18 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-10 h-10 bg-card rounded-lg flex items-center justify-center border border-border overflow-hidden shrink-0">
-                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                            <img
+                                                            <Image
                                                                 src={getLogoUrl(model.name)}
                                                                 alt={getProviderName(model.name)}
                                                                 width={28}
                                                                 height={28}
                                                                 className="object-contain"
                                                                 onError={(e) => {
-                                                                    // Fallback to text or icon if needed, but standard onError to hide is usually safe or swap src
-                                                                    e.currentTarget.style.display = 'none';
-                                                                    e.currentTarget.parentElement?.classList.add('bg-primary/10');
-                                                                    e.currentTarget.parentElement!.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box w-5 h-5 text-primary"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>';
+                                                                    (e.currentTarget as HTMLElement).style.display = 'none';
+                                                                    (e.currentTarget as HTMLElement).parentElement?.classList.add('bg-primary/10');
+                                                                    (e.currentTarget as HTMLElement).parentElement!.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box w-5 h-5 text-primary"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>';
                                                                 }}
+                                                                unoptimized
                                                             />
                                                         </div>
                                                         <div>

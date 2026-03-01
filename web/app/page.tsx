@@ -19,8 +19,25 @@ export default async function HomePage() {
     'incitement-to-violence', 'paternalism', 'political', 'self-harm', 'weapons'
   ];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Moderation Bias',
+    url: 'https://moderationbias.com',
+    description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
+    author: {
+      '@type': 'Person',
+      name: 'Jacob Kandel',
+      url: 'https://github.com/jacobkandel'
+    }
+  };
+
   return (
     <main className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ── Hero ── */}
       <section className="relative bg-card rounded-2xl overflow-hidden border border-border shadow-sm">
         {/* Maroon accent strip */}
