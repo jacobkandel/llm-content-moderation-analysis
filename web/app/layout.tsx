@@ -36,7 +36,6 @@ export const metadata: Metadata = {
   authors: [{ name: 'Jacob Kandel', url: 'https://github.com/jacobkandel' }],
   creator: 'Jacob Kandel',
   alternates: {
-    canonical: '/',
     types: {
       'application/rss+xml': '/feed.xml',
     },

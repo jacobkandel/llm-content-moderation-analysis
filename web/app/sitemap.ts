@@ -36,6 +36,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'monthly',
             priority: 0.5,
         },
+        // Analysis Deep Dives
+        ...[
+            'consensus', 'political', 'drift', 'paternalism', 'significance', 'summary', 'triggers', 'clusters', 'alignment', 'reliability'
+        ].map(slug => ({
+            url: `${BASE_URL}/analysis/${slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.7,
+        })),
+        // Categories
+        ...[
+            'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
+            'false-positive-control', 'harassment', 'hate-speech', 'health-misinformation',
+            'incitement-to-violence', 'paternalism', 'political', 'self-harm', 'weapons'
+        ].map(cat => ({
+            url: `${BASE_URL}/categories/${cat}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+        }))
     ];
 
     try {
