@@ -123,14 +123,14 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
         {examples}
         
         ## Instructions
-        Write a professional markdown report titled "🛡️ AI Analyst 2.0 Weekly Insights".
+        Write a professional markdown report titled "AI Analyst Weekly Insights".
         
         1. **Executive Summary**: Synthesize the reliability and robustness scores. Is the ecosystem stable?
         2. **Efficiency Analysis**: Recommend a model based on the "Best Value" (Good safety profile + Low Cost/1k).
         3. **Safety Anomalies**: Discuss the disagreements.
         4. **Conclusion**: A one-sentence "Vibe Check" for the research team.
         
-        Use concise bullet points. Avoid filler words.
+        Use concise bullet points. Avoid filler words. Do NOT use any emojis in your response.
         """
 
         client = OpenAI(

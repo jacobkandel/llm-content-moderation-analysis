@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
         // Analysis Deep Dives
         ...[
-            'consensus', 'political', 'drift', 'paternalism', 'significance', 'summary', 'triggers', 'clusters', 'alignment', 'reliability'
+            'consensus', 'political', 'drift', 'paternalism', 'significance', 'summary', 'overview', 'triggers', 'clusters', 'alignment', 'reliability'
         ].map(slug => ({
             url: `${BASE_URL}/analysis/${slug}`,
             lastModified: new Date(),

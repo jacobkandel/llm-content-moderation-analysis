@@ -1,4 +1,4 @@
-# 🛡️ AI Analyst 2.0 Weekly Insights
+# AI Analyst 2.0 Weekly Insights
 
 ## Executive Summary
 - **Inter-Rater Reliability**: Fleiss' Kappa score of 0.118 indicates slight agreement among models, suggesting variability in judgments.

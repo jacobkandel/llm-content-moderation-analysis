@@ -7,7 +7,7 @@ import {
     Box, LayoutDashboard, ArrowRightLeft, Brain,
     Menu, X, ChevronRight,
     FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users
+    Network, ListChecks, Users, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -27,6 +27,7 @@ const analysisCategories = [
         title: 'Summary',
         items: [
             { name: 'Summary', href: '/analysis/summary', icon: FileText },
+            { name: 'AI Overview', href: '/analysis/overview', icon: Sparkles },
             { name: 'Longitudinal', href: '/analysis/longitudinal', icon: TrendingUp },
         ]
     },

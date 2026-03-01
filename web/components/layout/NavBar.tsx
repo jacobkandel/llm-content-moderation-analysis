@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard, FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Table, Info, Home, Box, Filter
+    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Table, Info, Home, Box, Filter, Sparkles
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -19,6 +19,7 @@ const navItems = [
         icon: FileText,
         dropdown: [
             { title: 'Summary', href: '/analysis/summary', icon: FileText },
+            { title: 'AI Overview', href: '/analysis/overview', icon: Sparkles },
             { title: 'Reliability', href: '/analysis/reliability', icon: Shield },
             { title: 'Longitudinal Analysis', href: '/analysis/longitudinal', icon: TrendingUp },
             { title: 'Model Stability', href: '/analysis/drift', icon: TrendingUp },
