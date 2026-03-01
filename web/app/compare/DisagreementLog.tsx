@@ -89,6 +89,7 @@ export function DisagreementLog({
                                 }}
                                 className="text-xs bg-background border border-border rounded px-2 py-1 text-foreground focus:ring-2 focus:ring-primary"
                             >
+                                <option value={5}>5</option>
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
                                 <option value={50}>50</option>

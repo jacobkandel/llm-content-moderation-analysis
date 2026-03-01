@@ -134,7 +134,7 @@ export default function CompareContent() {
     const [selectedDate, setSelectedDate] = useState('all');
 
     // Pagination
-    const [batchSize, setBatchSize] = useState(10);
+    const [batchSize, setBatchSize] = useState(5);
     const [visibleCount, setVisibleCount] = useState(5);
 
     // Debounce search input (300ms)
