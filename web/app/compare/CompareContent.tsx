@@ -78,6 +78,23 @@ function VerdictBadge({ verdict }: { verdict: string | null | undefined }) {
     );
 }
 
+// --- Helper: approximate normal CDF and McNemar's test for dynamic p-value ---
+function normalCDF(x: number) {
+    const t = 1 / (1 + 0.2316419 * Math.abs(x));
+    const d = 0.3989423 * Math.exp(-x * x / 2);
+    const prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+    return x > 0 ? 1 - prob : prob;
+}
+
+function calculateMcNemarPValue(b: number, c: number) {
+    if (b + c === 0) return 1.0;
+    const diff = Math.abs(b - c);
+    if (diff === 0) return 1.0;
+    const chi2 = Math.pow(diff - 1, 2) / (b + c);
+    const z = Math.sqrt(chi2);
+    return 2 * (1 - normalCDF(z));
+}
+
 export default function CompareContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -369,6 +386,28 @@ export default function CompareContent() {
         return diffs;
     }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch]);
 
+    const dynamicPairResult = useMemo(() => {
+        const hasFilters = selectedCategory !== 'all' || selectedDate !== 'all' || debouncedSearch !== '';
+        if (!hasFilters || !fullData || !modelA || !modelB) return null;
+
+        const isSafe = (verdict: string | null | undefined) => {
+            const v = verdict?.toUpperCase();
+            return v !== 'REMOVED' && v !== 'REFUSAL' && v !== 'UNSAFE';
+        };
+
+        const b = disagreements.filter(d => isSafe(d.rowA.verdict) && !isSafe(d.rowB.verdict)).length;
+        const c = disagreements.filter(d => !isSafe(d.rowA.verdict) && isSafe(d.rowB.verdict)).length;
+
+        const pValue = calculateMcNemarPValue(b, c);
+
+        return {
+            'Model A': modelA,
+            'Model B': modelB,
+            'P-Value': pValue,
+            'Significant': pValue < 0.05 ? 'YES' as const : 'NO' as const
+        };
+    }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch, disagreements]);
+
     const clearFilters = () => {
         setSearchKeyword('');
         setDebouncedSearch('');
@@ -453,7 +492,7 @@ export default function CompareContent() {
                             statsB={statsB}
                             showStats={showStats}
                             setShowStats={setShowStats}
-                            pairResult={pValues.find((row) =>
+                            pairResult={dynamicPairResult || pValues.find((row) =>
                                 (row['Model A'] === modelA && row['Model B'] === modelB) ||
                                 (row['Model A'] === modelB && row['Model B'] === modelA)
                             )}
