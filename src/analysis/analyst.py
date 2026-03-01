@@ -116,7 +116,7 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
         - **Inter-Rater Reliability (Fleiss' Kappa)**: {kappa:.3f} ({kappa_interpretation})
         - **Robustness**: {robustness_text}
         
-        ## Model Leaderboard (Cost vs Safety)
+        ## Model Performance
         {leaderboard_text}
         
         ## Disagreement Examples
@@ -125,12 +125,11 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
         ## Instructions
         Write a professional markdown report titled "AI Analyst Weekly Insights".
         
-        1. **Executive Summary**: Synthesize the reliability and robustness scores. Is the ecosystem stable?
-        2. **Efficiency Analysis**: Recommend a model based on the "Best Value" (Good safety profile + Low Cost/1k).
-        3. **Safety Anomalies**: Discuss the disagreements.
-        4. **Conclusion**: A one-sentence "Vibe Check" for the research team.
+        1. **Longitudinal Analysis**: Explain how models are shifting week over week. Focus on the longitudinal nature of the monitoring and highlight any drastic changes or trends in stability/robustness.
+        2. **Safety Anomalies**: Briefly discuss notable disagreements or edge cases.
+        3. **Conclusion**: A one-sentence "Vibe Check" for the research team.
         
-        Use concise bullet points. Avoid filler words. Do NOT use any emojis in your response.
+        Write strictly in paragraph form. DO NOT use bullet points. The entire report MUST be under 300 words. Avoid filler words. Do NOT use any emojis in your response.
         """
 
         client = OpenAI(

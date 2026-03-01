@@ -17,6 +17,7 @@ import { Search, Filter } from 'lucide-react';
 
 
 const mainNavItems: { name: string; href: string; icon: any }[] = [
+    { name: 'AI Overview', href: '/analysis/overview', icon: Sparkles },
     { name: 'Comparison', href: '/compare', icon: ArrowRightLeft },
     { name: 'Models', href: '/models', icon: Box },
     { name: 'Categories', href: '/categories', icon: Filter },
@@ -27,7 +28,6 @@ const analysisCategories = [
         title: 'Summary',
         items: [
             { name: 'Summary', href: '/analysis/summary', icon: FileText },
-            { name: 'AI Overview', href: '/analysis/overview', icon: Sparkles },
             { name: 'Longitudinal', href: '/analysis/longitudinal', icon: TrendingUp },
         ]
     },
