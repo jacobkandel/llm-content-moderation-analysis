@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getLogoUrl } from '@/lib/provider-logos';
 import { ArrowLeft, ArrowRight, BarChart2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { TooltipHover } from '@/components/ui/TooltipHover';
@@ -23,7 +24,7 @@ interface ModelStats {
     categoryRates: Record<string, number>;
 }
 
-function getModelData() {
+async function getModelData() {
     const modelsPath = path.join(process.cwd(), 'public', 'models.json');
     const comparePath = path.join(process.cwd(), 'public', 'compare_data.json');
     const longitudinalPath = path.join(process.cwd(), 'public', 'longitudinal_data.json');
@@ -33,18 +34,24 @@ function getModelData() {
     const paternalismPath = path.join(process.cwd(), 'public', 'paternalism.json');
     const consensusPath = path.join(process.cwd(), 'public', 'consensus_stats.json');
 
-    const models: ModelInfo[] = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
-    const compare = JSON.parse(fs.readFileSync(comparePath, 'utf8'));
-    const longitudinal = JSON.parse(fs.readFileSync(longitudinalPath, 'utf8'));
+    const [modelsFile, compareFile, longitudinalFile] = await Promise.all([
+        fs.promises.readFile(modelsPath, 'utf8'),
+        fs.promises.readFile(comparePath, 'utf8'),
+        fs.promises.readFile(longitudinalPath, 'utf8')
+    ]);
+
+    const models: ModelInfo[] = JSON.parse(modelsFile);
+    const compare = JSON.parse(compareFile);
+    const longitudinal = JSON.parse(longitudinalFile);
 
     let drift = [];
     let political = [];
     let paternalism = [];
     let consensus: any = {};
-    try { drift = JSON.parse(fs.readFileSync(driftPath, 'utf8')); } catch { }
-    try { political = JSON.parse(fs.readFileSync(politicalPath, 'utf8')); } catch { }
-    try { paternalism = JSON.parse(fs.readFileSync(paternalismPath, 'utf8')); } catch { }
-    try { consensus = JSON.parse(fs.readFileSync(consensusPath, 'utf8')); } catch { }
+    try { drift = JSON.parse(await fs.promises.readFile(driftPath, 'utf8')); } catch { }
+    try { political = JSON.parse(await fs.promises.readFile(politicalPath, 'utf8')); } catch { }
+    try { paternalism = JSON.parse(await fs.promises.readFile(paternalismPath, 'utf8')); } catch { }
+    try { consensus = JSON.parse(await fs.promises.readFile(consensusPath, 'utf8')); } catch { }
 
     return { models, compare, longitudinal, drift, political, paternalism, consensus };
 }
@@ -52,7 +59,8 @@ function getModelData() {
 export async function generateStaticParams() {
     try {
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
-        const models: ModelInfo[] = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
+        const fileContent = await fs.promises.readFile(modelsPath, 'utf8');
+        const models: ModelInfo[] = JSON.parse(fileContent);
         return models.map(m => {
             const [provider, ...rest] = m.id.split('/');
             return {
@@ -70,19 +78,23 @@ export async function generateMetadata({ params }: { params: Promise<{ provider:
     const id = `${provider}/${model}`;
     try {
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
-        const models: ModelInfo[] = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
-        const model = models.find(m => m.id === id);
-        if (!model) return { title: 'Model Not Found — Moderation Bias' };
+        const modelsFile = await fs.promises.readFile(modelsPath, 'utf8');
+        const models: ModelInfo[] = JSON.parse(modelsFile);
+        const md = models.find(m => m.id === id);
+        if (!md) return { title: 'Model Not Found — Moderation Bias' };
+
         const comparePath = path.join(process.cwd(), 'public', 'compare_data.json');
-        const compare = JSON.parse(fs.readFileSync(comparePath, 'utf8'));
+        const compareFile = await fs.promises.readFile(comparePath, 'utf8');
+        const compare = JSON.parse(compareFile);
+
         const stats: ModelStats | undefined = compare.modelStats?.[id];
         const refusalPct = stats ? Math.round(stats.refusalRate) : null;
         return {
-            title: `${model.display_name} Censorship Analysis — Moderation Bias`,
-            description: `How does ${model.display_name} handle content moderation? ${refusalPct !== null ? `Refusal rate: ${refusalPct}%. ` : ''}Category breakdown, behavioral trends, and side-by-side comparisons with other LLMs.`,
+            title: `${md.display_name} Censorship Analysis — Moderation Bias`,
+            description: `How does ${md.display_name} handle content moderation? ${refusalPct !== null ? `Refusal rate: ${refusalPct}%. ` : ''}Category breakdown, behavioral trends, and side-by-side comparisons with other LLMs.`,
             openGraph: {
-                title: `${model.display_name} Content Moderation Profile`,
-                description: `Refusal rates, category breakdown, and behavioral analysis for ${model.display_name} (${model.provider}).`,
+                title: `${md.display_name} Content Moderation Profile`,
+                description: `Refusal rates, category breakdown, and behavioral analysis for ${md.display_name} (${md.provider}).`,
             },
         };
     } catch {
@@ -108,7 +120,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
     let consensusData: any = null;
 
     try {
-        const data = getModelData();
+        const data = await getModelData();
         models = data.models;
         modelInfo = models.find(m => m.id === id);
         stats = data.compare.modelStats?.[id] || null;
@@ -196,7 +208,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
             <header className="flex items-start gap-5">
                 {logoUrl && (
                     <>
-                        <img src={logoUrl} alt={`${modelInfo.display_name} logo by ${modelInfo.provider}`} width={56} height={56} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" />
+                        <Image src={logoUrl} alt={`${modelInfo.display_name} logo by ${modelInfo.provider}`} width={56} height={56} className="h-14 w-14 object-contain rounded-xl border border-border bg-card p-2 flex-shrink-0" unoptimized />
                     </>
                 )}
                 <div>

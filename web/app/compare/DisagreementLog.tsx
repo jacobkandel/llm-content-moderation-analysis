@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { ExternalLink, CheckCircle } from 'lucide-react';
 import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
 
@@ -151,11 +152,14 @@ export function DisagreementLog({
                                         <div className={`rounded-lg border group/resp ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
                                             <div className={`sticky top-14 z-10 px-3 py-2 flex justify-between items-center border-b rounded-t-lg backdrop-blur-md ${diff.rowA.verdict === 'safe' || diff.rowA.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10/80 supports-[backdrop-filter]:bg-safe/5/80' : 'border-refusal/30 bg-refusal/10/80 supports-[backdrop-filter]:bg-refusal/5/80'}`}>
                                                 <div className="flex items-center gap-2">
-                                                    <img
+                                                    <Image
                                                         src={getProviderLogo(modelA)}
                                                         alt={`${modelA.split('/').pop() || modelA} logo`}
+                                                        width={20}
+                                                        height={20}
                                                         className="h-5 w-5 rounded object-contain"
-                                                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                        onError={e => { (e.target as HTMLElement).style.display = 'none'; }}
+                                                        unoptimized
                                                     />
                                                     <span className="font-bold text-sm text-foreground">{modelA?.split('/')[1] || modelA}</span>
                                                 </div>
@@ -172,11 +176,14 @@ export function DisagreementLog({
                                         <div className={`rounded-lg border group/resp ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/5' : 'border-refusal/30 bg-refusal/5'}`}>
                                             <div className={`sticky top-14 z-10 px-3 py-2 flex justify-between items-center border-b rounded-t-lg backdrop-blur-md ${diff.rowB.verdict === 'safe' || diff.rowB.verdict === 'ALLOWED' ? 'border-safe/30 bg-safe/10/80 supports-[backdrop-filter]:bg-safe/5/80' : 'border-refusal/30 bg-refusal/10/80 supports-[backdrop-filter]:bg-refusal/5/80'}`}>
                                                 <div className="flex items-center gap-2">
-                                                    <img
+                                                    <Image
                                                         src={getProviderLogo(modelB)}
                                                         alt={`${modelB.split('/').pop() || modelB} logo`}
+                                                        width={20}
+                                                        height={20}
                                                         className="h-5 w-5 rounded object-contain"
-                                                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                        onError={e => { (e.target as HTMLElement).style.display = 'none'; }}
+                                                        unoptimized
                                                     />
                                                     <span className="font-bold text-sm text-foreground">{modelB?.split('/')[1] || modelB}</span>
                                                 </div>

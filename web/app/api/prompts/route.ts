@@ -13,12 +13,14 @@ export async function GET() {
         const publicCsvPath = path.join(process.cwd(), 'public', 'prompts.csv');
 
         let fileContent = '';
-        if (fs.existsSync(csvPath)) {
-            fileContent = fs.readFileSync(csvPath, 'utf-8');
-        } else if (fs.existsSync(publicCsvPath)) {
-            fileContent = fs.readFileSync(publicCsvPath, 'utf-8');
-        } else {
-            return NextResponse.json({ data: [], error: 'Prompts file not found', path: csvPath });
+        try {
+            fileContent = await fs.promises.readFile(csvPath, 'utf-8');
+        } catch {
+            try {
+                fileContent = await fs.promises.readFile(publicCsvPath, 'utf-8');
+            } catch {
+                return NextResponse.json({ data: [], error: 'Prompts file not found', path: csvPath });
+            }
         }
 
         // Use Papa Parse

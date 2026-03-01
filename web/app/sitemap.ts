@@ -41,7 +41,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
         if (fs.existsSync(modelsPath)) {
-            const models = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
+            const fileContent = await fs.promises.readFile(modelsPath, 'utf8');
+            const models = JSON.parse(fileContent);
             for (const model of models) {
                 if (model.id) {
                     sitemapData.push({

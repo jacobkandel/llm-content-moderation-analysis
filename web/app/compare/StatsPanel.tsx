@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronDown, Info, ExternalLink } from 'lucide-react';
 import { TooltipHover } from '@/components/ui/TooltipHover';
 
@@ -82,14 +83,17 @@ export function StatsPanel({
                 {/* Card A */}
                 <div className="bg-card rounded-xl border border-border p-6 border-t border-t-brand relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <img src={getProviderLogo(modelA)} alt={`${modelA.split('/').pop() || modelA} logo`} width={128} height={128} className="h-32 w-32 object-contain" />
+                        <Image src={getProviderLogo(modelA)} alt={`${modelA.split('/').pop() || modelA} logo`} width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
                     </div>
                     <div className="flex items-center gap-3 mb-4">
-                        <img
+                        <Image
                             src={getProviderLogo(modelA)}
                             alt={`${modelA.split('/').pop() || modelA} logo`}
+                            width={40}
+                            height={40}
                             className="h-10 w-10 rounded-lg object-contain bg-card border border-border"
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            onError={e => { (e.target as HTMLElement).style.display = 'none'; }}
+                            unoptimized
                         />
                         <div className="flex-1 min-w-0">
                             <h2 className="text-xl font-bold truncate text-foreground">{modelA}</h2>
@@ -125,14 +129,17 @@ export function StatsPanel({
                 {/* Card B */}
                 <div className="bg-card rounded-xl border border-border p-6 border-t border-t-safe relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <img src={getProviderLogo(modelB)} alt={`${modelB.split('/').pop() || modelB} logo`} width={128} height={128} className="h-32 w-32 object-contain" />
+                        <Image src={getProviderLogo(modelB)} alt={`${modelB.split('/').pop() || modelB} logo`} width={128} height={128} className="h-32 w-32 object-contain" unoptimized />
                     </div>
                     <div className="flex items-center gap-3 mb-4">
-                        <img
+                        <Image
                             src={getProviderLogo(modelB)}
                             alt={`${modelB.split('/').pop() || modelB} logo`}
+                            width={40}
+                            height={40}
                             className="h-10 w-10 rounded-lg object-contain bg-card border border-border"
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            onError={e => { (e.target as HTMLElement).style.display = 'none'; }}
+                            unoptimized
                         />
                         <div className="flex-1 min-w-0">
                             <h2 className="text-xl font-bold truncate text-foreground">{modelB}</h2>

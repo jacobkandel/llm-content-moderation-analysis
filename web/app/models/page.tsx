@@ -1,13 +1,25 @@
 import { getProviderName, getLogoUrl } from '@/lib/provider-logos';
 import Link from 'next/link';
+import Image from 'next/image';
 import fs from 'fs';
 import path from 'path';
 
+interface ModelInfo {
+    id: string;
+    name: string;
+    display_name: string;
+    provider: string;
+    tier: string;
+    cost_per_m_in: number;
+    cost_per_m_out: number;
+}
+
 export default async function ModelsIndex() {
-    let models: any[] = [];
+    let models: ModelInfo[] = [];
     try {
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
-        models = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
+        const fileContent = await fs.promises.readFile(modelsPath, 'utf8');
+        models = JSON.parse(fileContent);
     } catch (e) {
         console.error("Failed to load models.json", e);
     }
@@ -30,12 +42,13 @@ export default async function ModelsIndex() {
                             className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/50 hover-lift transition-all group"
                         >
                             <div className="w-12 h-12 rounded-lg border border-border bg-muted/30 flex items-center justify-center shrink-0">
-                                <img
+                                <Image
                                     src={getLogoUrl(model.id)}
-                                    alt=""
+                                    alt={`${model.display_name} logo`}
                                     width={24}
                                     height={24}
                                     className="object-contain opacity-80"
+                                    unoptimized
                                 />
                             </div>
                             <div className="min-w-0">

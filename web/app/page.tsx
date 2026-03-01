@@ -7,7 +7,8 @@ export default async function HomePage() {
   let modelsData: { id: string; display_name: string; provider: string }[] = [];
   try {
     const modelsPath = path.join(process.cwd(), 'public', 'models.json');
-    modelsData = JSON.parse(fs.readFileSync(modelsPath, 'utf8'));
+    const fileContent = await fs.promises.readFile(modelsPath, 'utf8');
+    modelsData = JSON.parse(fileContent);
   } catch (error) {
     console.error('Failed to load models for homepage:', error);
   }
