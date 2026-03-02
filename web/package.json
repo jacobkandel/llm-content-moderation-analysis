@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node scripts/generate-traces.js && next dev",
     "dev:secure": "node scripts/generate-traces.js && next dev --experimental-https",
-    "build": "node scripts/generate-traces.js && next build",
+    "build": "node scripts/generate-traces.js && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
