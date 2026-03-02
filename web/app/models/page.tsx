@@ -1,8 +1,7 @@
 import { getProviderName, getLogoUrl } from '@/lib/provider-logos';
 import Link from 'next/link';
 import Image from 'next/image';
-import fs from 'fs';
-import path from 'path';
+import modelsData from '@/public/models.json';
 
 interface ModelInfo {
     id: string;
@@ -17,9 +16,7 @@ interface ModelInfo {
 export default async function ModelsIndex() {
     let models: ModelInfo[] = [];
     try {
-        const modelsPath = path.join(process.cwd(), 'public', 'models.json');
-        const fileContent = await fs.promises.readFile(modelsPath, 'utf8');
-        models = JSON.parse(fileContent);
+        models = modelsData as ModelInfo[];
     } catch (e) {
         console.error("Failed to load models.json", e);
     }

@@ -1,10 +1,9 @@
 import { MetadataRoute } from 'next';
-import fs from 'fs';
-import path from 'path';
+import models from '../public/models.json';
 
 const BASE_URL = 'https://moderationbias.com';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
     const sitemapData: MetadataRoute.Sitemap = [
         {
             url: BASE_URL,
@@ -59,19 +58,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
 
     try {
-        const modelsPath = path.join(process.cwd(), 'public', 'models.json');
-        if (fs.existsSync(modelsPath)) {
-            const fileContent = await fs.promises.readFile(modelsPath, 'utf8');
-            const models = JSON.parse(fileContent);
-            for (const model of models) {
-                if (model.id) {
-                    sitemapData.push({
-                        url: `${BASE_URL}/models/${model.id}`,
-                        lastModified: new Date(),
-                        changeFrequency: 'weekly',
-                        priority: 0.7,
-                    });
-                }
+        for (const model of models as any) {
+            if (model.id) {
+                sitemapData.push({
+                    url: `${BASE_URL}/models/${model.id}`,
+                    lastModified: new Date(),
+                    changeFrequency: 'weekly',
+                    priority: 0.7,
+                });
             }
         }
     } catch (e) {
