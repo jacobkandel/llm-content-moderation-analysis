@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { InstallButton } from '@/components/ui/InstallButton';
 
 const navItems = [
     { name: 'AI Overview', href: '/analysis/overview', icon: Sparkles },
@@ -135,6 +136,7 @@ export function NavBar() {
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2">
+                        <InstallButton />
                         <ThemeToggle />
                     </div>
                 </div>
