@@ -173,10 +173,31 @@ jobs:
 
       - name: Clean up Large Files
         run: |
+          echo "🧹 Removing large files before Vercel deployment..."
+          
+          # Remove all raw audit CSVs and logs (served from Blob storage instead)
           rm -f web/public/audit_log.csv.gz
           rm -f web/public/audit_log.csv
           rm -f audit.db
+          
+          # Remove raw trace JSON files (largest culprits – can be 200MB+)
+          rm -rf data/raw_traces/
+          rm -rf web/public/assets/history/
+          
+          # Remove unneeded large data files
+          rm -f data/prompts_full_db.csv
+          rm -f data/prompts_augmented.csv
           rm -f web/public/assets/traces_small.json
+          
+          # Remove Python source (not needed by Next.js at runtime)
+          rm -rf src/
+          rm -rf scripts/
+          
+          # Show what's left to help debug future size issues
+          echo "📦 Remaining large files (top 20 by size):"
+          find . -not -path './.git/*' -not -path './web/.next/*' -type f -exec du -sh {} + 2>/dev/null \
+            | sort -rh | head -20
+
 
       - name: Get current date
         id: date

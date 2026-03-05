@@ -1,0 +1,30 @@
+# Vercel ignores these paths during deployment.
+# This prevents large data/raw files from being bundled
+# into the deployment, which would exceed Vercel's 100MB file limit.
+
+# Raw audit data (large CSVs and JSON traces)
+data/
+*.csv
+*.db
+audit.db
+
+# Raw trace files
+web/public/assets/history/
+web/public/audit_log.csv
+web/public/audit_log.csv.gz
+
+# Python source and scripts (not needed at runtime)
+src/
+scripts/
+requirements.txt
+pytest.ini
+lighthouserc.json
+
+# Development files
+.github/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+node_modules/
