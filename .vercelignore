@@ -15,7 +15,7 @@ web/public/audit_log.csv.gz
 
 # Python source and scripts (not needed at runtime)
 src/
-scripts/
+/scripts/
 requirements.txt
 pytest.ini
 lighthouserc.json
