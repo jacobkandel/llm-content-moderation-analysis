@@ -2,20 +2,14 @@ import Link from 'next/link';
 import { Filter } from 'lucide-react';
 
 const CATEGORIES: Record<string, string> = {
-    'crime': 'Crime',
-    'cybersecurity': 'Cybersecurity',
-    'dangerous': 'Dangerous',
-    'deception': 'Deception',
     'explicit-sexual': 'Explicit/Sexual',
     'false-positive-control': 'False Positive Control',
-    'harassment': 'Harassment',
     'hate-speech': 'Hate Speech',
     'health-misinformation': 'Health Misinformation',
     'incitement-to-violence': 'Incitement to Violence',
+    'international-controversy': 'International Controversy',
     'paternalism': 'Paternalism',
     'political': 'Political',
-    'self-harm': 'Self-Harm',
-    'weapons': 'Weapons',
 };
 
 export default function CategoriesIndex() {
