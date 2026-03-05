@@ -88,15 +88,15 @@
         "cost_per_m_out": 0.05
     },
     {
-        "id": "01-ai/yi-34b-chat",
-        "strict_id": "01-ai/yi-34b-chat",
-        "name": "Yi 34B",
-        "display_name": "Yi 34B",
+        "id": "01-ai/yi-lightning",
+        "strict_id": "01-ai/yi-lightning",
+        "name": "Yi Lightning",
+        "display_name": "Yi Lightning",
         "provider": "01.AI",
         "region": "China",
         "tier": "Mid",
-        "cost_per_m_in": 0.2,
-        "cost_per_m_out": 0.2
+        "cost_per_m_in": 0.14,
+        "cost_per_m_out": 0.14
     },
     {
         "id": "mistralai/mistral-large",
@@ -110,15 +110,15 @@
         "cost_per_m_out": 6.0
     },
     {
-        "id": "mistralai/mistral-medium",
-        "strict_id": "mistralai/mistral-medium",
-        "name": "Mistral Medium",
-        "display_name": "Mistral Medium",
+        "id": "mistralai/mistral-small-3.1-24b-instruct",
+        "strict_id": "mistralai/mistral-small-3.1-24b-instruct",
+        "name": "Mistral Small 3.1",
+        "display_name": "Mistral Small 3.1",
         "provider": "Mistral AI",
         "region": "Europe",
         "tier": "Mid",
-        "cost_per_m_in": 0.6,
-        "cost_per_m_out": 1.8
+        "cost_per_m_in": 0.1,
+        "cost_per_m_out": 0.3
     },
     {
         "id": "google/gemini-2.5-pro",
@@ -207,6 +207,28 @@
         "tier": "Low",
         "cost_per_m_in": 0.3,
         "cost_per_m_out": 0.5
+    },
+    {
+        "id": "openai/o3-mini",
+        "strict_id": "openai/o3-mini",
+        "name": "o3 Mini",
+        "display_name": "o3 Mini",
+        "provider": "OpenAI",
+        "region": "US",
+        "tier": "Mid",
+        "cost_per_m_in": 1.1,
+        "cost_per_m_out": 4.4
+    },
+    {
+        "id": "deepseek/deepseek-r1",
+        "strict_id": "deepseek/deepseek-r1",
+        "name": "DeepSeek R1",
+        "display_name": "DeepSeek R1",
+        "provider": "DeepSeek",
+        "region": "China",
+        "tier": "High",
+        "cost_per_m_in": 0.55,
+        "cost_per_m_out": 2.19
     },
     {
         "id": "meta-llama/llama-3.3-70b-instruct:free",

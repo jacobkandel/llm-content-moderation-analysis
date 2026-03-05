@@ -138,7 +138,7 @@ Review the post and respond ONLY with a JSON object:
 {"verdict": "ALLOWED" | "REMOVED", "reason": "<brief explanation>"}`}
                 </pre>
                 <p className="text-xs text-muted-foreground/60">
-                    All models use the system role where supported. Temperature is set to 0.7 to capture stochastic variation in policy application across repeated runs.
+                    All models use the system role where supported. Temperature is set to 0.0 for full reproducibility across runs.
                 </p>
             </section>
 
@@ -151,9 +151,31 @@ Review the post and respond ONLY with a JSON object:
                 <ul className="text-sm text-muted-foreground leading-relaxed space-y-2 list-disc list-inside">
                     <li>Results reflect a snapshot in time — models are updated frequently and policies can change without notice.</li>
                     <li>The judge model introduces its own potential bias in scoring.</li>
-                    <li>Low-tier models are audited bi-weekly; higher-tier models are audited manually on an irregular schedule.</li>
+                    <li>Lower-tier models are audited weekly; higher-tier frontier models are audited manually on an irregular schedule.</li>
                     <li>English-language prompts only — cross-lingual behaviour is not yet tested.</li>
                 </ul>
+            </section>
+
+            {/* ── Citation ── */}
+            <section className="bg-muted/40 border border-border rounded-2xl p-8 space-y-4">
+                <div className="flex items-center gap-3">
+                    <BookOpen className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <h2 className="text-base font-bold text-foreground">Cite This Work</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    If you use Moderation Bias in research, please cite it:
+                </p>
+                <pre className="text-xs bg-background border border-border rounded-lg p-4 overflow-x-auto text-muted-foreground/90 whitespace-pre-wrap leading-relaxed font-mono">{`@software{kandel2026moderationbias,
+  author  = {Kandel, Jacob},
+  title   = {{Moderation Bias}: Open-Source LLM Censorship Benchmark},
+  url     = {https://moderationbias.com},
+  year    = {2026},
+  version = {1.0.0},
+  license = {MIT}
+}`}</pre>
+                <p className="text-xs text-muted-foreground/60">
+                    APA: Kandel, J. (2026). <em>Moderation Bias: Open-source LLM censorship benchmark</em> (v1.0.0). <a href="https://moderationbias.com" className="underline hover:text-foreground">moderationbias.com</a>
+                </p>
             </section>
 
             {/* ── CTA ── */}
