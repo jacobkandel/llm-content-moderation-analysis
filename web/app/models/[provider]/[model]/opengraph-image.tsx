@@ -16,16 +16,19 @@ export default async function Image({ params }: { params: Promise<{ provider: st
     let providerName = 'Unknown';
     let refusalRate = '?';
 
+    let displayName = model;
+
     try {
         const appUrl = process.env.VERCEL_URL
-            ?\`https://\${process.env.VERCEL_URL}\` 
+            ? `https://${process.env.VERCEL_URL}`
             : (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
-            
-        const res = await fetch(\`\${appUrl}/spectrum_data.json\`);
+
+        const res = await fetch(`${appUrl}/spectrum_data.json`);
         const data = await res.json();
         const modelData = data.find((d: any) => d.fullName === rawId);
         if (modelData && modelData.refusalRate !== undefined) {
-            refusalRate = \`\${modelData.refusalRate}%\`;
+            refusalRate = `${modelData.refusalRate}%`;
+            if (modelData.name) displayName = modelData.name;
         }
     } catch (e) {
         console.error('Failed to fetch spectrum data for OG image', e);
@@ -79,9 +82,9 @@ export default async function Image({ params }: { params: Promise<{ provider: st
                     }}>
                         <img
                             src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
-        width = { 96}
-        height = { 96}
-            />
+                            width={96}
+                            height={96}
+                        />
                     </div >
 
                     <h1 style={{ fontSize: 72, fontWeight: 900, color: '#0f172a', margin: '0 0 10px 0', textAlign: 'center' }}>
@@ -107,4 +110,4 @@ export default async function Image({ params }: { params: Promise<{ provider: st
         ),
         { ...size }
     );
-    }
+}
