@@ -219,8 +219,9 @@ jobs:
             cp data/latest_report.md web/public/
           fi
           
-          cd web
           # Deploy without --prod to generate a Preview Deployment
+          # NOTE: Vercel project root dir is already set to 'web' in the dashboard,
+          # so we deploy from repo root to avoid double-nesting (web/web)
           PREVIEW_URL=$(npx vercel deploy --token=$VERCEL_TOKEN --yes)
           echo "Deployed to: $PREVIEW_URL"
           echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
