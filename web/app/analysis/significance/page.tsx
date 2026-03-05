@@ -91,6 +91,8 @@ export default function SignificancePage() {
                         modelA: mA,
                         modelB: mB,
                         pValue: test.pValue,
+                        pValueAdjusted: test.pValue, // Fallback for live filter
+                        cohensH: undefined, // Requires full dataset calculation
                         significant: test.significant,
                         samples,
                         disagreements: b + c,
@@ -121,9 +123,10 @@ export default function SignificancePage() {
                 description="Not all differences in refusal rates are meaningful—some may be due to random chance. We use McNemar's Test, a statistical method designed for paired categorical data, to determine if observed differences between two models are statistically significant (P-value < 0.05) or likely due to sampling variability. This helps us identify which model comparisons represent genuine policy differences versus statistical noise."
                 importance="Statistical rigor is essential for internet openness advocacy because unsubstantiated claims about AI bias undermine credibility. By applying McNemar's Test, we ensure that when we report a model as 'more restrictive' than another, that difference is real and reproducible—not an artifact of random variation. This scientific approach strengthens accountability: AI companies can't dismiss our findings as statistical flukes, and users can trust that documented differences in censorship behavior are genuine and significant."
                 metrics={[
-                    "P-Value: Probability that observed difference is due to chance (< 0.05 = statistically significant)",
-                    "McNemar's Test Statistic: Measures discordance between paired model verdicts on the same prompts",
-                    "Significance Threshold: P < 0.05 indicates 95% confidence the difference is real, not random"
+                    "P-Value: Probability that observed difference is due to chance",
+                    "Benjamini-Hochberg FDR: P-values are adjusted to correct for multiple comparisons across models",
+                    "Cohen's h: Measures the actual effect size of the difference (0.2=small, 0.5=medium, 0.8=large)",
+                    "Significance Threshold: Adj. P < 0.05 indicates 95% confidence the difference is real, not random"
                 ]}
             />
 
@@ -166,7 +169,8 @@ export default function SignificancePage() {
                                 <th className="text-left py-2">Model B</th>
                                 <th className="text-right py-2">Shared Prompts</th>
                                 <th className="text-right py-2">Disagreements</th>
-                                <th className="text-right py-2">P-Value</th>
+                                <th className="text-right py-2" title="Cohen's h effect size">Effect (h)</th>
+                                <th className="text-right py-2" title="Benjamini-Hochberg Adjusted P-Value">Adj. P-Value</th>
                                 <th className="text-right py-2">Significant?</th>
                             </tr>
                         </thead>
@@ -181,7 +185,8 @@ export default function SignificancePage() {
                                         <td className="py-1.5 text-foreground text-xs">{row.modelB}</td>
                                         <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{row.samples.toLocaleString()}</td>
                                         <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{row.disagreements.toLocaleString()}</td>
-                                        <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{row.pValue.toExponential(2)}</td>
+                                        <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{row.cohensH !== undefined ? row.cohensH.toFixed(2) : "—"}</td>
+                                        <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{(row.pValueAdjusted ?? row.pValue).toExponential(2)}</td>
                                         <td className="py-1.5 text-right">
                                             {row.significant
                                                 ? <span className="text-xs bg-foreground text-background px-2 py-0.5 rounded-full font-bold">Yes</span>

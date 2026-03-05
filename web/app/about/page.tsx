@@ -116,6 +116,17 @@ export default function AboutPage() {
                     </p>
                 </div>
 
+                {/* Related Work */}
+                <div className="border-l-4 border-brand pl-6 space-y-2 md:col-span-2">
+                    <h2 className="text-sm font-black uppercase tracking-widest text-brand">Related Work</h2>
+                    <p className="text-muted-foreground leading-relaxed">
+                        Moderation Bias builds upon excellent prior datasets like <strong>ToxicChat</strong>, <strong>BOLD</strong>, <strong>WinoBias</strong>, <strong>BBQ</strong>, and <strong>HarmBench</strong>.
+                        While those projects established rigorous, single-turn English evaluations for bias and safety,
+                        Moderation Bias focuses exclusively on <em>continuous, longitudinal auditing</em> across a wide array of models
+                        as their policies drift over time, providing a public resource for ongoing transparency.
+                    </p>
+                </div>
+
             </div>
 
             {/* ── System Prompt Transparency ── */}

@@ -260,26 +260,57 @@ def generate_precomputed_json(df):
         for j in range(i + 1, len(all_models_sorted)):
             mA, mB = all_models_sorted[i], all_models_sorted[j]
             b_count, c_count, samples = 0, 0, 0
+            a_total_unsafe, b_total_unsafe = 0, 0
             for pid, mv in prompt_verdicts.items():
                 if mA in mv and mB in mv:
                     samples += 1
                     a_unsafe = mv[mA]
                     b_unsafe = mv[mB]
+                    if a_unsafe: a_total_unsafe += 1
+                    if b_unsafe: b_total_unsafe += 1
                     if a_unsafe and not b_unsafe:
                         b_count += 1
                     if not a_unsafe and b_unsafe:
                         c_count += 1
             if samples > 0:
-                p_val, significant = mcnemars_test(b_count, c_count)
+                p_val, _ = mcnemars_test(b_count, c_count)
+                
+                # Calculate Cohen's h effect size
+                pA = a_total_unsafe / samples
+                pB = b_total_unsafe / samples
+                # Prevent domain errors in asin(sqrt(x)) for floating point imprecision
+                pA, pB = max(0, min(1, pA)), max(0, min(1, pB))
+                phiA = 2 * math.asin(math.sqrt(pA))
+                phiB = 2 * math.asin(math.sqrt(pB))
+                cohens_h = abs(phiA - phiB)
+                
                 sig_results.append({
                     'modelA': mA,
                     'modelB': mB,
-                    'pValue': round(p_val, 8),
-                    'significant': significant,
+                    'pValue': p_val, # Unadjusted
+                    'cohensH': round(cohens_h, 4),
                     'samples': samples,
                     'disagreements': b_count + c_count,
                 })
+                
+    # Sort by unadjusted p-value for Benjamini-Hochberg FDR
     sig_results.sort(key=lambda x: x['pValue'])
+    
+    # Apply Benjamini-Hochberg False Discovery Rate (FDR) correction
+    m = len(sig_results)
+    for i, res in enumerate(sig_results):
+        rank = i + 1
+        res['pValueAdjusted'] = min(res['pValue'] * m / rank, 1.0)
+        
+    # Step-up procedure for monotonic adjusted p-values
+    for i in range(m - 2, -1, -1):
+        sig_results[i]['pValueAdjusted'] = min(sig_results[i]['pValueAdjusted'], sig_results[i+1]['pValueAdjusted'])
+        
+    # Re-assign significant boolean based on adjusted list and round off decimals
+    for res in sig_results:
+        res['significant'] = res['pValueAdjusted'] < 0.05
+        res['pValue'] = round(res['pValue'], 8)
+        res['pValueAdjusted'] = round(res['pValueAdjusted'], 8)
 
     with open('web/public/significance_pairwise.json', 'w') as f:
         json.dump(sig_results, f, separators=(',', ':'))

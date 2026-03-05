@@ -371,6 +371,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                         'category': p['category'],
                         'style': p.get('style', 'Direct'), # Default to Direct
                         'persona': p.get('persona', 'Default'), # New Field
+                        'system_prompt': sys_prompt or PERSONAS.get(p.get('persona', 'Default'), PERSONAS['Default']),
                         'verdict': legacy_verdict,
                         'classification': classification['category'], # Add to CSV
                         'prompt_text': p['text'],
@@ -391,6 +392,9 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                         'model': model_name,
                         'prompt_id': p['id'],
                         'category': p['category'],
+                        'style': p.get('style', 'Direct'),
+                        'persona': p.get('persona', 'Default'),
+                        'system_prompt': sys_prompt or PERSONAS.get(p.get('persona', 'Default'), PERSONAS['Default']),
                         'verdict': "ERROR",
                         'prompt_text': p['text'],
                         'response_text': f"DB_SAVE_ERROR: {e}",
@@ -437,9 +441,12 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                 return {
                     'test_date': datetime.datetime.now().strftime("%Y-%m-%d"),
                     'model': model_name,
-                    'prompt_id': p['id'],
-                    'category': p['category'],
-                    'verdict': verdict,
+                        'prompt_id': p['id'],
+                        'category': p['category'],
+                        'style': p.get('style', 'Direct'),
+                        'persona': p.get('persona', 'Default'),
+                        'system_prompt': p.get('system_prompt') or PERSONAS.get(p.get('persona', 'Default'), PERSONAS['Default']),
+                        'verdict': verdict,
                     'prompt_text': p['text'],
                     'response_text': f"ERROR: {e}",
                     'prompt_tokens': 0,
@@ -457,7 +464,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
 async def run_audit_async(prompts, models, output_file, policy_version=None):
     """Orchestrates the audit across multiple models."""
     
-    headers = ['test_date', 'model', 'model_version', 'prompt_id', 'category', 'style', 'persona', 'verdict', 'classification',
+    headers = ['test_date', 'model', 'model_version', 'prompt_id', 'category', 'style', 'persona', 'system_prompt', 'verdict', 'classification',
                'prompt_text', 'response_text', 'prompt_tokens', 'completion_tokens', 'total_tokens', 'run_cost', 'confidence', 'reasoning']
     
     # Initialize file with headers if needed
