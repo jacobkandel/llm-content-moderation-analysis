@@ -215,20 +215,20 @@
         "display_name": "o3 Mini",
         "provider": "OpenAI",
         "region": "US",
-        "tier": "Mid",
+        "tier": "High",
         "cost_per_m_in": 1.1,
         "cost_per_m_out": 4.4
     },
     {
-        "id": "deepseek/deepseek-r1",
-        "strict_id": "deepseek/deepseek-r1",
+        "id": "deepseek/deepseek-r1:free",
+        "strict_id": "deepseek/deepseek-r1:free",
         "name": "DeepSeek R1",
         "display_name": "DeepSeek R1",
         "provider": "DeepSeek",
         "region": "China",
-        "tier": "High",
-        "cost_per_m_in": 0.55,
-        "cost_per_m_out": 2.19
+        "tier": "Low",
+        "cost_per_m_in": 0.0,
+        "cost_per_m_out": 0.0
     },
     {
         "id": "meta-llama/llama-3.3-70b-instruct:free",
