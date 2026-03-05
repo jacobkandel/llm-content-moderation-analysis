@@ -150,6 +150,9 @@ def update_trends(audit_file='audit_log.csv', trends_file='data/trends.csv'):
         logger.error(f"Failed to update trends: {e}")
 
 def export_recent_data(audit_file='audit_log.csv', output_file='web/public/audit_recent.csv', days=7):
+    # TODO: audit_recent.csv is generated but never consumed by the frontend.
+    # Either wire it up in AnalysisContext.tsx as a faster initial load source,
+    # or remove this function and the call in main() to reduce disk I/O.
     """Exports only the last N days of audit data for faster frontend loading."""
     try:
         if not os.path.exists(audit_file): return

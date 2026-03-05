@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * SkeletonLoader — full-page loading state for analysis pages.
+ * Renders a realistic card/chart layout structure while data is loading.
+ *
+ * For inline / ad-hoc skeleton primitives, use `@/components/ui/Skeleton` instead.
+ */
 export default function SkeletonLoader() {
     return (
         <div className="animate-pulse space-y-6">
