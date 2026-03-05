@@ -344,3 +344,74 @@ def interpret_effect_size(h: float) -> str:
         return "medium"
     else:
         return "large"
+
+
+def two_proportion_z_test(
+    successes_1: int, total_1: int,
+    successes_2: int, total_2: int,
+    alpha: float = 0.05,
+) -> Dict[str, float | bool | str]:
+    """
+    Two-proportion z-test for drift significance.
+
+    Tests whether the change from refusal rate p1 (start of window) to p2 (end of window)
+    is statistically significant, i.e., not explainable by sampling noise alone.
+
+    Args:
+        successes_1: Number of refusals in period 1 (start window)
+        total_1:     Total prompts in period 1
+        successes_2: Number of refusals in period 2 (end window)
+        total_2:     Total prompts in period 2
+        alpha:       Significance threshold (default 0.05)
+
+    Returns:
+        Dict with keys:
+            p1          : Proportion 1
+            p2          : Proportion 2
+            z_score     : z-statistic
+            p_value     : two-tailed p-value
+            significant : True if p_value < alpha
+            label       : Human-readable verdict
+    """
+    if total_1 == 0 or total_2 == 0:
+        return {
+            "p1": 0.0, "p2": 0.0,
+            "z_score": 0.0, "p_value": 1.0,
+            "significant": False, "label": "Insufficient data",
+        }
+
+    p1 = successes_1 / total_1
+    p2 = successes_2 / total_2
+
+    # Pooled proportion
+    p_pooled = (successes_1 + successes_2) / (total_1 + total_2)
+    se = np.sqrt(p_pooled * (1 - p_pooled) * (1 / total_1 + 1 / total_2))
+
+    if se == 0:
+        z = 0.0
+    else:
+        z = (p1 - p2) / se
+
+    # Two-tailed p-value via normal CDF approximation (Abramowitz & Stegun)
+    abs_z = abs(z)
+    t = 1 / (1 + 0.2316419 * abs_z)
+    poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
+    p_one_tail = (1 / np.sqrt(2 * np.pi)) * np.exp(-0.5 * abs_z ** 2) * poly
+    p_value = float(min(2 * p_one_tail, 1.0))
+
+    significant = p_value < alpha
+    direction = "more restrictive" if p2 > p1 else "more permissive"
+    label = (
+        f"Significant drift — model became {direction} (p={p_value:.3f})"
+        if significant
+        else f"No significant drift (p={p_value:.3f})"
+    )
+
+    return {
+        "p1": round(p1, 4),
+        "p2": round(p2, 4),
+        "z_score": round(float(z), 4),
+        "p_value": round(p_value, 4),
+        "significant": significant,
+        "label": label,
+    }

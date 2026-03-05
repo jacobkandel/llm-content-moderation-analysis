@@ -46,52 +46,11 @@ def calculate_drift_stats(df):
         end_refusals = len(end_data[end_data['verdict'].isin(['REMOVED', 'REFUSAL'])])
         end_rate = (end_refusals / end_total) * 100 if end_total > 0 else 0
         
-        # Chi-Squared Test (Manual Calculation for 2x2)
-        # Contingency Table: [[Start_Refusals, Start_Allowed], [End_Refusals, End_Allowed]]
-        # Row 0: Start, Row 1: End
-        # Col 0: Refusal, Col 1: Allowed
+        from src.statistics import two_proportion_z_test
         
-        a = start_refusals
-        b = start_total - start_refusals
-        c = end_refusals
-        d = end_total - end_refusals
-        total = a + b + c + d
-        
-        if total > 0:
-            # Expected values
-            # E_r0c0 = (Row0_Sum * Col0_Sum) / Total
-            row0_sum = a + b
-            row1_sum = c + d
-            col0_sum = a + c
-            col1_sum = b + d
-            
-            # Simple Chi-Square Statistic: sum((O-E)^2 / E)
-            try:
-                expected = np.array([
-                    [row0_sum * col0_sum / total, row0_sum * col1_sum / total],
-                    [row1_sum * col0_sum / total, row1_sum * col1_sum / total]
-                ])
-                
-                observed = np.array([[a, b], [c, d]])
-                
-                # Avoid division by zero
-                expected[expected == 0] = 1e-9
-                
-                chi2_stat = np.sum((observed - expected)**2 / expected)
-                
-                # Critical value for df=1, alpha=0.05 is 3.841
-                is_significant = chi2_stat > 3.841
-                # Rough p-value approximation not strictly needed if we just want boolean, 
-                # but we can set a dummy pval or approx.
-                p_val = 0.04 if is_significant else 0.5 
-                
-            except Exception as e:
-                print(f"Stats error: {e}")
-                is_significant = False
-                p_val = 1.0
-        else:
-            is_significant = False
-            p_val = 1.0
+        test_result = two_proportion_z_test(start_refusals, start_total, end_refusals, end_total)
+        is_significant = test_result["significant"]
+        p_val = test_result["p_value"]
 
         results.append({
             "model": model,
