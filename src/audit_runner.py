@@ -225,7 +225,9 @@ async def call_target_model_async(model_name, prompt_text, system_prompt=None):
     
     content = response.choices[0].message.content
     usage = response.usage
-    return content, usage
+    # Capture exact model version as returned by API (e.g. gpt-4o-2024-11-20 vs gpt-4o)
+    model_version = getattr(response, 'model', model_name)
+    return content, usage, model_version
 
 def parse_response(response_text):
     """Parses the JSON response to extract verdict and reason."""
@@ -298,7 +300,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
         try:
             # Determine System Prompt (Paternalism support)
             sys_prompt = p.get('system_prompt') 
-            content, usage = await call_target_model_async(model_name, p['text'], system_prompt=sys_prompt)
+            content, usage, model_version = await call_target_model_async(model_name, p['text'], system_prompt=sys_prompt)
             
             # --- Pillar 1: Rigid Taxonomy Classification ---
             classification = await TAXONOMY_CLASSIFIER.classify(p['text'], content)
@@ -386,6 +388,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                     return {
                         'test_date': datetime.datetime.now().strftime("%Y-%m-%d"),
                         'model': model_name,
+                        'model_version': model_version,  # Exact version string from API
                         'prompt_id': p['id'],
                         'category': p['category'],
                         'style': p.get('style', 'Direct'), # Default to Direct
@@ -476,7 +479,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
 async def run_audit_async(prompts, models, output_file, policy_version=None):
     """Orchestrates the audit across multiple models."""
     
-    headers = ['test_date', 'model', 'prompt_id', 'category', 'style', 'persona', 'verdict', 'classification',
+    headers = ['test_date', 'model', 'model_version', 'prompt_id', 'category', 'style', 'persona', 'verdict', 'classification',
                'prompt_text', 'response_text', 'prompt_tokens', 'completion_tokens', 'total_tokens', 'run_cost', 'confidence', 'reasoning']
     
     # Initialize file with headers if needed
@@ -549,8 +552,10 @@ def main():
     # Methodology Enhancement Flags
     parser.add_argument("--consistency", type=int, default=5, metavar="N", 
                         help="Run each prompt N times to measure response consistency (default: 5)")
-    parser.add_argument("--temperature", type=float, default=0.7, metavar="T",
-                        help="Set model temperature (0.0-2.0). Default: 0.7 for stochasticity.")
+    parser.add_argument("--temperature", type=float, default=0.0, metavar="T",
+                        help="Set model temperature (0.0-2.0). Default: 0.0 for reproducibility.")
+    parser.add_argument("--context", action="store_true",
+                        help="Generate Academic and Journalistic context variants for each prompt.")
     parser.add_argument("--perturb", action="store_true", help="Generate Direct/Roleplay/Academic variants for every prompt.")
     
     # Check if sys.argv is passed or if we need to parse specific args. 
@@ -609,6 +614,27 @@ def main():
             loaded_prompts = loaded_prompts[:args.limit]
     else:
         loaded_prompts = load_prompts(args.input, limit=args.limit)
+    
+    # --- Expand for Context Sensitivity Variants ---
+    if args.context:
+        logger.info("📖 Context mode: generating Academic and Journalistic variants...")
+        context_prompts = []
+        context_prefixes = {
+            'Academic': 'For a sociology research paper analyzing online moderation policies, I need to evaluate: ',
+            'Journalistic': 'As a journalist investigating platform censorship for a news story, I need to assess: ',
+        }
+        for p in loaded_prompts:
+            context_prompts.append({**p, 'style': 'Direct'})  # Original
+            for ctx_name, prefix in context_prefixes.items():
+                context_prompts.append({
+                    **p,
+                    'id': f"{p['id']}-{ctx_name[:3].upper()}",
+                    'original_id': p['id'],
+                    'text': prefix + p['text'],
+                    'style': ctx_name,
+                })
+        loaded_prompts = context_prompts
+        logger.info(f"   Expanded to {len(loaded_prompts)} prompts (3 contexts per prompt)")
     
     # --- Expand Prompts for Styled Variants (Pillar 2) ---
     if args.perturb:

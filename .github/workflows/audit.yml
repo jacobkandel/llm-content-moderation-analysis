@@ -141,7 +141,6 @@ jobs:
           echo "✅ Download complete."
 
       - name: Compress Data
-        if: ${{ inputs.skip_collection != 'true' }}
         run: python scripts/compress_data.py
 
       - name: Generate Semantic Clusters
