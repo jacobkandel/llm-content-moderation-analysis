@@ -67,8 +67,10 @@ export default function FilterBar() {
                     {/* Date Range - Stacked or Row */}
                     <div className="flex items-center gap-2 w-full md:w-auto flex-1 min-w-[280px]">
                         <div className="relative flex-1">
-                            <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5" />
+                            <label htmlFor="filter-start-date" className="sr-only">Start Date</label>
+                            <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5 pointer-events-none" aria-hidden="true" />
                             <input
+                                id="filter-start-date"
                                 type="date"
                                 value={dateRange.start}
                                 min={minDate}
@@ -77,10 +79,12 @@ export default function FilterBar() {
                                 className="w-full text-xs border border-border rounded-lg pl-8 pr-2 py-1.5 bg-card text-foreground hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none transition-colors appearance-none"
                             />
                         </div>
-                        <span className="text-xs text-muted-foreground">→</span>
+                        <span className="text-xs text-muted-foreground" aria-hidden="true">→</span>
                         <div className="relative flex-1">
-                            <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5" />
+                            <label htmlFor="filter-end-date" className="sr-only">End Date</label>
+                            <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5 pointer-events-none" aria-hidden="true" />
                             <input
+                                id="filter-end-date"
                                 type="date"
                                 value={dateRange.end}
                                 min={dateRange.start || minDate}
@@ -135,7 +139,7 @@ export default function FilterBar() {
                                     )}
                                 </div>
                                 <div className="p-1">
-                                    {allModels.map(model => {
+                                    {allModels.map((model, index) => {
                                         const isSelected = selectedModels.includes(model);
                                         const displayName = model.split('/').pop() || model;
                                         return (
@@ -143,6 +147,8 @@ export default function FilterBar() {
                                                 key={model}
                                                 role="option"
                                                 aria-selected={isSelected}
+                                                aria-setsize={allModels.length}
+                                                aria-posinset={index + 1}
                                                 onClick={() => toggleModel(model)}
                                                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${isSelected
                                                     ? 'bg-primary/20 text-primary'
@@ -200,12 +206,16 @@ export default function FilterBar() {
 
             {/* Active chips row */}
             {selectedModels.length > 0 && selectedModels.length <= 3 && (
-                <div className="mt-3 pt-3 border-t border-border flex items-center gap-1 flex-wrap">
+                <div className="mt-3 pt-3 border-t border-border flex items-center gap-2 flex-wrap" role="list" aria-label="Active model filters">
                     {selectedModels.map(m => (
-                        <span key={m} className="inline-flex items-center gap-1 text-[10px] bg-primary/20 text-primary rounded-full px-2 py-0.5 font-medium border border-primary/20">
+                        <span key={m} role="listitem" className="inline-flex items-center gap-1.5 text-xs bg-primary/20 text-primary rounded-full pl-3 pr-1 py-1 font-medium border border-primary/20">
                             {m.split('/').pop()}
-                            <button aria-label={`Remove model ${m.split('/').pop()}`} onClick={() => toggleModel(m)} className="hover:text-primary/70">
-                                <X className="h-2.5 w-2.5" />
+                            <button
+                                aria-label={`Remove model ${m.split('/').pop()}`}
+                                onClick={() => toggleModel(m)}
+                                className="hover:text-primary/70 focus:outline-none focus:ring-2 focus:ring-primary rounded-full p-1 -m-1"
+                            >
+                                <X className="h-3 w-3" />
                             </button>
                         </span>
                     ))}

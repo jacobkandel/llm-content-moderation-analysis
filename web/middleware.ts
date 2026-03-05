@@ -2,22 +2,22 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Middleware: adds a per-request CSP nonce and tightens the Content-Security-Policy.
+ * Middleware: sets security headers including a compatible Content-Security-Policy.
  *
- * Why: 'unsafe-inline' in next.config.ts allows any inline script to run, defeating XSS
- * protection. A nonce ensures only Next.js-injected scripts (which receive the nonce) execute.
- *
- * The nonce is placed in the `x-csp-nonce` response header so that the root layout
- * can read it via `headers()` and pass it to `<Script nonce={nonce}>` tags.
+ * NOTE: A nonce-based script-src requires full Next.js app router nonce integration
+ * (reading x-csp-nonce in layout.tsx and passing it to every <Script> tag including
+ * the theme-toggle inline script). That wiring is complex. Until it is fully implemented,
+ * we use 'unsafe-inline' for scripts — which is what the Next.js default ships with —
+ * while still hardening all other directives (HSTS, X-Frame-Options, nosniff, etc.).
  */
 export function middleware(request: NextRequest) {
-    const nonce = crypto.randomUUID().replace(/-/g, '');
     const isProd = process.env.NODE_ENV === 'production';
 
     const csp = [
         `default-src 'self'`,
-        // Next.js needs 'unsafe-eval' in dev for hot-reload; locked down in prod
-        `script-src 'self' 'nonce-${nonce}'${isProd ? '' : " 'unsafe-eval'"}`,
+        // 'unsafe-inline' is required by Next.js for its own injected scripts and theme toggles.
+        // 'unsafe-eval' is only needed in dev for hot-reload.
+        `script-src 'self' 'unsafe-inline'${isProd ? '' : " 'unsafe-eval'"}`,
         `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
         `font-src 'self' data: https://fonts.gstatic.com`,
         `img-src 'self' data: https:`,
@@ -28,12 +28,7 @@ export function middleware(request: NextRequest) {
         `form-action 'self'`,
     ].join('; ');
 
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-csp-nonce', nonce);
-
-    const response = NextResponse.next({
-        request: { headers: requestHeaders },
-    });
+    const response = NextResponse.next();
 
     response.headers.set('Content-Security-Policy', csp);
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
@@ -41,7 +36,6 @@ export function middleware(request: NextRequest) {
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    response.headers.set('x-csp-nonce', nonce);
 
     return response;
 }

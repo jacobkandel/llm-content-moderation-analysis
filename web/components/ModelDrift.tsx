@@ -45,6 +45,26 @@ export function ModelDrift({ data = [] }: ModelDriftProps) {
                         <EmptyState title="No drift data" description="Adjust your filters or select models with drift data." icon="search" />
                     </div>
                 )}
+
+                {/* Screen reader fallback table */}
+                {data.length > 0 && (
+                    <table className="sr-only" aria-label="Model Drift Data">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Refusal Rate Change (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map((entry, i) => (
+                                <tr key={i}>
+                                    <td>{entry.model}</td>
+                                    <td>{entry.rate_change}%</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </CardContent>
         </Card>
     );

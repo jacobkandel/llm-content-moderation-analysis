@@ -252,24 +252,29 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                     const isExpanded = expandedModel === m;
 
                     return (
-                        <div key={m} className="border border-border rounded-lg overflow-hidden">
+                        <div key={m} className="border border-border rounded-xl shadow-sm bg-card overflow-hidden">
                             <div
-                                className={`p-4 flex items-center justify-between cursor-pointer transition-colors ${isExpanded ? 'bg-muted/50' : 'bg-card'}`}
+                                className={`p-4 flex items-center justify-between cursor-pointer transition-colors ${isExpanded ? 'bg-muted/30' : 'bg-card'}`}
                                 onClick={() => toggleModel(m)}
                             >
-                                <div>
-                                    <p className="font-semibold text-foreground">
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-foreground text-base">
                                         {m && typeof m === 'string' ? (m.split('/').pop() || m) : 'Unknown'}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Avg Refusal: <span className={avgRate > 0.5 ? 'text-brand font-bold' : 'text-foreground'}>{(avgRate * 100).toFixed(1)}%</span>
-                                    </p>
+                                    </h4>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Overall:</span>
+                                        <span className={`text-sm font-bold ${avgRate > 0.5 ? 'text-brand' : 'text-foreground'}`}>
+                                            {(avgRate * 100).toFixed(1)}% refusal
+                                        </span>
+                                    </div>
                                 </div>
-                                {isExpanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+                                <div className="bg-muted/40 p-2 rounded-full">
+                                    {isExpanded ? <ChevronUp className="w-5 h-5 text-foreground" /> : <ChevronDown className="w-5 h-5 text-foreground" />}
+                                </div>
                             </div>
 
                             {isExpanded && (
-                                <div className="border-t border-border bg-muted/20 p-2 grid grid-cols-2 gap-2 text-xs">
+                                <div className="border-t border-border bg-muted/10 p-4 space-y-3">
                                     {matrix.categories.map(c => {
                                         const cell = matrix.stats[m][c];
                                         if (!cell || cell.total === 0) return null;
@@ -280,12 +285,12 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                                 role="button"
                                                 tabIndex={0}
                                                 aria-label={`${c}: ${getSeverity(rate)} severity with ${(rate * 100).toFixed(0)}% refusals`}
-                                                className={`p-2 rounded flex justify-between items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getColor(rate)}`}
+                                                className={`p-3 rounded-lg flex justify-between items-center cursor-pointer shadow-sm border border-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${getColor(rate)}`}
                                                 onClick={() => handleCellClick(m, c)}
                                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCellClick(m, c); } }}
                                             >
-                                                <span className="truncate mr-2 font-medium">{sanitizeCategory(c)}</span>
-                                                <span>{(rate * 100).toFixed(0)}%</span>
+                                                <span className="truncate mr-3 font-semibold text-sm">{sanitizeCategory(c)}</span>
+                                                <span className="text-base font-black tracking-tight">{(rate * 100).toFixed(0)}%</span>
                                             </div>
                                         );
                                     })}

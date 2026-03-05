@@ -117,6 +117,26 @@ export default function VerdictPieChart({ data, title = 'Verdict Distribution' }
                     </PieChart>
                 </ResponsiveContainer>
             </div>
+
+            {/* Screen reader fallback table */}
+            <table className="sr-only" aria-label={title}>
+                <thead>
+                    <tr>
+                        <th>Verdict</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {chartData.map((d, i) => (
+                        <tr key={i}>
+                            <td>{d.name}</td>
+                            <td>{d.value}</td>
+                            <td>{((d.value / total) * 100).toFixed(1)}%</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 }
