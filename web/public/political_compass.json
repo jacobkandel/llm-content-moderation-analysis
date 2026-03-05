@@ -1,97 +1,122 @@
 [
   {
     "model": "openai/gpt-4o",
-    "economic": 1.9278711271532085,
-    "social": 1.2299296716268362
+    "economic": 4.1909794603282275,
+    "social": 7.991253778606511
   },
   {
     "model": "openai/gpt-4o-mini",
-    "economic": 4.020847622286306,
-    "social": 1.2851364589683953
+    "economic": 4.56905975587094,
+    "social": -4.580100069392486
   },
   {
     "model": "anthropic/claude-3.5-sonnet",
-    "economic": 1.488216586692781,
-    "social": 3.7912350544776636
+    "economic": 1.9197202289745334,
+    "social": -6.021049802593772
   },
   {
     "model": "anthropic/claude-3-haiku",
-    "economic": -6.250796459327368,
-    "social": 4.476557983800671
+    "economic": -0.3199667799031509,
+    "social": 1.1048533437976928
   },
   {
     "model": "google/gemini-2.0-flash-001",
-    "economic": -4.099168573235151,
-    "social": -2.146604814067535
+    "economic": -1.4189996974108716,
+    "social": 2.3857963177559967
   },
   {
     "model": "deepseek/deepseek-chat",
-    "economic": -0.3891547370999895,
-    "social": -5.576300999589922
+    "economic": -3.552317236595586,
+    "social": 0.9363325255049961
   },
   {
     "model": "qwen/qwen-2.5-72b-instruct",
-    "economic": 1.5240331710528423,
-    "social": 2.190605161028838
+    "economic": -0.4723803694134805,
+    "social": 3.7930677936017716
   },
   {
     "model": "qwen/qwen-2.5-7b-instruct",
-    "economic": -6.988858627189693,
-    "social": 1.9113506311301798
+    "economic": 0.5332251461873305,
+    "social": 0.1274216332462288
   },
   {
     "model": "01-ai/yi-34b-chat",
-    "economic": -5.424593971474138,
-    "social": 1.1136358898910572
+    "economic": 5.9036392996039115,
+    "social": -5.609342806334153
   },
   {
     "model": "mistralai/mistral-large",
-    "economic": 4.538578905259898,
-    "social": -4.419269823131852
+    "economic": -2.0659557189714004,
+    "social": -6.729277579872614
   },
   {
     "model": "mistralai/mistral-medium",
-    "economic": 6.393241088202588,
-    "social": 5.613558696658789
+    "economic": 7.990972111399534,
+    "social": -1.2655606997682618
   },
   {
     "model": "google/gemini-2.5-pro",
-    "economic": -1.3521154654064897,
-    "social": 0.6709236610519547
+    "economic": 2.920528129430469,
+    "social": 2.5335644990433224
   },
   {
     "model": "google/gemini-2.0-flash-lite-001",
-    "economic": 1.6980449295456932,
-    "social": 1.8966460977505584
+    "economic": -3.8820661200274227,
+    "social": -1.5136894590206325
   },
   {
     "model": "anthropic/claude-3.5-haiku",
-    "economic": -2.0523923795628214,
-    "social": 5.38939884394366
+    "economic": 5.476355396104376,
+    "social": 6.327366607052417
   },
   {
     "model": "mistralai/mistral-small-24b-instruct-2501",
-    "economic": 3.013997040837987,
-    "social": 0.7605769317278828
+    "economic": -4.396606823109103,
+    "social": -3.2665933267228446
   },
   {
     "model": "mistralai/ministral-8b",
-    "economic": -4.854418998348136,
-    "social": 0.8201632536242602
+    "economic": 1.113405668829948,
+    "social": -3.4034003534831108
   },
   {
     "model": "qwen/qwen-plus",
-    "economic": 5.611946464781395,
-    "social": 0.23256620275498996
+    "economic": -3.6011826351894083,
+    "social": -1.6990606732152056
   },
   {
     "model": "x-ai/grok-3",
-    "economic": 5.854106563427807,
-    "social": 2.735046989945559
+    "economic": 1.2551241832109703,
+    "social": -1.6955243123011794
   },
   {
     "model": "x-ai/grok-3-mini",
-    "economic": -4.1276455795436515,
-    "social": -4.390670927710609
+    "economic": -2.370816949194083,
+    "social": -2.199988236259758
+  },
+  {
+    "model": "meta-llama/llama-3.3-70b-instruct:free",
+    "economic": -7.716185253312993,
+    "social": -0.8201825247536387
+  },
+  {
+    "model": "mistralai/mistral-small-3.1-24b-instruct:free",
+    "economic": -4.995636591660309,
+    "social": -2.561405221875823
+  },
+  {
+    "model": "google/gemma-3-27b-it:free",
+    "economic": 7.9354474415576775,
+    "social": -2.7285151707901143
+  },
+  {
+    "model": "nousresearch/hermes-3-llama-3.1-405b:free",
+    "economic": -0.8151833131853508,
+    "social": 5.435509993240803
+  },
+  {
+    "model": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+    "economic": -6.894467473481807,
+    "social": 3.1496700582670947
   }
 ]
