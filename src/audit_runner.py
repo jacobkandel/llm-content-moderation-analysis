@@ -149,28 +149,6 @@ def update_trends(audit_file='audit_log.csv', trends_file='data/trends.csv'):
     except Exception as e:
         logger.error(f"Failed to update trends: {e}")
 
-def export_recent_data(audit_file='audit_log.csv', output_file='web/public/audit_recent.csv', days=7):
-    # TODO: audit_recent.csv is generated but never consumed by the frontend.
-    # Either wire it up in AnalysisContext.tsx as a faster initial load source,
-    # or remove this function and the call in main() to reduce disk I/O.
-    """Exports only the last N days of audit data for faster frontend loading."""
-    try:
-        if not os.path.exists(audit_file): return
-        
-        df = pd.read_csv(audit_file)
-        if df.empty: return
-        
-        # Ensure date format
-        df['test_date'] = pd.to_datetime(df['test_date'])
-        
-        cutoff_date = datetime.datetime.now() - datetime.timedelta(days=days)
-        recent_df = df[df['test_date'] >= cutoff_date]
-        
-        recent_df.to_csv(output_file, index=False)
-        logger.info(f"✅ Exported recent data ({days} days): {len(recent_df)} rows to {output_file}")
-    except Exception as e:
-        logger.error(f"Failed to export recent data: {e}")
-
 # --- Core Logic ---
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
@@ -780,9 +758,6 @@ def main():
     logger.info("📈 Updating longitudinal trends...")
     update_trends(args.output, "data/trends.csv")
     
-    logger.info("🚀 Exporting Light Mode data (Recent 7 Days)...")
-    export_recent_data(args.output, "web/public/audit_recent.csv")
-
     logger.info("📸 Saving Daily Snapshot...")
     save_snapshot(args.output)
     
