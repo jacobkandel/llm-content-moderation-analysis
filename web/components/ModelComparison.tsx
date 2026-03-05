@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
 
 type AuditRow = {
     model: string;
@@ -73,6 +74,18 @@ function normalCDF(x: number): number {
 }
 
 export default function ModelComparison({ data, onModelSelect }: { data: AuditRow[], onModelSelect?: (model: string) => void }) {
+    const [sortKey, setSortKey] = useState<'refusalRate' | 'model' | 'count' | 'avgLength'>('refusalRate');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+    const handleSort = (key: typeof sortKey) => {
+        if (sortKey === key) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortOrder('desc'); // Default new sort to desc, since higher values are usually more interesting here
+        }
+    };
+
     const stats = useMemo(() => {
         const map: Record<string, { total: number; refusals: number; totalLen: number }> = {};
 
@@ -112,8 +125,17 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
                 confidenceInterval: ci,
                 pValue
             };
-        }).sort((a, b) => b.refusalRate - a.refusalRate);
-    }, [data]);
+        }).sort((a, b) => {
+            let cmp = 0;
+            switch (sortKey) {
+                case 'model': cmp = a.model.localeCompare(b.model); break;
+                case 'count': cmp = a.count - b.count; break;
+                case 'avgLength': cmp = a.avgLength - b.avgLength; break;
+                default: cmp = a.refusalRate - b.refusalRate; break;
+            }
+            return sortOrder === 'asc' ? cmp : -cmp;
+        });
+    }, [data, sortKey, sortOrder]);
 
     const formatCI = (ci: { lower: number; upper: number }) => {
         return `${ci.lower.toFixed(1)}–${ci.upper.toFixed(1)}%`;
@@ -127,33 +149,78 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
         return '';
     };
 
+    const SortIcon = ({ column }: { column: typeof sortKey }) => {
+        if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 opacity-30 group-hover:opacity-100 transition-opacity" />;
+        return sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-brand" /> : <ArrowDown className="h-3 w-3 text-brand" />;
+    };
+
     return (
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-border">
+            <div className="p-4 sm:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <span>🏆</span> Model Comparison
                 </h3>
+
+                {/* Mobile-friendly Sort Dropdown (Visible only on small screens) */}
+                <div className="flex sm:hidden items-center gap-2 w-full">
+                    <label htmlFor="mobile-sort" className="text-sm font-medium text-muted-foreground whitespace-nowrap">Sort by:</label>
+                    <select
+                        id="mobile-sort"
+                        className="bg-background border border-border text-foreground text-sm rounded-lg focus:ring-brand focus:border-brand block w-full p-2.5"
+                        value={`${sortKey}-${sortOrder}`}
+                        onChange={(e) => {
+                            const [k, o] = e.target.value.split('-');
+                            setSortKey(k as any);
+                            setSortOrder(o as any);
+                        }}
+                    >
+                        <option value="refusalRate-desc">Refusal Rate (High to Low)</option>
+                        <option value="refusalRate-asc">Refusal Rate (Low to High)</option>
+                        <option value="model-asc">Model Name (A-Z)</option>
+                        <option value="count-desc">Prompts (High to Low)</option>
+                        <option value="avgLength-desc">Avg Response (High to Low)</option>
+                    </select>
+                </div>
             </div>
 
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                     <thead>
                         <tr className="bg-muted/50 border-b border-border">
-                            <th className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider">Model</th>
-                            <th className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider">
+                            <th
+                                className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider cursor-pointer group hover:bg-muted/70 transition-colors"
+                                onClick={() => handleSort('model')}
+                            >
+                                <div className="flex items-center gap-1">Model <SortIcon column="model" /></div>
+                            </th>
+                            <th
+                                className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider cursor-pointer group hover:bg-muted/70 transition-colors"
+                                onClick={() => handleSort('refusalRate')}
+                            >
                                 <div className="flex items-center gap-1">
                                     Refusal Rate
-                                    <span title="Percentage of prompts refused or flagged as unsafe">ⓘ</span>
+                                    <span title="Percentage of prompts refused or flagged as unsafe" className="cursor-help">ⓘ</span>
+                                    <SortIcon column="refusalRate" />
                                 </div>
                             </th>
                             <th className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider">
                                 <div className="flex items-center gap-1">
                                     95% CI
-                                    <span title="Wilson score confidence interval for the refusal rate">ⓘ</span>
+                                    <span title="Wilson score confidence interval for the refusal rate" className="cursor-help">ⓘ</span>
                                 </div>
                             </th>
-                            <th className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider">Avg Response</th>
-                            <th className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider text-right">Prompts</th>
+                            <th
+                                className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider cursor-pointer group hover:bg-muted/70 transition-colors"
+                                onClick={() => handleSort('avgLength')}
+                            >
+                                <div className="flex items-center gap-1">Avg Response <SortIcon column="avgLength" /></div>
+                            </th>
+                            <th
+                                className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider text-right cursor-pointer group hover:bg-muted/70 transition-colors"
+                                onClick={() => handleSort('count')}
+                            >
+                                <div className="flex items-center justify-end gap-1"><SortIcon column="count" /> Prompts</div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -168,7 +235,11 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
                                 </td>
                                 <td className="p-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex-1 h-2 bg-muted rounded-full max-w-[100px] overflow-hidden">
+                                        <div
+                                            className="flex-1 h-2 bg-muted rounded-full max-w-[100px] overflow-hidden"
+                                            role="img"
+                                            aria-label={`Visual bar showing ${row.refusalRate.toFixed(1)}% refusal rate`}
+                                        >
                                             <div
                                                 className={`h-full rounded-full ${row.refusalRate > 50 ? 'bg-refusal' :
                                                     row.refusalRate > 30 ? 'bg-[#EAAA00]' : 'bg-safe'

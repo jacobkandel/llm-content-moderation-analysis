@@ -29,7 +29,7 @@ function erf(x: number): number {
 }
 
 export default function SignificancePage() {
-    const { filteredAuditData, loading, ensureAuditData, ensureSignificance, precomputedSignificance, selectedModels, dateRange } = useAnalysis();
+    const { filteredAuditData, loading, ensureAuditData, ensureSignificance, precomputedSignificance, selectedModels, dateRange, stats } = useAnalysis();
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
 
     // Load significance data on mount (lazy)
@@ -67,7 +67,7 @@ export default function SignificancePage() {
 
         // Get all models
         const models = Array.from(new Set(filteredAuditData.map(r => r.model))).filter(Boolean).sort();
-        const results: { modelA: string; modelB: string; pValue: number; significant: boolean; samples: number; disagreements: number }[] = [];
+        const results: { modelA: string; modelB: string; pValue: number; significant: boolean; samples: number; disagreements: number; pValueAdjusted?: number; cohensH?: number }[] = [];
 
         // Compute pairwise for all unique combinations
         for (let i = 0; i < models.length; i++) {
@@ -143,6 +143,17 @@ export default function SignificancePage() {
                 <div className="bg-card rounded-xl border border-border p-4 flex-1 min-w-[200px]">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider">Not Significant</p>
                     <p className="text-2xl font-bold text-muted-foreground">{pairwiseResults.length - sigCount}</p>
+                </div>
+                <div className="bg-card rounded-xl border border-border p-4 flex-1 min-w-[200px]" title="Minimum Detectable Effect Size for 80% power. This proves the dataset is large enough to confidently rely on the p-values.">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                        Statistical Power <span>ⓘ</span>
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                        {stats?.statisticalPowerMDES
+                            ? `Detects ${stats.statisticalPowerMDES.toFixed(1)}% Δ`
+                            : 'N/A'
+                        }
+                    </p>
                 </div>
             </div>
 

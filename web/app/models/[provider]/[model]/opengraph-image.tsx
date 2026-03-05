@@ -14,8 +14,22 @@ export default async function Image({ params }: { params: Promise<{ provider: st
     // the TS module which might fail in Edge runtime if it relies on node APIs
     let domain = 'openai.com';
     let providerName = 'Unknown';
-    let displayName = rawId;
     let refusalRate = '?';
+
+    try {
+        const appUrl = process.env.VERCEL_URL
+            ?\`https://\${process.env.VERCEL_URL}\` 
+            : (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
+            
+        const res = await fetch(\`\${appUrl}/spectrum_data.json\`);
+        const data = await res.json();
+        const modelData = data.find((d: any) => d.fullName === rawId);
+        if (modelData && modelData.refusalRate !== undefined) {
+            refusalRate = \`\${modelData.refusalRate}%\`;
+        }
+    } catch (e) {
+        console.error('Failed to fetch spectrum data for OG image', e);
+    }
 
     // Best effort mapping inline for Edge runtime
     const lower = rawId.toLowerCase();
@@ -65,10 +79,10 @@ export default async function Image({ params }: { params: Promise<{ provider: st
                     }}>
                         <img
                             src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
-                            width={96}
-                            height={96}
-                        />
-                    </div>
+        width = { 96}
+        height = { 96}
+            />
+                    </div >
 
                     <h1 style={{ fontSize: 72, fontWeight: 900, color: '#0f172a', margin: '0 0 10px 0', textAlign: 'center' }}>
                         {displayName}
@@ -78,12 +92,19 @@ export default async function Image({ params }: { params: Promise<{ provider: st
                         {providerName}
                     </p>
 
-                    <div style={{ display: 'flex', background: '#0f172a', color: 'white', padding: '16px 48px', borderRadius: 100, fontSize: 32, fontWeight: 'bold', alignItems: 'center' }}>
-                        Refusal Rate Analysis
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                        <div style={{ display: 'flex', background: '#e2e8f0', color: '#0f172a', padding: '16px 32px', borderRadius: 100, fontSize: 24, fontWeight: 'bold', alignItems: 'center' }}>
+                            Refusal Rate Analysis
+                        </div>
+                        {refusalRate !== '?' && (
+                            <div style={{ display: 'flex', background: '#ef4444', color: 'white', padding: '16px 32px', borderRadius: 100, fontSize: 32, fontWeight: '900', alignItems: 'center', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)' }}>
+                                {refusalRate}
+                            </div>
+                        )}
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
         ),
         { ...size }
     );
-}
+    }

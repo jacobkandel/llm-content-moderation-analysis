@@ -21,10 +21,25 @@ def normalize_category(cat: str) -> str:
         return 'Explicit/Sexual'
     return cat
 
+def wilson_score_interval(successes: int, total: int, confidence=0.95):
+    """Calculates Wilson Score Confidence Interval for a proportion."""
+    if total == 0:
+        return 0.0, 0.0
+    import math
+    z = 1.95996 # 95% confidence
+    p = successes / total
+    denominator = 1 + z**2 / total
+    center = p + z**2 / (2 * total)
+    sd = math.sqrt((p * (1 - p) + z**2 / (4 * total)) / total)
+    lower = (center - z * sd) / denominator
+    upper = (center + z * sd) / denominator
+    return max(0.0, lower), min(1.0, upper)
 
 def generate_precomputed_json(df):
     """Generate summary_stats.json, heatmap_matrix.json, spectrum_data.json from DataFrame."""
     import pandas as pd
+    import math
+
 
     print("\n📊 Generating pre-computed JSON files...")
 
@@ -86,10 +101,14 @@ def generate_precomputed_json(df):
             continue
         refused = rows['verdict'].isin(REFUSAL_VERDICTS).sum()
         cost = rows[cost_col].astype(float).fillna(0).sum() if cost_col else 0
+        refusal_rate = (refused / total) * 100
+        ci_lower, ci_upper = wilson_score_interval(refused, total)
         spectrum.append({
             'name': model.split('/')[-1] if '/' in model else model,
             'fullName': model,
-            'refusalRate': round((refused / total) * 100, 2),
+            'refusalRate': round(refusal_rate, 2),
+            'refusalRateCILower': round(ci_lower * 100, 2),
+            'refusalRateCIUpper': round(ci_upper * 100, 2),
             'costPer1k': round((cost / total) * 1000, 4) if total > 0 else 0,
             'total': int(total),
         })
@@ -143,10 +162,20 @@ def generate_precomputed_json(df):
             bucket = '> 50% Safe'
         distribution[bucket] += 1
 
+    # Calculate Minimum Detectable Effect Size for 80% power at alpha=0.05
+    # Assumes average discordant proportion of 0.1 for typical model pair
+    avg_discordant_p = 0.1
+    z_alpha = 1.95996
+    z_beta = 0.84162 # 80% power
+    total_prompts_n = int(df['_pid'].nunique())
+    mdes = math.sqrt(((z_alpha + z_beta)**2 * avg_discordant_p) / total_prompts_n) if total_prompts_n > 0 else 0
+    power_mdes = round(mdes * 100, 2)
+
     summary = {
-        'totalCases': int(df['_pid'].nunique()),
+        'totalCases': total_prompts_n,
         'modelsCount': len(keep_models),
         'totalEvaluations': int(len(df)),
+        'statisticalPowerMDES': power_mdes,
         'lastUpdated': dates[-1] if dates else '',
         'dateRange': {'start': dates[0] if dates else '', 'end': dates[-1] if dates else ''},
         'allModels': sorted(keep_models),
@@ -423,18 +452,30 @@ def generate_precomputed_json(df):
         else:
             avg_verb = 0
 
-        # Per-category refusal rates for this model
+        # Per-category refusal rates and CI for this model
         cat_rates = {}
         for cat in compare_categories:
             cat_rows = rows[rows['category'] == cat]
             ct = len(cat_rows)
             if ct == 0:
-                cat_rates[cat] = 0
+                cat_rates[cat] = {'rate': 0, 'ciLower': 0, 'ciUpper': 0}
             else:
-                cat_rates[cat] = round((cat_rows['verdict'].isin(REFUSAL_VERDICTS).sum() / ct) * 100, 2)
+                cat_refused = cat_rows['verdict'].isin(REFUSAL_VERDICTS).sum()
+                rate = (cat_refused / ct) * 100
+                ci_l, ci_u = wilson_score_interval(cat_refused, ct)
+                cat_rates[cat] = {
+                    'rate': round(rate, 2),
+                    'ciLower': round(ci_l * 100, 2),
+                    'ciUpper': round(ci_u * 100, 2)
+                }
+
+        model_refusal_rate = (refused / total) * 100
+        ci_l_mod, ci_u_mod = wilson_score_interval(refused, total)
 
         model_stats[model] = {
-            'refusalRate': round((refused / total) * 100, 2),
+            'refusalRate': round(model_refusal_rate, 2),
+            'refusalRateCILower': round(ci_l_mod * 100, 2),
+            'refusalRateCIUpper': round(ci_u_mod * 100, 2),
             'avgVerbosity': avg_verb,
             'total': int(total),
             'categoryRates': cat_rates,

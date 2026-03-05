@@ -301,12 +301,12 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                 })}
             </div>
 
-            <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground justify-end flex-wrap">
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#00843D]/30 rounded border border-[#00843D]"></div> Safe</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#FFC72C]/30 rounded border border-[#FFC72C]"></div> Low</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#FF671F]/40 rounded border border-[#FF671F]"></div> Medium</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-refusal/80 rounded border border-refusal"></div> High</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-brand rounded"></div> Critical</div>
+            <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground justify-end flex-wrap" aria-label="Heatmap Legend" role="group">
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#00843D]/30 rounded border border-[#00843D]" role="img" aria-label="Safe severity color"></div> Safe</div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#FFC72C]/30 rounded border border-[#FFC72C]" role="img" aria-label="Low severity color"></div> Low</div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#FF671F]/40 rounded border border-[#FF671F]" role="img" aria-label="Medium severity color"></div> Medium</div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-refusal/80 rounded border border-refusal" role="img" aria-label="High severity color"></div> High</div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-brand rounded" role="img" aria-label="Critical severity color"></div> Critical</div>
             </div>
 
             {/* Modal for cell details */}

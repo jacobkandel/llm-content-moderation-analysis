@@ -188,12 +188,17 @@ export default function CompareContent() {
                 setLoading(false);
             });
 
-        // Load pairwise significance data (small file) — lazy-load papaparse to keep initial bundle small
-        fetch('/assets/p_values.csv').then(async r => {
+        // Load pairwise significance data
+        fetch('/significance_pairwise.json').then(async r => {
             if (r.ok) {
-                const text = await r.text();
-                const Papa = (await import('papaparse')).default;
-                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setPValues(res.data) });
+                const rawData = await r.json();
+                const mapped = rawData.map((d: any) => ({
+                    'Model A': d.modelA,
+                    'Model B': d.modelB,
+                    'P-Value': d.pValue,
+                    'Significant': d.significant ? 'YES' : 'NO'
+                }));
+                setPValues(mapped);
             }
         }).catch(() => { });
     }, []);

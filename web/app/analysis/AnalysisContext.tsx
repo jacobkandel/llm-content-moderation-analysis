@@ -4,7 +4,6 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useRef 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { calculateFleissKappa } from '@/lib/statistics';
-import Papa from 'papaparse';
 
 // --- Types ---
 export type Cluster = {
@@ -20,7 +19,6 @@ interface AnalysisContextType {
     clusters: Cluster[];
     driftData: any[];
     consensusData: any[];
-    pValues: any[];
     politicalData: any[];
     paternalismData: any[];
     triggerData: any[];
@@ -36,7 +34,6 @@ interface AnalysisContextType {
     filteredPaternalismData: any[];
     filteredDriftData: any[];
     filteredConsensusData: any[];
-    filteredPValues: any[];
     filteredClusters: Cluster[];
     timelineDates: string[];
     stats: any;
@@ -54,7 +51,6 @@ interface AnalysisContextType {
     ensureClusters: () => Promise<void>;
     ensureDrift: () => Promise<void>;
     ensureConsensus: () => Promise<void>;
-    ensurePValues: () => Promise<void>;
     ensurePolitical: () => Promise<void>;
     ensurePaternalism: () => Promise<void>;
     ensureTriggers: () => Promise<void>;
@@ -87,7 +83,6 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const [clusters, setClusters] = useState<Cluster[]>([]);
     const [driftData, setDriftData] = useState<any[]>([]);
     const [consensusData, setConsensusData] = useState<any[]>([]);
-    const [pValues, setPValues] = useState<any[]>([]);
     const [politicalData, setPoliticalData] = useState<any[]>([]);
     const [paternalismData, setPaternalismData] = useState<any[]>([]);
     const [triggerData, setTriggerData] = useState<any[]>([]);
@@ -170,21 +165,10 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         if (loaded.current.consensus) return;
         loaded.current.consensus = true;
         try {
-            const r = await fetch('/consensus_bias.csv');
+            const r = await fetch('/consensus_stats.json');
             if (r.ok) {
-                const text = await r.text();
-                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setConsensusData(res.data) });
-            }
-        } catch { }
-    };
-    const ensurePValues = async () => {
-        if (loaded.current.pValues) return;
-        loaded.current.pValues = true;
-        try {
-            const r = await fetch('/assets/p_values.csv');
-            if (r.ok) {
-                const text = await r.text();
-                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res: any) => setPValues(res.data) });
+                const data = await r.json();
+                setConsensusData(data.perModel || []);
             }
         } catch { }
     };
@@ -352,17 +336,6 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const filteredDriftData = useMemo(() => filterByModels(driftData, selectedModels), [driftData, selectedModels]);
     const filteredConsensusData = useMemo(() => filterByModels(consensusData, selectedModels), [consensusData, selectedModels]);
 
-    // P-values: filter rows where BOTH Model A and Model B match selected models
-    const filteredPValues = useMemo(() => {
-        if (selectedModels.length === 0) return pValues;
-        return pValues.filter(row => {
-            const a = row['Model A'] || row.model_a || '';
-            const b = row['Model B'] || row.model_b || '';
-            return selectedModels.some(m => a.includes(m) || m.includes(a)) &&
-                selectedModels.some(m => b.includes(m) || m.includes(b));
-        });
-    }, [pValues, selectedModels]);
-
     // Clusters: filter the nested models object inside each cluster
     const filteredClusters = useMemo(() => {
         if (selectedModels.length === 0) return clusters;
@@ -392,6 +365,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 models: precomputedSummary.allModels || [],
                 prompts: Array.from({ length: precomputedSummary.totalCases || 0 }, (_, i) => String(i)),
                 distribution: precomputedSummary.distribution || [],
+                statisticalPowerMDES: precomputedSummary.statisticalPowerMDES || 0,
             };
         }
         if (filteredAuditData.length === 0) return null;
@@ -437,7 +411,15 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         });
         const distribution = Array.from(distributionMap.entries()).map(([name, value]) => ({ name, value }));
 
-        return { reliability, models, prompts, distribution };
+        // Calculate MDES for 80% power dynamically
+        const totalPromptsN = prompts.length;
+        const avgDiscordantP = 0.1;
+        const zAlpha = 1.95996;
+        const zBeta = 0.84162;
+        const mdes = totalPromptsN > 0 ? Math.sqrt((Math.pow(zAlpha + zBeta, 2) * avgDiscordantP) / totalPromptsN) : 0;
+        const powerMdes = Math.round(mdes * 10000) / 100;
+
+        return { reliability, models, prompts, distribution, statisticalPowerMDES: powerMdes };
     }, [filteredAuditData, hasFilters, precomputedSummary]);
 
     const efficiencyData = useMemo(() => {
@@ -466,14 +448,14 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AnalysisContext.Provider value={{
-            auditData, clusters, driftData, consensusData, pValues, politicalData, paternalismData, triggerData,
+            auditData, clusters, driftData, consensusData, politicalData, paternalismData, triggerData,
             reportContent, loading, dateRange, setDateRange, selectedModels, setSelectedModels, allModels,
             filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
-            filteredConsensusData, filteredPValues, filteredClusters,
+            filteredConsensusData, filteredClusters,
             timelineDates, stats, efficiencyData, precomputedPrompts, precomputedHeatmap,
             precomputedConsensus, precomputedSignificance, precomputedReliability, precomputedLongitudinal,
             isLite, isLoadingFull, loadFullDetails,
-            ensureClusters, ensureDrift, ensureConsensus, ensurePValues,
+            ensureClusters, ensureDrift, ensureConsensus,
             ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData,
             ensureSignificance, ensurePrompts
         }}>

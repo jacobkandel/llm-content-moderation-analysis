@@ -68,10 +68,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'LLM Censorship Benchmark: Live Audit',
-    description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude.',
     creator: '@jmk9494',
-    images: ['/assets/heatmap.png'],
   },
   robots: {
     index: true,
