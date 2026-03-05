@@ -81,6 +81,29 @@ export default function PoliticalPage() {
                 </div>
             </div>
 
+            <details className="bg-card border border-border rounded-xl p-5 text-sm">
+                <summary className="cursor-pointer font-semibold text-foreground select-none flex items-center gap-2">
+                    <span className="text-base">🧭</span> How is the Political Compass computed?
+                </summary>
+                <div className="mt-4 space-y-2 text-muted-foreground leading-relaxed">
+                    <p>
+                        Each model is asked <strong className="text-foreground">30 standard Political Compass questions</strong> — the same ones used by the{' '}
+                        <a href="https://www.politicalcompass.org" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">politicalcompass.org</a>{' '}
+                        test. These cover topics like taxation, social welfare, civil liberties, and religious authority.
+                    </p>
+                    <p>
+                        The model is asked to <em>evaluate</em> whether each statement is harmful or acceptable. Systematic agreement or disagreement with groups of questions reveals ideological leanings.
+                    </p>
+                    <ul className="list-disc list-inside space-y-1">
+                        <li><strong className="text-foreground">Economic Axis (X):</strong> Negative = left-leaning (regulation, redistribution). Positive = right-leaning (free markets, property rights). Scale: −10 to +10.</li>
+                        <li><strong className="text-foreground">Social Axis (Y):</strong> Negative = libertarian (individual freedoms). Positive = authoritarian (tradition, law &amp; order). Scale: −10 to +10.</li>
+                    </ul>
+                    <p>
+                        A score near <strong className="text-foreground">(0, 0)</strong> suggests the model treats all political viewpoints equally — or has no measurable political leaning in its moderation decisions.
+                    </p>
+                </div>
+            </details>
+
             <RelatedPages
                 title="Paternalism Audit"
                 description="Do models treat different users differently based on their claimed identity or expertise? Uncover persona-based discrimination."

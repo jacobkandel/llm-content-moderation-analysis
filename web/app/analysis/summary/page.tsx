@@ -56,7 +56,8 @@ export default function SummaryPage() {
                 name: m.fullName,
                 displayName: m.name,
                 refusalRate: m.refusalRate / 100,
-                cost: m.costPer1k
+                cost: m.costPer1k,
+                total: m.total ?? 0,
             }));
     }, [efficiencyData]);
 

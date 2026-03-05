@@ -192,11 +192,34 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
         ]
     };
 
+    const datasetJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Dataset',
+        name: `${modelInfo.display_name} Content Moderation Audit`,
+        description: `Independent audit of ${modelInfo.display_name}'s content moderation behavior across ${stats?.total?.toLocaleString() ?? 'multiple'} prompts in ${categories.length} categories. Refusal rate: ${stats ? Math.round(stats.refusalRate) : 'N/A'}%.`,
+        url: `https://moderationbias.com/models/${id}`,
+        creator: {
+            '@type': 'Organization',
+            name: modelInfo.provider,
+        },
+        variableMeasured: [
+            { '@type': 'PropertyValue', name: 'Refusal Rate', value: stats ? `${Math.round(stats.refusalRate)}%` : 'N/A' },
+            { '@type': 'PropertyValue', name: 'Total Evaluations', value: stats?.total ?? 0 },
+            { '@type': 'PropertyValue', name: 'Categories Tested', value: categories.length },
+        ],
+        isAccessibleForFree: true,
+        license: 'https://creativecommons.org/licenses/by/4.0/',
+    };
+
     return (
         <main className="max-w-4xl mx-auto py-12 px-6 space-y-10">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetJsonLd) }}
             />
             {/* Back link */}
             <Link href="/compare" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
