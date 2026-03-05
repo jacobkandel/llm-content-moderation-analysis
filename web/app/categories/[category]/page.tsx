@@ -9,11 +9,9 @@ import { CategoryPromptsTable } from './CategoryPromptsTable';
 
 const CATEGORIES: Record<string, string> = {
     'explicit-sexual': 'Explicit/Sexual',
-    'false-positive-control': 'False Positive Control',
     'hate-speech': 'Hate Speech',
     'health-misinformation': 'Health Misinformation',
     'incitement-to-violence': 'Incitement to Violence',
-    'international-controversy': 'International Controversy',
     'paternalism': 'Paternalism',
     'political': 'Political',
 };
