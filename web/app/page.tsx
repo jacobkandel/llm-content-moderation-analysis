@@ -1,17 +1,11 @@
 import Link from 'next/link';
 import { ArrowRight, BarChart2, Zap, RefreshCw, ChevronRight } from 'lucide-react';
-import fs from 'fs';
-import path from 'path';
+import modelsJson from '../public/models.json';
+import summaryStats from '../public/summary_stats.json';
 
-export default async function HomePage() {
-  let modelsData: { id: string; display_name: string; provider: string }[] = [];
-  try {
-    const modelsPath = path.join(process.cwd(), 'public', 'models.json');
-    const fileContent = await fs.promises.readFile(modelsPath, 'utf8');
-    modelsData = JSON.parse(fileContent);
-  } catch (error) {
-    console.error('Failed to load models for homepage:', error);
-  }
+export default function HomePage() {
+  const modelsData = modelsJson as { id: string; display_name: string; provider: string }[];
+  const stats = summaryStats as { totalCases: number; modelsCount: number; totalEvaluations: number };
 
   const hardcodedCategories = [
     'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
@@ -86,9 +80,9 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-6 py-16">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {([
-              { icon: BarChart2, value: '20+', label: 'Models Audited', desc: 'GPT-4, Claude, Llama, Gemini, and more' },
-              { icon: Zap, value: '200', label: 'Prompts Tested', desc: 'Grounded in Wikipedia\'s controversial issues list' },
-              { icon: RefreshCw, value: 'Bi-weekly', label: 'Auto-Updates', desc: 'Scheduled GitHub Actions keep data fresh' },
+              { icon: BarChart2, value: `${stats.modelsCount}+`, label: 'Models Audited', desc: 'GPT-4, Claude, Llama, Gemini, Grok, and more' },
+              { icon: Zap, value: stats.totalCases.toLocaleString(), label: 'Prompts Tested', desc: 'Grounded in Wikipedia\'s controversial issues list' },
+              { icon: RefreshCw, value: 'Weekly', label: 'Auto-Updates', desc: 'Scheduled GitHub Actions keep data fresh' },
             ] as const).map(({ icon: Icon, value, label, desc }) => (
               <div
                 key={label}

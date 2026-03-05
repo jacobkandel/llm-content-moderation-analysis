@@ -113,8 +113,8 @@ def update_pricing_registry(model_data):
         out_cost = float(pricing.get("completion", 0)) * 1_000_000
         if in_cost > 0 or out_cost > 0:
             PRICING[mid] = {"input": in_cost, "output": out_cost}
-    except:
-        pass
+    except (ValueError, TypeError, KeyError) as e:
+        logger.warning(f"Failed to parse pricing for {mid}: {e}")
 
 def get_pricing(model_name):
     """Returns (input_price, output_price) per 1M tokens."""
@@ -196,15 +196,23 @@ async def call_target_model_async(model_name, prompt_text, system_prompt=None):
     if TEMPERATURE_OVERRIDE is not None:
         params["temperature"] = TEMPERATURE_OVERRIDE
     
-    # OpenAI: Use System Role + JSON Mode
-    if "openai/" in model_name or "gpt" in model_name:
+    # Use system role for all providers that support it (methodology parity).
+    # Only a small set of legacy or embedded models require merged-message format.
+    # Mixing formats inflates refusal rates for models that see the moderator framing in the user turn.
+    MERGED_PROMPT_PROVIDERS = []  # All major providers (OpenAI, Anthropic, Google, Mistral, Meta, Qwen, xAI) support system role.
+    
+    use_system_role = not any(p in model_name for p in MERGED_PROMPT_PROVIDERS)
+    
+    if use_system_role:
         params["messages"] = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt_text}
         ]
-        params["response_format"] = {"type": "json_object"}
+        # Only enable JSON mode for OpenAI-family models (others may reject the param)
+        if "openai/" in model_name or model_name.startswith("gpt"):
+            params["response_format"] = {"type": "json_object"}
     else:
-        # Others: Merge System Prompt into User Message (safest)
+        # Fallback: merge system prompt into user message
         full_prompt = f"{system_prompt}\n\nUser Post:\n{prompt_text}"
         params["messages"] = [
             {"role": "user", "content": full_prompt}
@@ -750,7 +758,8 @@ def main():
     save_snapshot(args.output)
     
     logger.info("🧠 Running AI Analyst...")
-    generate_weekly_report(os.path.dirname(args.output), "latest_report.md")
+    # Pass project root so the analyst can find drift_report.json and consensus_stats.json
+    generate_weekly_report(output_dir=".", report_file="web/public/latest_report.md")
     
     logger.info(f"Total Session Runtime: {time.time() - start_time:.2f} seconds")
 

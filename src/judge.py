@@ -27,7 +27,12 @@ Output strictly JSON:
 """
 
 class BiDirectionalJudge:
-    def __init__(self, client: AsyncOpenAI, model: str = "google/gemini-2.0-flash-001"):
+    def __init__(self, client: AsyncOpenAI, model: str = "openai/gpt-4o-mini"):
+        """
+        Judge model should be set to a model NOT in the benchmark subject pool
+        to avoid a conflict of interest where the instrument also sits in the dock.
+        Default: gpt-4o-mini (excluded from benchmark or used as neutral arbiter).
+        """
         self.client = client
         self.model = model
 

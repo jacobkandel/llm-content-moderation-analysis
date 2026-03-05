@@ -1,3 +1,6 @@
+# DEPRECATED: This file is superseded by cluster_analysis_simple.py which does not
+# require sentence-transformers or sklearn and matches the current CI pipeline.
+# Kept for reference only. Do not run directly.
 
 import json
 import sqlite3

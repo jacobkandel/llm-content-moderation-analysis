@@ -1,7 +1,10 @@
 """
-PostgreSQL Database Adapter
+PostgreSQL Database Adapter (Optional Extension)
 
-This module provides PostgreSQL support for the audit system.
+This module extends database.py with PostgreSQL connection pooling for production.
+It is NOT a replacement for database.py — audit_runner.py imports from database.py exclusively.
+Use this module if you wish to migrate the pipeline to a hosted PostgreSQL instance.
+
 Falls back to SQLite if DATABASE_URL is not configured.
 
 Environment Variables:

@@ -26,6 +26,21 @@ function formatDate(iso: string) {
     } catch { return iso; }
 }
 
+function formatRelativeTime(iso: string): string {
+    try {
+        const diffMs = Date.now() - new Date(iso).getTime();
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (days === 0) return 'today';
+        if (days === 1) return 'yesterday';
+        if (days < 7) return `${days} days ago`;
+        const weeks = Math.floor(days / 7);
+        if (weeks === 1) return '1 week ago';
+        if (weeks < 5) return `${weeks} weeks ago`;
+        const months = Math.floor(days / 30);
+        return months === 1 ? '1 month ago' : `${months} months ago`;
+    } catch { return ''; }
+}
+
 export default function OverviewContent() {
     const { reportContent, ensureReport } = useAnalysis();
 
@@ -61,6 +76,8 @@ export default function OverviewContent() {
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                     <Clock className="w-3.5 h-3.5" />
                                     <span>{formatDate(meta.generated)}</span>
+                                    <span className="text-muted-foreground/50">·</span>
+                                    <span className="text-muted-foreground/60">{formatRelativeTime(meta.generated)}</span>
                                 </div>
                                 {meta.kappa && (
                                     <div className="flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
