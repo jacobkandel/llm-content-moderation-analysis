@@ -100,7 +100,7 @@ python src/audit_runner.py --preset high   # Frontier models
 ### Scheduled audits
 | Tier | Schedule | Description |
 |---|---|---|
-| Efficiency | Weekly (every Sunday 4am UTC) | Fast, cheap models for drift tracking |
+| Efficiency | Every other week (1st & 15th of month, 4am UTC) | Fast, cheap models for drift tracking |
 | Mid / High | Manual trigger | Frontier models on demand |
 
 ---

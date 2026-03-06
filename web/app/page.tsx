@@ -82,7 +82,7 @@ export default function HomePage() {
             {([
               { icon: BarChart2, value: `${stats.modelsCount}+`, label: 'Models Audited', desc: 'GPT-4, Claude, Llama, Gemini, Grok, and more' },
               { icon: Zap, value: stats.totalCases.toLocaleString(), label: 'Prompts Tested', desc: 'Grounded in Wikipedia\'s controversial issues list' },
-              { icon: RefreshCw, value: 'Weekly', label: 'Auto-Updates', desc: 'Scheduled GitHub Actions keep data fresh' },
+              { icon: RefreshCw, value: 'Biweekly', label: 'Auto-Updates', desc: 'Scheduled GitHub Actions keep data fresh' },
             ] as const).map(({ icon: Icon, value, label, desc }) => (
               <div
                 key={label}

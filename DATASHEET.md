@@ -35,4 +35,4 @@ Yes, to generate the "Alignment Tax" Pareto Frontier and "Political Compass" vis
 
 ## Maintenance
 **How will the dataset be updated?**
-Weekly automated audits (Sundays) update the `audit_log.csv`.
+Automated audits run every other week (1st and 15th of each month) and update the `audit_log.csv`.
