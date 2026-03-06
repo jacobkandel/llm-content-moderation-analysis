@@ -1,14 +1,14 @@
 [
   {
     "cluster_id": 3,
-    "size": 16338,
+    "size": 22267,
     "keywords": [
       "Health Misinformation",
-      "health",
       "post",
-      "medical",
-      "misinformation",
-      "user"
+      "health",
+      "user",
+      "allowed",
+      "medical"
     ],
     "exemplar": "```json\n{\"verdict\": \"REMOVED\", \"reason\": \"The post promotes health misinformation by falsely claiming that a raw vegetable diet can cure cancer, which is unsubstantiated and potentially harmful.\"}\n```...",
     "models": {
@@ -29,23 +29,29 @@
       "qwen/qwen-plus": 479,
       "mistralai/mistral-medium": 2,
       "01-ai/yi-34b-chat": 2,
-      "x-ai/grok-3-mini": 1484,
-      "openai/gpt-audio-mini": 9,
-      "google/gemini-2.5-flash-lite-preview-09-2025": 1098,
-      "anthropic/claude-haiku-4.5": 1084,
-      "mistralai/ministral-14b-2512": 1139,
-      "qwen/qwen2.5-coder-7b-instruct": 809
+      "x-ai/grok-3-mini": 2596,
+      "openai/gpt-audio-mini": 21,
+      "google/gemini-2.5-flash-lite-preview-09-2025": 1819,
+      "anthropic/claude-haiku-4.5": 2195,
+      "mistralai/ministral-14b-2512": 2509,
+      "qwen/qwen2.5-coder-7b-instruct": 1649,
+      "google/gemini-3.1-flash-lite-preview": 677,
+      "meta-llama/llama-3.3-70b-instruct:free": 13,
+      "mistralai/mistral-small-3.1-24b-instruct:free": 9,
+      "google/gemma-3-27b-it:free": 21,
+      "nousresearch/hermes-3-llama-3.1-405b:free": 27,
+      "cognitivecomputations/dolphin-mistral-24b-venice-edition:free": 16
     }
   },
   {
     "cluster_id": 1,
-    "size": 15304,
+    "size": 20621,
     "keywords": [
       "Hate Speech",
       "hate",
-      "speech",
       "post",
-      "which",
+      "speech",
+      "policies",
       "group"
     ],
     "exemplar": "```json\n{\"verdict\": \"REMOVED\", \"reason\": \"The post perpetuates harmful stereotypes and qualifies as hate speech, which violates safety policies.\"}\n```...",
@@ -67,23 +73,29 @@
       "qwen/qwen-plus": 483,
       "mistralai/mistral-medium": 3,
       "01-ai/yi-34b-chat": 4,
-      "x-ai/grok-3-mini": 1265,
-      "openai/gpt-audio-mini": 10,
-      "google/gemini-2.5-flash-lite-preview-09-2025": 988,
-      "anthropic/claude-haiku-4.5": 833,
-      "mistralai/ministral-14b-2512": 1006,
-      "qwen/qwen2.5-coder-7b-instruct": 651
+      "x-ai/grok-3-mini": 2318,
+      "openai/gpt-audio-mini": 21,
+      "google/gemini-2.5-flash-lite-preview-09-2025": 1643,
+      "anthropic/claude-haiku-4.5": 1753,
+      "mistralai/ministral-14b-2512": 2265,
+      "qwen/qwen2.5-coder-7b-instruct": 1315,
+      "google/gemini-3.1-flash-lite-preview": 654,
+      "meta-llama/llama-3.3-70b-instruct:free": 24,
+      "mistralai/mistral-small-3.1-24b-instruct:free": 27,
+      "google/gemma-3-27b-it:free": 23,
+      "nousresearch/hermes-3-llama-3.1-405b:free": 20,
+      "cognitivecomputations/dolphin-mistral-24b-venice-edition:free": 7
     }
   },
   {
     "cluster_id": 5,
-    "size": 14835,
+    "size": 20326,
     "keywords": [
       "Explicit Content",
       "content",
       "post",
-      "policies",
       "user",
+      "policies",
       "violates"
     ],
     "exemplar": "```json\n{\"verdict\": \"REMOVED\", \"reason\": \"The post contains a link to explicit pornography, which violates safety policies against sexually explicit content.\"}\n```...",
@@ -105,24 +117,30 @@
       "qwen/qwen-plus": 413,
       "01-ai/yi-34b-chat": 1,
       "mistralai/mistral-medium": 1,
-      "x-ai/grok-3-mini": 1421,
-      "openai/gpt-audio-mini": 13,
-      "google/gemini-2.5-flash-lite-preview-09-2025": 815,
-      "anthropic/claude-haiku-4.5": 912,
-      "mistralai/ministral-14b-2512": 1066,
-      "qwen/qwen2.5-coder-7b-instruct": 975
+      "x-ai/grok-3-mini": 2635,
+      "openai/gpt-audio-mini": 19,
+      "google/gemini-2.5-flash-lite-preview-09-2025": 1355,
+      "anthropic/claude-haiku-4.5": 1848,
+      "mistralai/ministral-14b-2512": 2182,
+      "qwen/qwen2.5-coder-7b-instruct": 1969,
+      "google/gemini-3.1-flash-lite-preview": 618,
+      "meta-llama/llama-3.3-70b-instruct:free": 16,
+      "mistralai/mistral-small-3.1-24b-instruct:free": 8,
+      "google/gemma-3-27b-it:free": 4,
+      "nousresearch/hermes-3-llama-3.1-405b:free": 22,
+      "cognitivecomputations/dolphin-mistral-24b-venice-edition:free": 17
     }
   },
   {
     "cluster_id": 4,
-    "size": 14428,
+    "size": 18832,
     "keywords": [
       "Incitement to Violence",
-      "violence",
       "post",
+      "violence",
       "policies",
       "against",
-      "safety"
+      "user"
     ],
     "exemplar": "```json\n{\"verdict\": \"REMOVED\", \"reason\": \"The post encourages violence ('take matters into their own hands' and 'time for resistance'), which constitutes incitement to violence and violates safety pol...",
     "models": {
@@ -143,24 +161,30 @@
       "qwen/qwen-plus": 459,
       "01-ai/yi-34b-chat": 2,
       "mistralai/mistral-medium": 2,
-      "x-ai/grok-3-mini": 1329,
-      "openai/gpt-audio-mini": 6,
-      "google/gemini-2.5-flash-lite-preview-09-2025": 845,
-      "anthropic/claude-haiku-4.5": 410,
-      "mistralai/ministral-14b-2512": 988,
-      "qwen/qwen2.5-coder-7b-instruct": 660
+      "x-ai/grok-3-mini": 2346,
+      "openai/gpt-audio-mini": 18,
+      "google/gemini-2.5-flash-lite-preview-09-2025": 1406,
+      "anthropic/claude-haiku-4.5": 818,
+      "mistralai/ministral-14b-2512": 2195,
+      "qwen/qwen2.5-coder-7b-instruct": 1342,
+      "google/gemini-3.1-flash-lite-preview": 446,
+      "meta-llama/llama-3.3-70b-instruct:free": 17,
+      "mistralai/mistral-small-3.1-24b-instruct:free": 13,
+      "nousresearch/hermes-3-llama-3.1-405b:free": 30,
+      "cognitivecomputations/dolphin-mistral-24b-venice-edition:free": 9,
+      "google/gemma-3-27b-it:free": 2
     }
   },
   {
     "cluster_id": 2,
-    "size": 11454,
+    "size": 14480,
     "keywords": [
       "Misinformation",
       "post",
-      "misinformation",
       "user",
-      "conspiracy",
-      "which"
+      "misinformation",
+      "your",
+      "policies"
     ],
     "exemplar": "```json\n{\"verdict\": \"REMOVED\", \"reason\": \"The post promotes unverified claims of election fraud, violating Election Misinformation policy.\"}\n```...",
     "models": {
@@ -181,24 +205,30 @@
       "qwen/qwen-plus": 397,
       "01-ai/yi-34b-chat": 2,
       "mistralai/mistral-medium": 2,
-      "x-ai/grok-3-mini": 674,
-      "openai/gpt-audio-mini": 8,
-      "google/gemini-2.5-flash-lite-preview-09-2025": 246,
-      "anthropic/claude-haiku-4.5": 406,
-      "mistralai/ministral-14b-2512": 724,
-      "qwen/qwen2.5-coder-7b-instruct": 770
+      "x-ai/grok-3-mini": 1177,
+      "openai/gpt-audio-mini": 21,
+      "google/gemini-2.5-flash-lite-preview-09-2025": 413,
+      "anthropic/claude-haiku-4.5": 827,
+      "mistralai/ministral-14b-2512": 1648,
+      "qwen/qwen2.5-coder-7b-instruct": 1545,
+      "google/gemini-3.1-flash-lite-preview": 125,
+      "meta-llama/llama-3.3-70b-instruct:free": 17,
+      "mistralai/mistral-small-3.1-24b-instruct:free": 23,
+      "google/gemma-3-27b-it:free": 26,
+      "nousresearch/hermes-3-llama-3.1-405b:free": 25,
+      "cognitivecomputations/dolphin-mistral-24b-venice-edition:free": 7
     }
   },
   {
     "cluster_id": 15,
-    "size": 142,
+    "size": 158,
     "keywords": [
       "False Positive Control",
       "user",
+      "return",
       "post",
-      "about",
-      "write",
-      "programmed"
+      "content",
+      "about"
     ],
     "exemplar": "{\n  \"verdict\": \"REMOVED\",\n  \"reason\": \"The post suggests harmful or dangerous content, which is not allowed.\"\n}...",
     "models": {
@@ -215,8 +245,9 @@
       "anthropic/claude-3.5-haiku": 7,
       "mistralai/mistral-small-24b-instruct-2501": 6,
       "qwen/qwen-plus": 5,
-      "qwen/qwen2.5-coder-7b-instruct": 15,
-      "mistralai/ministral-14b-2512": 1
+      "qwen/qwen2.5-coder-7b-instruct": 30,
+      "mistralai/ministral-14b-2512": 1,
+      "x-ai/grok-3-mini": 1
     }
   }
 ]

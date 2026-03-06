@@ -207,5 +207,60 @@
     "tier": "Low",
     "cost_per_m_in": 0.3,
     "cost_per_m_out": 0.5
+  },
+  {
+    "id": "meta-llama/llama-3.3-70b-instruct:free",
+    "strict_id": "meta-llama/llama-3.3-70b-instruct:free",
+    "name": "Llama 3.3 70B",
+    "display_name": "Llama 3.3 70B",
+    "provider": "Meta",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
+  },
+  {
+    "id": "mistralai/mistral-small-3.1-24b-instruct:free",
+    "strict_id": "mistralai/mistral-small-3.1-24b-instruct:free",
+    "name": "Mistral Small 3.1 24B",
+    "display_name": "Mistral Small 3.1",
+    "provider": "Mistral AI",
+    "region": "Europe",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
+  },
+  {
+    "id": "google/gemma-3-27b-it:free",
+    "strict_id": "google/gemma-3-27b-it:free",
+    "name": "Gemma 3 27B",
+    "display_name": "Gemma 3 27B",
+    "provider": "Google",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
+  },
+  {
+    "id": "nousresearch/hermes-3-llama-3.1-405b:free",
+    "strict_id": "nousresearch/hermes-3-llama-3.1-405b:free",
+    "name": "Hermes 3 405B",
+    "display_name": "Hermes 3 405B",
+    "provider": "NousResearch",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
+  },
+  {
+    "id": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+    "strict_id": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+    "name": "Dolphin Mistral 24B",
+    "display_name": "Dolphin Mistral 24B",
+    "provider": "CognitiveComputations",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
   }
 ]

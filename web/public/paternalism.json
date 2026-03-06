@@ -32,8 +32,14 @@
   {
     "model":"anthropic\/claude-haiku-4.5",
     "persona":"Default",
-    "is_refusal":0.6165489405,
-    "refusal_rate":61.6548940464
+    "is_refusal":0.5389938014,
+    "refusal_rate":53.8993801355
+  },
+  {
+    "model":"cognitivecomputations\/dolphin-mistral-24b-venice-edition:free",
+    "persona":"Default",
+    "is_refusal":0.007568113,
+    "refusal_rate":0.7568113017
   },
   {
     "model":"deepseek\/deepseek-chat",
@@ -56,8 +62,8 @@
   {
     "model":"google\/gemini-2.5-flash-lite-preview-09-2025",
     "persona":"Default",
-    "is_refusal":0.6759165826,
-    "refusal_rate":67.5916582577
+    "is_refusal":0.6741675076,
+    "refusal_rate":67.4167507568
   },
   {
     "model":"google\/gemini-2.5-pro",
@@ -66,10 +72,28 @@
     "refusal_rate":30.4516129032
   },
   {
+    "model":"google\/gemini-3.1-flash-lite-preview",
+    "persona":"Default",
+    "is_refusal":0.6402623613,
+    "refusal_rate":64.0262361251
+  },
+  {
+    "model":"google\/gemma-3-27b-it:free",
+    "persona":"Default",
+    "is_refusal":0.0143794147,
+    "refusal_rate":1.4379414733
+  },
+  {
+    "model":"meta-llama\/llama-3.3-70b-instruct:free",
+    "persona":"Default",
+    "is_refusal":0.0156407669,
+    "refusal_rate":1.5640766902
+  },
+  {
     "model":"mistralai\/ministral-14b-2512",
     "persona":"Default",
-    "is_refusal":0.8326606122,
-    "refusal_rate":83.2660612176
+    "is_refusal":0.7820383451,
+    "refusal_rate":78.2038345106
   },
   {
     "model":"mistralai\/ministral-8b",
@@ -94,6 +118,18 @@
     "persona":"Default",
     "is_refusal":0.7675009068,
     "refusal_rate":76.7500906783
+  },
+  {
+    "model":"mistralai\/mistral-small-3.1-24b-instruct:free",
+    "persona":"Default",
+    "is_refusal":0.0118567104,
+    "refusal_rate":1.1856710394
+  },
+  {
+    "model":"nousresearch\/hermes-3-llama-3.1-405b:free",
+    "persona":"Default",
+    "is_refusal":0.0259838547,
+    "refusal_rate":2.5983854692
   },
   {
     "model":"openai\/gpt-4o",
@@ -134,13 +170,13 @@
   {
     "model":"qwen\/qwen2.5-coder-7b-instruct",
     "persona":"Default",
-    "is_refusal":0.6569122099,
-    "refusal_rate":65.6912209889
+    "is_refusal":0.5692662534,
+    "refusal_rate":56.9266253424
   },
   {
     "model":"x-ai\/grok-3-mini",
     "persona":"Default",
-    "is_refusal":0.7831735621,
-    "refusal_rate":78.3173562059
+    "is_refusal":0.7018163471,
+    "refusal_rate":70.1816347124
   }
 ]
