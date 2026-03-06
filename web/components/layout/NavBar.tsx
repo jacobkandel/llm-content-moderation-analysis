@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard, FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Table, Info, Home, Box, Filter, Sparkles, Download
+    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -39,8 +39,6 @@ const navItems = [
             { title: 'Council Consensus', href: '/analysis/consensus', icon: Users },
         ]
     },
-    { name: 'Database', href: '/audit', icon: Table },
-    { name: 'Data', href: '/data', icon: Download },
     { name: 'About', href: '/about', icon: Info },
 ];
 
