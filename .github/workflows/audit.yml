@@ -24,7 +24,7 @@ on:
         type: boolean
         default: false
   schedule:
-    - cron: '0 4 * * 0' # Run every Sunday at 4am UTC (Efficiency/Low Tier)
+    - cron: '0 4 1,15 * *' # Run on the 1st and 15th of each month at 4am UTC (~biweekly)
 
 concurrency:
   group: audit-${{ github.ref }}
