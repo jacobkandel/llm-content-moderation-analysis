@@ -255,11 +255,6 @@ export default function ConsensusPage() {
                 importance="Identifying consensus failure points..."
                 as="h2"
             />
-            <RelatedPages
-                title="Raw Database"
-                description="Explore every single prompt and verdict in our dataset. Filter, search, and export the raw audit logs."
-                href="/audit"
-            />
-        </div >
+        </div>
     );
 }

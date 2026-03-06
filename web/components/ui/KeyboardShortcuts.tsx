@@ -33,7 +33,7 @@ export function KeyboardShortcuts() {
                     break;
                 case 'a':
                     e.preventDefault();
-                    router.push('/audit');
+                    router.push('/analysis/summary');
                     break;
                 case 's':
                     e.preventDefault();
@@ -91,7 +91,7 @@ export function KeyboardShortcuts() {
                                 <ShortcutRow kbd="⌘ + K" label="Open global search" />
                                 <div className="h-px bg-border my-2" />
                                 <ShortcutRow kbd="C" label="Go to Compare Models" />
-                                <ShortcutRow kbd="A" label="Go to Audit Log" />
+                                <ShortcutRow kbd="A" label="Go to Analysis Summary" />
                                 <ShortcutRow kbd="S" label="Go to Significance Analysis" />
                             </div>
                         </motion.div>

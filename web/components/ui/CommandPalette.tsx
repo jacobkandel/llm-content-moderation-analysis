@@ -150,7 +150,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
         title: p.text,
         description: `Prompt in ${p.category}`,
         icon: <Search className="h-4 w-4" />,
-        action: () => router.push(`/audit?q=${encodeURIComponent(p.text)}`),
+        action: () => router.push(`/compare?q=${encodeURIComponent(p.text)}`),
         keywords: ['prompt', 'query', p.category, ...p.text.split(' ')]
     }));
 

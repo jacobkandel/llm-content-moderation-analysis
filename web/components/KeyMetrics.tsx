@@ -122,7 +122,6 @@ export default function KeyMetrics({
                     icon={<BarChart3 className="w-6 h-6 text-foreground" />}
                     description="Total model evaluations"
                     trend="neutral"
-                    onClick={() => router.push('/audit')}
                 />
 
                 <MetricCard
