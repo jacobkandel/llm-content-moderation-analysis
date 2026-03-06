@@ -60,12 +60,13 @@ TAXONOMY_CLASSIFIER = TaxonomyClassifier(client)
 
 # Group keys for CLI presets
 PRESETS = {
-    "us": [m['id'] for m in MODEL_REGISTRY if m['region'] == "US"],
-    "china": [m['id'] for m in MODEL_REGISTRY if m['region'] == "China"],
+    "us": [m['id'] for m in MODEL_REGISTRY if m['region'] == "US" and m['tier'] != "Manual"],
+    "china": [m['id'] for m in MODEL_REGISTRY if m['region'] == "China" and m['tier'] != "Manual"],
     "high": [m['id'] for m in MODEL_REGISTRY if m['tier'] == "High"],
     "mid": [m['id'] for m in MODEL_REGISTRY if m['tier'] == "Mid"],
     "low": [m['id'] for m in MODEL_REGISTRY if m['tier'] == "Low"],
-    "all": [m['id'] for m in MODEL_REGISTRY if m['id'] not in ["anthropic/claude-3.5-sonnet", "x-ai/grok-3"]],
+    "manual": [m['id'] for m in MODEL_REGISTRY if m['tier'] == "Manual"],  # Expensive models (>$0.50/run) — run explicitly only
+    "all": [m['id'] for m in MODEL_REGISTRY if m['tier'] != "Manual"],  # Excludes expensive models from bulk runs
     "efficiency": [] # Placeholder for dynamic resolution
 }
 

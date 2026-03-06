@@ -6,7 +6,7 @@
     "display_name": "GPT-4o",
     "provider": "OpenAI",
     "region": "US",
-    "tier": "High",
+    "tier": "Manual",
     "cost_per_m_in": 5.0,
     "cost_per_m_out": 15.0
   },
@@ -28,7 +28,7 @@
     "display_name": "Claude 3.5 Sonnet",
     "provider": "Anthropic",
     "region": "US",
-    "tier": "High",
+    "tier": "Manual",
     "cost_per_m_in": 3.0,
     "cost_per_m_out": 15.0
   },
@@ -105,7 +105,7 @@
     "display_name": "Mistral Large",
     "provider": "Mistral AI",
     "region": "Europe",
-    "tier": "High",
+    "tier": "Manual",
     "cost_per_m_in": 2.0,
     "cost_per_m_out": 6.0
   },
@@ -116,7 +116,7 @@
     "display_name": "Mistral Medium",
     "provider": "Mistral AI",
     "region": "Europe",
-    "tier": "Mid",
+    "tier": "Manual",
     "cost_per_m_in": 0.6,
     "cost_per_m_out": 1.8
   },
@@ -127,7 +127,7 @@
     "display_name": "Gemini 2.5 Pro",
     "provider": "Google",
     "region": "US",
-    "tier": "High",
+    "tier": "Manual",
     "cost_per_m_in": 2.5,
     "cost_per_m_out": 7.5
   },
@@ -149,7 +149,7 @@
     "display_name": "Claude 3.5 Haiku",
     "provider": "Anthropic",
     "region": "US",
-    "tier": "Mid",
+    "tier": "Manual",
     "cost_per_m_in": 0.8,
     "cost_per_m_out": 4.0
   },
@@ -193,7 +193,7 @@
     "display_name": "Grok 3",
     "provider": "xAI",
     "region": "US",
-    "tier": "High",
+    "tier": "Manual",
     "cost_per_m_in": 3.0,
     "cost_per_m_out": 15.0
   },
