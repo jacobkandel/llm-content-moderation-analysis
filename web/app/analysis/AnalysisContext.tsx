@@ -235,7 +235,9 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
             const r = await fetch('/prompts_list.json.gz');
             if (r.ok) {
                 const data = await r.json();
-                if (data?.length) setPrecomputedPrompts(data);
+                // GOLD prompts are used backend-only for statistical calibration; exclude from public display
+                const publicPrompts = data.filter((p: { id: string }) => !p.id?.toUpperCase().startsWith('GOLD'));
+                if (publicPrompts?.length) setPrecomputedPrompts(publicPrompts);
             }
         } catch { }
     }, []);

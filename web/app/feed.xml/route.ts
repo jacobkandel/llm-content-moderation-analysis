@@ -29,7 +29,7 @@ export async function GET() {
       { slug: 'alignment', title: 'Alignment Tax', desc: 'The Pareto frontier: which models give the best helpfulness-to-safety tradeoff at the lowest cost?' },
       { slug: 'clusters', title: 'Semantic Clusters', desc: 'Explore visually grouped refused prompts by semantic similarity to find hidden moderation patterns.' },
       {
-        slug: 'significance', title: 'Statistical Significance', desc: 'Pairwise McNemar's tests separating signal from noise in model refusal rate differences.' },
+        slug: 'significance', title: 'Statistical Significance', desc: 'Pairwise McNemar tests separating signal from noise in model refusal rate differences.' },
       { slug: 'triggers', title: 'Censorship Triggers', desc: 'Which specific words and linguistic patterns automatically trigger AI content refusals?' },
       { slug: 'paternalism', title: 'Paternalism in AI', desc: 'Do AI models gatekeep differently based on who they think is asking? Persona-based refusal analysis.' },
     ];
