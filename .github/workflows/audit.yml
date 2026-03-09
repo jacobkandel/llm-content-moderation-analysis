@@ -251,6 +251,45 @@ jobs:
           echo "Deployed to: $PREVIEW_URL"
           echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
+      - name: Ping IndexNow (Bing, Yandex, DuckDuckGo)
+        run: |
+          echo "🔔 Notifying search engines via IndexNow..."
+          INDEXNOW_KEY="f5108eb2ee8a474e8b2c5ef375f7dad1"
+          BASE_URL="https://moderationbias.com"
+
+          # Build the list of URLs that were just updated
+          URLS=$(cat <<EOF
+          [
+            "${BASE_URL}/",
+            "${BASE_URL}/compare",
+            "${BASE_URL}/analysis/summary",
+            "${BASE_URL}/analysis/overview",
+            "${BASE_URL}/analysis/drift",
+            "${BASE_URL}/analysis/consensus",
+            "${BASE_URL}/analysis/political",
+            "${BASE_URL}/analysis/reliability",
+            "${BASE_URL}/analysis/longitudinal",
+            "${BASE_URL}/analysis/alignment",
+            "${BASE_URL}/analysis/clusters",
+            "${BASE_URL}/analysis/paternalism",
+            "${BASE_URL}/analysis/significance",
+            "${BASE_URL}/analysis/triggers",
+            "${BASE_URL}/data",
+            "${BASE_URL}/feed.xml"
+          ]
+          EOF
+          )
+
+          # Submit to IndexNow (Bing endpoint – shared with Yandex and DuckDuckGo)
+          curl -s -X POST "https://api.indexnow.org/IndexNow" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"host\": \"moderationbias.com\",
+              \"key\": \"${INDEXNOW_KEY}\",
+              \"keyLocation\": \"${BASE_URL}/${INDEXNOW_KEY}.txt\",
+              \"urlList\": ${URLS}
+            }" && echo "✅ IndexNow ping sent successfully" || echo "⚠️ IndexNow ping failed (non-critical)"
+
       - name: Sync to Hugging Face Hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

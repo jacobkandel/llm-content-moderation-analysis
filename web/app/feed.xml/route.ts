@@ -16,12 +16,30 @@ export async function GET() {
 
     const lastUpdated = new Date(stats.lastUpdated || new Date());
 
+    // Analysis deep dive pages to surface in the feed
+    const analysisPages = [
+      { slug: 'summary', title: 'Executive Summary', desc: 'High-level summary of LLM censorship, refusal rates, and key findings across all audited models.' },
+      { slug: 'overview', title: 'Model Overview', desc: 'Refusal rate heatmaps and radar charts visualising how each model handles sensitive categories.' },
+      { slug: 'drift', title: 'Model Drift & Stability', desc: 'Tracking how LLM censorship behaviours change over time — are models getting more or less restrictive?' },
+      { slug: 'consensus', title: 'Council Consensus', desc: 'Do AI models agree with each other on what's safe? Explore inter- model agreement rates.' },
+      { slug: 'political', title: 'AI Political Compass', desc: 'Mapping the structural political biases of LLMs across economic and social axes.' },
+      {
+        slug: 'reliability', title: 'Model Reliability', desc: 'Internal consistency and self-agreement analysis — how reliable is each model's moderation?' },
+      { slug: 'longitudinal', title: 'Longitudinal Analysis', desc: 'Interactive timeline tracking the evolution of AI content moderation policies over months.' },
+      { slug: 'alignment', title: 'Alignment Tax', desc: 'The Pareto frontier: which models give the best helpfulness-to-safety tradeoff at the lowest cost?' },
+      { slug: 'clusters', title: 'Semantic Clusters', desc: 'Explore visually grouped refused prompts by semantic similarity to find hidden moderation patterns.' },
+      {
+        slug: 'significance', title: 'Statistical Significance', desc: 'Pairwise McNemar's tests separating signal from noise in model refusal rate differences.' },
+      { slug: 'triggers', title: 'Censorship Triggers', desc: 'Which specific words and linguistic patterns automatically trigger AI content refusals?' },
+      { slug: 'paternalism', title: 'Paternalism in AI', desc: 'Do AI models gatekeep differently based on who they think is asking? Persona-based refusal analysis.' },
+    ];
+
     let xml = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Moderation Bias - LLM Censorship Tracker</title>
     <link>${baseUrl}</link>
-    <description>Tracking the political and social biases of Llama-3, GPT-4, Claude, and other AI models.</description>
+    <description>Tracking the political and social biases of Llama-3, GPT-4, Claude, and other AI models via live, automated red-teaming audits.</description>
     <language>en-us</language>
     <lastBuildDate>${lastUpdated.toUTCString()}</lastBuildDate>
     <atom:link href="${baseUrl}/feed.xml" rel="self" type="application/rss+xml" />
@@ -35,8 +53,20 @@ export async function GET() {
     </item>
 `;
 
-    // Add an item for the top 5 models to surface them in the feed
-    const recentModels = [...models].slice(0, 5); // Assuming the list order is loosely chronological/relevant
+    // Add analysis deep dive pages
+    for (const page of analysisPages) {
+      xml += `
+    <item>
+      <title>${page.title} — Moderation Bias</title>
+      <link>${baseUrl}/analysis/${page.slug}</link>
+      <guid>${baseUrl}/analysis/${page.slug}</guid>
+      <pubDate>${lastUpdated.toUTCString()}</pubDate>
+      <description>${page.desc}</description>
+    </item>`;
+    }
+
+    // Add items for the top models
+    const recentModels = [...models].slice(0, 8);
 
     for (const model of recentModels) {
       xml += `
