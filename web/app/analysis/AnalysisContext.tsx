@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef, useCallback, useTransition } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { calculateFleissKappa } from '@/lib/statistics';
@@ -100,14 +100,25 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const [precomputedPrompts, setPrecomputedPrompts] = useState<{ id: string; text: string; category: string; source: string }[]>([]);
 
     // Global Filters – initialised from URL
-    const [dateRange, setDateRange] = useState<{ start: string; end: string }>(() => ({
+    const [dateRange, setDateRangeRaw] = useState<{ start: string; end: string }>(() => ({
         start: searchParams.get('from') || '',
         end: searchParams.get('to') || '',
     }));
-    const [selectedModels, setSelectedModels] = useState<string[]>(() => {
+    const [selectedModels, setSelectedModelsRaw] = useState<string[]>(() => {
         const param = searchParams.get('models');
         return param ? param.split(',').filter(Boolean) : [];
     });
+
+    // Wrap filter setters in startTransition so they don't block INP
+    const [, startTransition] = useTransition();
+    const setDateRange: React.Dispatch<React.SetStateAction<{ start: string; end: string }>> = useCallback(
+        (action) => startTransition(() => setDateRangeRaw(action)),
+        []
+    );
+    const setSelectedModels: React.Dispatch<React.SetStateAction<string[]>> = useCallback(
+        (action) => startTransition(() => setSelectedModelsRaw(action)),
+        []
+    );
 
     // Sync filter state → URL (skip the very first render to avoid replacing on mount)
     const isInitialMount = useRef(true);
@@ -145,23 +156,23 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     // --- Lazy-load helpers: fetch supplementary data on-demand (once) ---
     const loaded = useRef<Record<string, boolean>>({});
 
-    const ensureClusters = async () => {
+    const ensureClusters = useCallback(async () => {
         if (loaded.current.clusters) return;
         loaded.current.clusters = true;
         try {
             const r = await fetch('/clusters.json');
             if (r.ok) setClusters(await r.json());
         } catch { }
-    };
-    const ensureDrift = async () => {
+    }, []);
+    const ensureDrift = useCallback(async () => {
         if (loaded.current.drift) return;
         loaded.current.drift = true;
         try {
             const r = await fetch('/drift_report.json');
             if (r.ok) setDriftData(await r.json());
         } catch { }
-    };
-    const ensureConsensus = async () => {
+    }, []);
+    const ensureConsensus = useCallback(async () => {
         if (loaded.current.consensus) return;
         loaded.current.consensus = true;
         try {
@@ -171,32 +182,32 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 setConsensusData(data.perModel || []);
             }
         } catch { }
-    };
-    const ensurePolitical = async () => {
+    }, []);
+    const ensurePolitical = useCallback(async () => {
         if (loaded.current.political) return;
         loaded.current.political = true;
         try {
             const r = await fetch('/political_compass.json');
             if (r.ok) setPoliticalData(await r.json());
         } catch { }
-    };
-    const ensurePaternalism = async () => {
+    }, []);
+    const ensurePaternalism = useCallback(async () => {
         if (loaded.current.paternalism) return;
         loaded.current.paternalism = true;
         try {
             const r = await fetch('/paternalism.json');
             if (r.ok) setPaternalismData(await r.json());
         } catch { }
-    };
-    const ensureTriggers = async () => {
+    }, []);
+    const ensureTriggers = useCallback(async () => {
         if (loaded.current.triggers) return;
         loaded.current.triggers = true;
         try {
             const r = await fetch('/assets/trigger_words.json');
             if (r.ok) setTriggerData(await r.json());
         } catch { }
-    };
-    const ensureReport = async () => {
+    }, []);
+    const ensureReport = useCallback(async () => {
         if (loaded.current.report) return;
         loaded.current.report = true;
         try {
@@ -206,18 +217,18 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 if (j.content) setReportContent(j.content);
             }
         } catch { }
-    };
+    }, []);
 
-    const ensureSignificance = async () => {
+    const ensureSignificance = useCallback(async () => {
         if (loaded.current.significance) return;
         loaded.current.significance = true;
         try {
             const r = await fetch('/significance_pairwise.json');
             if (r.ok) setPrecomputedSignificance(await r.json());
         } catch { }
-    };
+    }, []);
 
-    const ensurePrompts = async () => {
+    const ensurePrompts = useCallback(async () => {
         if (loaded.current.prompts) return;
         loaded.current.prompts = true;
         try {
@@ -227,10 +238,10 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 if (data?.length) setPrecomputedPrompts(data);
             }
         } catch { }
-    };
+    }, []);
 
     // Load the lite CSV (for filtering & drill-downs)
-    const ensureAuditData = async () => {
+    const ensureAuditData = useCallback(async () => {
         if (loaded.current.csv) return;
         loaded.current.csv = true;
         console.log('📦 Loading lite CSV...');
@@ -242,7 +253,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         } catch (e) {
             console.error('Failed to load CSV', e);
         }
-    };
+    }, []);
 
     // PHASE 1 (instant): Load pre-computed JSON files on mount
     useEffect(() => {
@@ -449,19 +460,33 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         })).filter(m => m.total > 0);
     }, [filteredAuditData, hasFilters, precomputedSpectrum]);
 
+    const contextValue = useMemo(() => ({
+        auditData, clusters, driftData, consensusData, politicalData, paternalismData, triggerData,
+        reportContent, loading, dateRange, setDateRange, selectedModels, setSelectedModels, allModels,
+        filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
+        filteredConsensusData, filteredClusters,
+        timelineDates, stats, efficiencyData, precomputedPrompts, precomputedHeatmap,
+        precomputedConsensus, precomputedSignificance, precomputedReliability, precomputedLongitudinal,
+        isLite, isLoadingFull, loadFullDetails,
+        ensureClusters, ensureDrift, ensureConsensus,
+        ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData,
+        ensureSignificance, ensurePrompts
+    }), [
+        auditData, clusters, driftData, consensusData, politicalData, paternalismData, triggerData,
+        reportContent, loading, dateRange, selectedModels, allModels,
+        filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
+        filteredConsensusData, filteredClusters,
+        timelineDates, stats, efficiencyData, precomputedPrompts, precomputedHeatmap,
+        precomputedConsensus, precomputedSignificance, precomputedReliability, precomputedLongitudinal,
+        isLite, isLoadingFull, loadFullDetails,
+        ensureClusters, ensureDrift, ensureConsensus,
+        ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData,
+        ensureSignificance, ensurePrompts,
+        setDateRange, setSelectedModels
+    ]);
+
     return (
-        <AnalysisContext.Provider value={{
-            auditData, clusters, driftData, consensusData, politicalData, paternalismData, triggerData,
-            reportContent, loading, dateRange, setDateRange, selectedModels, setSelectedModels, allModels,
-            filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
-            filteredConsensusData, filteredClusters,
-            timelineDates, stats, efficiencyData, precomputedPrompts, precomputedHeatmap,
-            precomputedConsensus, precomputedSignificance, precomputedReliability, precomputedLongitudinal,
-            isLite, isLoadingFull, loadFullDetails,
-            ensureClusters, ensureDrift, ensureConsensus,
-            ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData,
-            ensureSignificance, ensurePrompts
-        }}>
+        <AnalysisContext.Provider value={contextValue}>
             {children}
         </AnalysisContext.Provider>
     );
