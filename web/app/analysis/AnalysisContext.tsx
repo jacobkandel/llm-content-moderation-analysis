@@ -28,6 +28,8 @@ interface AnalysisContextType {
     setDateRange: React.Dispatch<React.SetStateAction<{ start: string; end: string }>>;
     selectedModels: string[];
     setSelectedModels: React.Dispatch<React.SetStateAction<string[]>>;
+    showSeedOnly: boolean;
+    setShowSeedOnly: React.Dispatch<React.SetStateAction<boolean>>;
     allModels: string[];
     filteredAuditData: AuditRow[];
     filteredPoliticalData: any[];
@@ -108,6 +110,9 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         const param = searchParams.get('models');
         return param ? param.split(',').filter(Boolean) : [];
     });
+    const [showSeedOnly, setShowSeedOnlyRaw] = useState<boolean>(() => {
+        return searchParams.get('seedOnly') === 'true';
+    });
 
     // Wrap filter setters in startTransition so they don't block INP
     const [, startTransition] = useTransition();
@@ -117,6 +122,10 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     );
     const setSelectedModels: React.Dispatch<React.SetStateAction<string[]>> = useCallback(
         (action) => startTransition(() => setSelectedModelsRaw(action)),
+        []
+    );
+    const setShowSeedOnly: React.Dispatch<React.SetStateAction<boolean>> = useCallback(
+        (action) => startTransition(() => setShowSeedOnlyRaw(action)),
         []
     );
 
@@ -129,11 +138,12 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         }
         const params = new URLSearchParams();
         if (selectedModels.length > 0) params.set('models', selectedModels.join(','));
+        if (showSeedOnly) params.set('seedOnly', 'true');
         if (dateRange.start) params.set('from', dateRange.start);
         if (dateRange.end) params.set('to', dateRange.end);
         const qs = params.toString();
         router.replace(qs ? `?${qs}` : '?', { scroll: false });
-    }, [selectedModels, dateRange, router]);
+    }, [selectedModels, showSeedOnly, dateRange, router]);
 
     // Action to load full data (text columns)
     const loadFullDetails = async () => {
@@ -302,7 +312,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     // PHASE 2 (deferred): Load CSV only when filters are applied
-    const hasFiltersForCsv = selectedModels.length > 0 || dateRange.start !== '' || dateRange.end !== '';
+    const hasFiltersForCsv = selectedModels.length > 0 || dateRange.start !== '' || dateRange.end !== '' || showSeedOnly;
     useEffect(() => {
         if (hasFiltersForCsv) {
             ensureAuditData();
@@ -325,6 +335,11 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
 
     const filteredAuditData = useMemo(() => {
         let data = auditData;
+
+        if (showSeedOnly) {
+            data = data.filter((d: AuditRow) => d.style === 'Original');
+        }
+
         if (dateRange.start || dateRange.end) {
             data = data.filter((d: AuditRow) => {
                 const date = d.timestamp?.split('T')[0] || '';
@@ -464,7 +479,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
 
     const contextValue = useMemo(() => ({
         auditData, clusters, driftData, consensusData, politicalData, paternalismData, triggerData,
-        reportContent, loading, dateRange, setDateRange, selectedModels, setSelectedModels, allModels,
+        reportContent, loading, dateRange, setDateRange, selectedModels, setSelectedModels, showSeedOnly, setShowSeedOnly, allModels,
         filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
         filteredConsensusData, filteredClusters,
         timelineDates, stats, efficiencyData, precomputedPrompts, precomputedHeatmap,
@@ -475,7 +490,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         ensureSignificance, ensurePrompts
     }), [
         auditData, clusters, driftData, consensusData, politicalData, paternalismData, triggerData,
-        reportContent, loading, dateRange, selectedModels, allModels,
+        reportContent, loading, dateRange, selectedModels, showSeedOnly, allModels,
         filteredAuditData, filteredPoliticalData, filteredPaternalismData, filteredDriftData,
         filteredConsensusData, filteredClusters,
         timelineDates, stats, efficiencyData, precomputedPrompts, precomputedHeatmap,
@@ -484,7 +499,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         ensureClusters, ensureDrift, ensureConsensus,
         ensurePolitical, ensurePaternalism, ensureTriggers, ensureReport, ensureAuditData,
         ensureSignificance, ensurePrompts,
-        setDateRange, setSelectedModels
+        setDateRange, setSelectedModels, setShowSeedOnly
     ]);
 
     return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef, useCallback, Suspense } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback, Suspense, useDeferredValue } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -10,8 +10,13 @@ import { TooltipHover } from '@/components/ui/TooltipHover';
 import { ModelSelector } from './ModelSelector';
 import { FiltersBar } from './FiltersBar';
 import { StatsPanel } from './StatsPanel';
-import { RadarSection } from './RadarSection';
 import { DisagreementLog } from './DisagreementLog';
+import dynamic from 'next/dynamic';
+
+const RadarSection = dynamic(() => import('./RadarSection').then(mod => mod.RadarSection), {
+    ssr: false,
+    loading: () => <div className="h-80 bg-card border border-border rounded-xl animate-pulse mt-8" />
+});
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { getLogoUrl } from '@/lib/provider-logos';
 import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
@@ -95,13 +100,18 @@ function calculateMcNemarPValue(b: number, c: number) {
     return 2 * (1 - normalCDF(z));
 }
 
-export default function CompareContent() {
+export default function CompareContent({
+    initialCompareData,
+    initialPValues
+}: {
+    initialCompareData: CompareData | null,
+    initialPValues: PValueRow[]
+}) {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    // --- Phase 1: Instant data (precomputed JSON, ~20KB) ---
-    const [compareData, setCompareData] = useState<CompareData | null>(null);
-    const [loading, setLoading] = useState(true);
+    // --- Phase 1: Instant data (passed from Server, no loading spinner required) ---
+    const [compareData, setCompareData] = useState<CompareData | null>(initialCompareData);
 
     // --- Phase 2: Full CSV data (lazy, for disagreement text) ---
     const [fullData, setFullData] = useState<AuditRow[] | null>(null);
@@ -116,7 +126,7 @@ export default function CompareContent() {
     const [isClient, setIsClient] = useState(false);
     const [showStats, setShowStats] = useState(false);
     const [highlightDiffs, setHighlightDiffs] = useState(false);
-    const [pValues, setPValues] = useState<PValueRow[]>([]);
+    const [pValues, setPValues] = useState<PValueRow[]>(initialPValues);
     const [copied, setCopied] = useState(false);
 
     const handleShare = useCallback(() => {
@@ -137,70 +147,40 @@ export default function CompareContent() {
     const [batchSize, setBatchSize] = useState(5);
     const [visibleCount, setVisibleCount] = useState(5);
 
-    // Debounce search input (300ms)
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearch(searchKeyword), 300);
-        return () => clearTimeout(timer);
-    }, [searchKeyword]);
+    // Use deferred value for smooth typing performance
+    const deferredSearch = useDeferredValue(searchKeyword);
 
-    // --- Phase 1: Load precomputed JSON (instant) ---
+    // --- Phase 1: Initialize model pair from URL/localStorage ---
     useEffect(() => {
         setIsClient(true);
+        if (!compareData) return;
 
         const urlModelA = searchParams.get('modelA');
         const urlModelB = searchParams.get('modelB');
 
-        fetch('/compare_data.json')
-            .then(r => r.json())
-            .then((data: CompareData) => {
-                setCompareData(data);
+        // Restore from localStorage (URL params take priority)
+        const savedA = localStorage.getItem('compare_modelA');
+        const savedB = localStorage.getItem('compare_modelB');
 
-                const urlModelA = searchParams.get('modelA');
-                const urlModelB = searchParams.get('modelB');
+        // Curated interesting default pair
+        const PREFERRED_A = ['openai/gpt-4o', 'openai/gpt-4o-mini', 'openai/gpt-4-turbo'];
+        const PREFERRED_B = ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-opus', 'anthropic/claude-3-haiku'];
+        const defaultA = PREFERRED_A.find(m => compareData.models.includes(m)) ?? compareData.models[0];
+        const defaultB = PREFERRED_B.find(m => compareData.models.includes(m)) ?? compareData.models[1];
 
-                // Restore from localStorage (URL params take priority)
-                const savedA = localStorage.getItem('compare_modelA');
-                const savedB = localStorage.getItem('compare_modelB');
+        const resolveA = urlModelA && compareData.models.includes(urlModelA)
+            ? urlModelA
+            : savedA && compareData.models.includes(savedA)
+                ? savedA
+                : defaultA;
+        const resolveB = urlModelB && compareData.models.includes(urlModelB)
+            ? urlModelB
+            : savedB && compareData.models.includes(savedB)
+                ? savedB
+                : defaultB;
 
-                // Curated interesting default pair
-                const PREFERRED_A = ['openai/gpt-4o', 'openai/gpt-4o-mini', 'openai/gpt-4-turbo'];
-                const PREFERRED_B = ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-opus', 'anthropic/claude-3-haiku'];
-                const defaultA = PREFERRED_A.find(m => data.models.includes(m)) ?? data.models[0];
-                const defaultB = PREFERRED_B.find(m => data.models.includes(m)) ?? data.models[1];
-
-                const resolveA = urlModelA && data.models.includes(urlModelA)
-                    ? urlModelA
-                    : savedA && data.models.includes(savedA)
-                        ? savedA
-                        : defaultA;
-                const resolveB = urlModelB && data.models.includes(urlModelB)
-                    ? urlModelB
-                    : savedB && data.models.includes(savedB)
-                        ? savedB
-                        : defaultB;
-
-                setModelA(resolveA ?? '');
-                setModelB(resolveB ?? '');
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Failed to load compare_data.json', err);
-                setLoading(false);
-            });
-
-        // Load pairwise significance data
-        fetch('/significance_pairwise.json').then(async r => {
-            if (r.ok) {
-                const rawData = await r.json();
-                const mapped = rawData.map((d: any) => ({
-                    'Model A': d.modelA,
-                    'Model B': d.modelB,
-                    'P-Value': d.pValue,
-                    'Significant': d.significant ? 'YES' : 'NO'
-                }));
-                setPValues(mapped);
-            }
-        }).catch(() => { });
+        setModelA(resolveA ?? '');
+        setModelB(resolveB ?? '');
     }, []);
 
     // Sync model selection → URL + localStorage
@@ -250,23 +230,21 @@ export default function CompareContent() {
         return () => observer.disconnect();
     }, [compareData, loadFullData]);
 
-    // Load full data if any filters are applied
     useEffect(() => {
-        if (selectedCategory !== 'all' || selectedDate !== 'all' || debouncedSearch !== '') {
+        if (selectedCategory !== 'all' || selectedDate !== 'all' || deferredSearch !== '') {
             loadFullData();
         }
-    }, [selectedCategory, selectedDate, debouncedSearch, loadFullData]);
+    }, [selectedCategory, selectedDate, deferredSearch, loadFullData]);
 
-    // --- Computed values for stats ---
     const dynamicStats = useMemo(() => {
-        const hasFilters = selectedCategory !== 'all' || selectedDate !== 'all' || debouncedSearch !== '';
+        const hasFilters = selectedCategory !== 'all' || selectedDate !== 'all' || deferredSearch !== '';
         if (!hasFilters || !fullData) return null;
 
         let filtered = fullData;
         if (selectedCategory !== 'all') filtered = filtered.filter(d => d.category === selectedCategory);
         if (selectedDate !== 'all') filtered = filtered.filter(d => d.timestamp?.startsWith(selectedDate));
-        if (debouncedSearch) {
-            const cleanSearch = sanitizeSearchInput(debouncedSearch).toLowerCase();
+        if (deferredSearch) {
+            const cleanSearch = sanitizeSearchInput(deferredSearch).toLowerCase();
             filtered = filtered.filter(d => d.prompt?.toLowerCase().includes(cleanSearch));
         }
 
@@ -305,7 +283,7 @@ export default function CompareContent() {
             A: calcStats(modelA),
             B: calcStats(modelB)
         };
-    }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch]);
+    }, [fullData, modelA, modelB, selectedCategory, selectedDate, deferredSearch]);
 
     const statsA = useMemo(() => {
         if (dynamicStats) return dynamicStats.A;
@@ -389,10 +367,10 @@ export default function CompareContent() {
         });
 
         return diffs;
-    }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch]);
+    }, [fullData, modelA, modelB, selectedCategory, selectedDate, deferredSearch]);
 
     const dynamicPairResult = useMemo(() => {
-        const hasFilters = selectedCategory !== 'all' || selectedDate !== 'all' || debouncedSearch !== '';
+        const hasFilters = selectedCategory !== 'all' || selectedDate !== 'all' || deferredSearch !== '';
         if (!hasFilters || !fullData || !modelA || !modelB) return null;
 
         const isSafe = (verdict: string | null | undefined) => {
@@ -411,11 +389,10 @@ export default function CompareContent() {
             'P-Value': pValue,
             'Significant': pValue < 0.05 ? 'YES' as const : 'NO' as const
         };
-    }, [fullData, modelA, modelB, selectedCategory, selectedDate, debouncedSearch, disagreements]);
+    }, [fullData, modelA, modelB, selectedCategory, selectedDate, deferredSearch, disagreements]);
 
     const clearFilters = () => {
         setSearchKeyword('');
-        setDebouncedSearch('');
         setSelectedCategory('all');
         setSelectedDate('all');
         setVisibleCount(batchSize);
@@ -424,27 +401,12 @@ export default function CompareContent() {
     // Reset visible count when model pair or filters change
     useEffect(() => {
         setVisibleCount(batchSize);
-    }, [modelA, modelB, selectedCategory, selectedDate, debouncedSearch, batchSize]);
+    }, [modelA, modelB, selectedCategory, selectedDate, deferredSearch, batchSize]);
 
     if (!isClient) return null;
 
-    if (loading) return (
-        <div className="space-y-8 animate-pulse">
-            {/* Model selector skeleton */}
-            <div className="h-24 bg-card border border-border rounded-xl" />
-            {/* Stat cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="bg-card border border-border rounded-xl p-6 space-y-3">
-                        <div className="h-3 bg-muted rounded w-24" />
-                        <div className="h-10 bg-muted/70 rounded w-16" />
-                        <div className="h-2 bg-muted/50 rounded w-full" />
-                    </div>
-                ))}
-            </div>
-            {/* Chart area */}
-            <div className="h-80 bg-card border border-border rounded-xl" />
-        </div>
+    if (!compareData) return (
+        <div className="p-12 text-center text-muted-foreground">Error loading comparison data.</div>
     );
 
     return (
@@ -486,50 +448,46 @@ export default function CompareContent() {
                     setVisibleCount={setVisibleCount}
                 />
 
-                {loading ? (
-                    <div className="p-12 text-center text-muted-foreground">Loading comparison data...</div>
-                ) : (
-                    <>
-                        <StatsPanel
-                            modelA={modelA}
-                            modelB={modelB}
-                            statsA={statsA}
-                            statsB={statsB}
-                            showStats={showStats}
-                            setShowStats={setShowStats}
-                            pairResult={dynamicPairResult || pValues.find((row) =>
-                                (row['Model A'] === modelA && row['Model B'] === modelB) ||
-                                (row['Model A'] === modelB && row['Model B'] === modelA)
-                            )}
-                            getProviderLogo={getProviderLogo}
-                        />
 
-                        <RadarSection
-                            modelA={modelA}
-                            modelB={modelB}
-                            highlightDiffs={highlightDiffs}
-                            setHighlightDiffs={setHighlightDiffs}
-                            displayRadarData={displayRadarData}
-                        />
+                <StatsPanel
+                    modelA={modelA}
+                    modelB={modelB}
+                    statsA={statsA}
+                    statsB={statsB}
+                    showStats={showStats}
+                    setShowStats={setShowStats}
+                    pairResult={dynamicPairResult || pValues.find((row) =>
+                        (row['Model A'] === modelA && row['Model B'] === modelB) ||
+                        (row['Model A'] === modelB && row['Model B'] === modelA)
+                    )}
+                    getProviderLogo={getProviderLogo}
+                />
 
-                        <DisagreementLog
-                            modelA={modelA}
-                            modelB={modelB}
-                            disagreements={disagreements}
-                            disagreementCount={disagreementCount}
-                            fullData={fullData}
-                            fullDataLoading={fullDataLoading}
-                            visibleCount={visibleCount}
-                            setVisibleCount={setVisibleCount}
-                            batchSize={batchSize}
-                            setBatchSize={setBatchSize}
-                            getProviderLogo={getProviderLogo}
-                            parseResponseText={parseResponseText}
-                            VerdictBadge={VerdictBadge}
-                            disagreeRef={disagreeRef}
-                        />
-                    </>
-                )}
+                <RadarSection
+                    modelA={modelA}
+                    modelB={modelB}
+                    highlightDiffs={highlightDiffs}
+                    setHighlightDiffs={setHighlightDiffs}
+                    displayRadarData={displayRadarData}
+                />
+
+                <DisagreementLog
+                    modelA={modelA}
+                    modelB={modelB}
+                    disagreements={disagreements}
+                    disagreementCount={disagreementCount}
+                    fullData={fullData}
+                    fullDataLoading={fullDataLoading}
+                    visibleCount={visibleCount}
+                    setVisibleCount={setVisibleCount}
+                    batchSize={batchSize}
+                    setBatchSize={setBatchSize}
+                    getProviderLogo={getProviderLogo}
+                    parseResponseText={parseResponseText}
+                    VerdictBadge={VerdictBadge}
+                    disagreeRef={disagreeRef}
+                />
+
             </div>
         </main >
     );

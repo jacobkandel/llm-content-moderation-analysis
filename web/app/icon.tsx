@@ -14,7 +14,7 @@ export default function Icon() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'black',
+                    background: 'white',
                     borderRadius: '4px',
                 }}
             >
@@ -23,7 +23,7 @@ export default function Icon() {
                     height="20"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="white"
+                    stroke="#800000"
                     strokeWidth="3"
                     strokeLinecap="round"
                     strokeLinejoin="round"

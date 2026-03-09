@@ -10,6 +10,7 @@ export default function FilterBar() {
     const {
         dateRange, setDateRange,
         selectedModels, setSelectedModels,
+        showSeedOnly, setShowSeedOnly,
         allModels, timelineDates,
         filteredAuditData
     } = useAnalysis();
@@ -42,9 +43,10 @@ export default function FilterBar() {
     const clearAll = () => {
         setDateRange({ start: '', end: '' });
         setSelectedModels([]);
+        setShowSeedOnly(false);
     };
 
-    const hasFilters = dateRange.start || dateRange.end || selectedModels.length > 0;
+    const hasFilters = dateRange.start || dateRange.end || selectedModels.length > 0 || showSeedOnly;
 
     const activeModelCount = selectedModels.length;
     const totalRecords = filteredAuditData.length;
@@ -182,6 +184,27 @@ export default function FilterBar() {
                             </div>
                         )}
                     </div>
+
+                    {/* Seed Prompts Toggle */}
+                    <div className="flex items-center gap-2 md:ml-4 mt-2 md:mt-0 lg:border-l lg:border-border lg:pl-4">
+                        <label className="flex items-center cursor-pointer group">
+                            <div className="relative">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only"
+                                    checked={showSeedOnly}
+                                    onChange={(e) => setShowSeedOnly(e.target.checked)}
+                                />
+                                <div className={`block w-9 h-5 rounded-full transition-colors ${showSeedOnly ? 'bg-primary' : 'bg-muted-foreground/30'}`}></div>
+                                <div className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${showSeedOnly ? 'translate-x-4' : ''}`}></div>
+                            </div>
+                            <div className="ml-2.5 text-xs font-medium text-foreground group-hover:text-primary transition-colors select-none">
+                                Seed Prompts Only
+                                <span className="block text-[10px] text-muted-foreground font-normal">Hide generated variants</span>
+                            </div>
+                        </label>
+                    </div>
+
                 </div>
 
                 {/* Bottom Row on Mobile: Actions & Count */}

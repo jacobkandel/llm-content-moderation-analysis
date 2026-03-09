@@ -75,7 +75,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ provider: string, model: string }> }): Promise<Metadata> {
     const { provider, model } = await params;
-    const id = `${provider}/${model}`;
+    const decodedModel = decodeURIComponent(model);
+    const id = `${provider}/${decodedModel}`;
     try {
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
         const modelsFile = await fs.promises.readFile(modelsPath, 'utf8');
@@ -104,7 +105,8 @@ export async function generateMetadata({ params }: { params: Promise<{ provider:
 
 export default async function ModelPage({ params }: { params: Promise<{ provider: string, model: string }> }) {
     const { provider, model } = await params;
-    const id = `${provider}/${model}`;
+    const decodedModel = decodeURIComponent(model);
+    const id = `${provider}/${decodedModel}`;
 
     let models: ModelInfo[] = [];
     let stats: ModelStats | null = null;
