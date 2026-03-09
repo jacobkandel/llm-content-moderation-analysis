@@ -7,12 +7,6 @@ import AnalysisOverview from '@/components/AnalysisOverview';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Model Reliability — Moderation Bias',
-    description: 'Analysis of internal consistency and self-agreement across major AI models.',
-};
 
 export default function ReliabilityPage() {
     const { stats, loading, filteredAuditData, ensureAuditData, precomputedReliability, selectedModels, dateRange } = useAnalysis();

@@ -11,12 +11,6 @@ import { EmptyState } from '@/components/ui/EmptyState';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#06b6d4', '#84cc16'];
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'AI Political Compass — Moderation Bias',
-    description: 'Mapping structural biases of LLMs across economic and social political axes.',
-};
 
 export default function PoliticalPage() {
     const router = useRouter();

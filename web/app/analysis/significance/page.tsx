@@ -28,12 +28,6 @@ function erf(x: number): number {
     return sign * y;
 }
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Statistical Significance — Moderation Bias',
-    description: 'Separating signal from noise with pairwise significance results for model refusal rates.',
-};
 
 export default function SignificancePage() {
     const { filteredAuditData, loading, ensureAuditData, ensureSignificance, precomputedSignificance, selectedModels, dateRange, stats } = useAnalysis();

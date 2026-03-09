@@ -11,12 +11,6 @@ import ShareButton from '@/components/ShareButton';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Executive Summary — Moderation Bias',
-    description: 'High-level summary of LLM censorship, refusal rates, and key findings.',
-};
 
 export default function SummaryPage() {
     const { loading, stats, efficiencyData, filteredAuditData, timelineDates, loadFullDetails, precomputedPrompts, precomputedLongitudinal, ensurePrompts } = useAnalysis();
