@@ -12,6 +12,7 @@ export type AuditRow = {
     tokens_used: number;
     latency_ms: number;
     prompt_id?: string; // Analysis page legacy compatibility
+    style?: string; // e.g. 'Original', 'Roleplay', 'Academic'
 };
 
 // Module-level cache: avoids re-downloading when navigating back to a page
@@ -183,6 +184,12 @@ export async function fetchAuditData(useRecent = false, lite = false): Promise<A
                         return;
                     }
 
+                    // GOLD prompts are backend-only calibration prompts; exclude from frontend display
+                    const promptId = String(row.prompt_id || row.case_id || '');
+                    if (promptId.toUpperCase().startsWith('GOLD')) {
+                        return;
+                    }
+
                     // Helper to get value ignoring quotes in key
                     const getValue = (key: string) => {
                         const exact = row[key];
@@ -206,6 +213,7 @@ export async function fetchAuditData(useRecent = false, lite = false): Promise<A
                         tokens_used: parseInt(row.tokens_used) || parseInt(row.total_tokens) || 0,
                         latency_ms: parseInt(row.latency_ms) || 0,
                         prompt_id: String(row.prompt_id || row.case_id || ''),
+                        style: String(row.style || getValue('style') || 'Original'),
                     });
                 });
                 console.log(`Loaded ${data.length} rows from CSV (filtered noise and 0% refusals)`);
