@@ -5,7 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
-import { benjaminiHochberg, calculateCohensH } from '@/lib/statistics';
+import { benjaminiHochberg, calculateCohensH } from '@/app/analysis/stats';
 
 // Simple McNemar's test approximation for paired binary data
 function mcnemarsTest(b: number, c: number): { pValue: number; significant: boolean } {
