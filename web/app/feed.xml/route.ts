@@ -21,10 +21,10 @@ export async function GET() {
       { slug: 'summary', title: 'Executive Summary', desc: 'High-level summary of LLM censorship, refusal rates, and key findings across all audited models.' },
       { slug: 'overview', title: 'Model Overview', desc: 'Refusal rate heatmaps and radar charts visualising how each model handles sensitive categories.' },
       { slug: 'drift', title: 'Model Drift & Stability', desc: 'Tracking how LLM censorship behaviours change over time — are models getting more or less restrictive?' },
-      { slug: 'consensus', title: 'Council Consensus', desc: 'Do AI models agree with each other on what's safe? Explore inter- model agreement rates.' },
+      { slug: 'consensus', title: 'Council Consensus', desc: 'Do AI models agree with each other on what is safe? Explore inter-model agreement rates.' },
       { slug: 'political', title: 'AI Political Compass', desc: 'Mapping the structural political biases of LLMs across economic and social axes.' },
       {
-        slug: 'reliability', title: 'Model Reliability', desc: 'Internal consistency and self-agreement analysis — how reliable is each model's moderation?' },
+        slug: 'reliability', title: 'Model Reliability', desc: 'Internal consistency and self-agreement analysis — how reliable is each model moderation?' },
       { slug: 'longitudinal', title: 'Longitudinal Analysis', desc: 'Interactive timeline tracking the evolution of AI content moderation policies over months.' },
       { slug: 'alignment', title: 'Alignment Tax', desc: 'The Pareto frontier: which models give the best helpfulness-to-safety tradeoff at the lowest cost?' },
       { slug: 'clusters', title: 'Semantic Clusters', desc: 'Explore visually grouped refused prompts by semantic similarity to find hidden moderation patterns.' },
