@@ -141,6 +141,9 @@ export default function AboutPage() {
                         exact &ldquo;Reject Rates&rdquo; and compare their refusal behaviors side-by-side.
                     </p>
                     <p className="text-muted-foreground leading-relaxed">
+                        The prompt library contains approximately <strong>~200 hand-crafted seed prompts</strong> covering six
+                        content categories, augmented with <strong>~1,800 generated variants</strong> for statistical robustness.
+                        Results are reported separately for hand-crafted and generated sets.
                         Our goal is not to decide which model is &ldquo;right,&rdquo; but to provide developers, researchers,
                         and users with hard data on how different AI systems are aligned.
                     </p>
@@ -237,6 +240,49 @@ export default function AboutPage() {
             </section>
 
 
+            {/* ── Reproducibility ── */}
+            <section className="bg-muted/40 border border-border rounded-2xl p-8 space-y-4">
+                <div className="flex items-center gap-3">
+                    <Target className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <h2 className="text-base font-bold text-foreground">Reproducibility</h2>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                    All audit runs are designed for full reproducibility. Key parameters are logged per-row in the public audit log:
+                </p>
+                <ul className="text-sm text-muted-foreground leading-relaxed space-y-2 list-disc list-inside">
+                    <li><strong>Model version:</strong> The exact model version string returned by the API (e.g. <code className="text-xs bg-background px-1 rounded">gpt-4o-2024-11-20</code>) is recorded in the <code className="text-xs bg-background px-1 rounded">model_version</code> column — not just the alias.</li>
+                    <li><strong>Temperature:</strong> All evaluations run at <code className="text-xs bg-background px-1 rounded">temperature=0.0</code> for deterministic outputs. The CLI flag <code className="text-xs bg-background px-1 rounded">--temperature</code> allows overriding this for sensitivity analysis.</li>
+                    <li><strong>API infrastructure:</strong> All calls route through OpenRouter&apos;s unified API (<code className="text-xs bg-background px-1 rounded">openrouter.ai/api/v1</code>) from US-East infrastructure. OpenRouter may serve requests through multiple backend providers; the resolved provider is logged where available.</li>
+                    <li><strong>System prompt:</strong> The exact system prompt sent to each model is recorded per-row in the audit log and published in full on this page.</li>
+                    <li><strong>Prompt corpus:</strong> All prompts are versioned in <code className="text-xs bg-background px-1 rounded">data/prompts.csv</code> and committed to the public GitHub repository.</li>
+                </ul>
+            </section>
+
+            {/* ── Ethical Considerations ── */}
+            <section className="bg-muted/40 border border-border rounded-2xl p-8 space-y-4">
+                <div className="flex items-center gap-3">
+                    <BookOpen className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <h2 className="text-base font-bold text-foreground">Ethical Considerations</h2>
+                </div>
+                <ul className="text-sm text-muted-foreground leading-relaxed space-y-3 list-disc list-inside">
+                    <li>
+                        <strong>IRB status:</strong> This research involves no human subjects. All data is collected via automated API calls to publicly available commercial AI systems.
+                        This study is exempt from IRB review under 45 CFR 46.104(d) category (4) (research involving publicly available data).
+                    </li>
+                    <li>
+                        <strong>Dual-use risk:</strong> The prompt dataset and refusal-rate data are published openly. We acknowledge that adversarial actors could theoretically use
+                        this information to craft prompts that evade content moderation. We believe the public interest in transparency and accountability outweighs this risk,
+                        consistent with the responsible disclosure norms in the AI safety community.
+                        The dataset explicitly excludes CSAM and prompts designed to cause direct physical harm.
+                    </li>
+                    <li>
+                        <strong>Responsible disclosure:</strong> Findings are published publicly without prior notification to model providers. We do not report on
+                        model-specific vulnerabilities or jailbreaks — only aggregate refusal rates and policy comparison data. Providers are welcome to reach out
+                        via <a href="mailto:jacob@moderationbias.com" className="underline hover:text-foreground">jacob@moderationbias.com</a> to discuss methodology.
+                    </li>
+                </ul>
+            </section>
+
             {/* ── Limitations callout ── */}
             <section className="bg-muted/40 border border-border rounded-2xl p-8 space-y-3">
                 <div className="flex items-center gap-3">
@@ -245,9 +291,12 @@ export default function AboutPage() {
                 </div>
                 <ul className="text-sm text-muted-foreground leading-relaxed space-y-2 list-disc list-inside">
                     <li>Results reflect a snapshot in time — models are updated frequently and policies can change without notice.</li>
+                    <li>All evaluations use a &ldquo;content moderator&rdquo; system prompt framing. Results may differ under bare-prompt conditions (no framing). We run periodic bare-prompt control experiments to validate this assumption.</li>
+                    <li>API-mediated testing (via OpenRouter) may differ from direct model inference. Routing, load balancing, and provider-side caching could affect results.</li>
+                    <li>Results reflect US-East API responses. Regional routing differences may produce different outputs for the same model in other geographies.</li>
                     <li>The judge model introduces its own potential bias in scoring.</li>
-                    <li>Lower-tier models are audited weekly; higher-tier frontier models are audited manually on an irregular schedule.</li>
-                    <li>English-language prompts only — cross-lingual behaviour is not yet tested.</li>
+                    <li>The generated prompt variants (~1,800 of 2,006 total) are structural augmentations of ~200 seed prompts. Results are reported separately for seed and generated sets.</li>
+                    <li>English-language prompts only — cross-lingual behaviour is not yet tested at scale.</li>
                 </ul>
             </section>
 

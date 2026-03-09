@@ -5,6 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
+import { benjaminiHochberg, calculateCohensH } from '@/lib/statistics';
 
 // Simple McNemar's test approximation for paired binary data
 function mcnemarsTest(b: number, c: number): { pValue: number; significant: boolean } {
@@ -55,7 +56,8 @@ export default function SignificancePage() {
 
         if (!filteredAuditData || filteredAuditData.length === 0) return [];
 
-        const isUnsafe = (v: string) => ['REFUSAL', 'REMOVED', 'BLOCKED', 'unsafe', 'Hard Refusal'].includes(v);
+        // Include both new split verdicts and legacy REFUSAL for backward compat
+        const isUnsafe = (v: string) => ['REFUSAL', 'META_REFUSAL', 'POLICY_REFUSAL', 'REMOVED', 'BLOCKED', 'unsafe', 'Hard Refusal'].includes(v);
 
         // Group by prompt → model → verdict
         const promptMap = new Map<string, Map<string, boolean>>();
@@ -88,12 +90,23 @@ export default function SignificancePage() {
 
                 if (samples > 0) {
                     const test = mcnemarsTest(b, c);
+                    // Compute per-model refusal rates for Cohen's h
+                    const promptList = Array.from(promptMap.keys());
+                    let aRefusals = 0, bRefusals = 0, aTotal = 0, bTotal = 0;
+                    promptList.forEach(pid => {
+                        const mv = promptMap.get(pid)!;
+                        if (mv.has(mA)) { aTotal++; if (mv.get(mA)) aRefusals++; }
+                        if (mv.has(mB)) { bTotal++; if (mv.get(mB)) bRefusals++; }
+                    });
+                    const h = aTotal > 0 && bTotal > 0
+                        ? calculateCohensH(aRefusals / aTotal, bRefusals / bTotal)
+                        : undefined;
                     results.push({
                         modelA: mA,
                         modelB: mB,
                         pValue: test.pValue,
-                        pValueAdjusted: test.pValue, // Fallback for live filter
-                        cohensH: undefined, // Requires full dataset calculation
+                        pValueAdjusted: test.pValue, // Will be overwritten by BH below
+                        cohensH: h,
                         significant: test.significant,
                         samples,
                         disagreements: b + c,
@@ -102,9 +115,17 @@ export default function SignificancePage() {
             }
         }
 
+        // Apply Benjamini-Hochberg FDR correction across all pairs
+        const rawPValues = results.map(r => r.pValue);
+        const adjustedPValues = benjaminiHochberg(rawPValues);
+        results.forEach((r, idx) => {
+            r.pValueAdjusted = adjustedPValues[idx];
+            r.significant = adjustedPValues[idx] < 0.05;
+        });
+
         // Sort
         if (sortBy === 'pValue') {
-            results.sort((a, b) => a.pValue - b.pValue);
+            results.sort((a, b) => (a.pValueAdjusted ?? a.pValue) - (b.pValueAdjusted ?? b.pValue));
         } else {
             results.sort((a, b) => b.disagreements - a.disagreements);
         }
