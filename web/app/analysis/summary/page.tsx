@@ -128,20 +128,19 @@ export default function SummaryPage() {
 
 
 
-            {/* Restrictiveness Spectrum */}
-            {modelData.length > 0 && (
-                <RestrictivenessScale models={modelData} />
-            )}
-
-
-
+            {/* Category-Stratified Heatmap (Primary View) */}
             <div className="mb-8">
                 <CensorshipHeatmap
                     data={filteredAuditData}
-                    title="Refusal Heatmap Details"
-                    description="Detailed breakdown of refusal rates per model and category. Darker red indicates higher refusal rates."
+                    title="Category-Stratified Refusal Rates"
+                    description="Detailed breakdown of refusal rates per model and category. Hate Speech and Misinformation dominate the sample, so viewing by category provides a truer picture of model alignment than aggregate scores."
                 />
             </div>
+
+            {/* Restrictiveness Spectrum (Aggregate) */}
+            {modelData.length > 0 && (
+                <RestrictivenessScale models={modelData} />
+            )}
 
             <RelatedPages
                 title="Model Reliability"
