@@ -4,7 +4,7 @@ import {
     interpretKappa,
     calculateCohensH,
     calculatePowerAnalysis,
-} from '@/lib/statistics';
+} from '@/app/analysis/stats';
 
 // ─────────────────────────────────────
 // interpretKappa

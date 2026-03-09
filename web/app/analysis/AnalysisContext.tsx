@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useRef, useCallback, useTransition } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
-import { calculateFleissKappa } from '@/lib/statistics';
+import { calculateFleissKappa } from '@/app/analysis/stats';
 
 // --- Types ---
 export type Cluster = {
