@@ -23,6 +23,13 @@ const CHART_COLORS = [
     '#737373', // Dark Greystone
 ];
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Longitudinal Analysis — Moderation Bias',
+    description: 'Interactive timeline tracking the evolution of AI content moderation.',
+};
+
 export default function LongitudinalPage() {
     const { filteredAuditData, dateRange, setDateRange, loading, ensureAuditData, precomputedLongitudinal, selectedModels } = useAnalysis();
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;

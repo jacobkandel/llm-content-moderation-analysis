@@ -2,8 +2,38 @@ import Link from 'next/link';
 import { Github, Linkedin, ArrowRight, BookOpen, Target, FlaskConical } from 'lucide-react';
 
 export default function AboutPage() {
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        name: 'About Moderation Bias',
+        description: 'Moderation Bias is an open-source research platform that audits how LLMs handle content moderation.',
+        url: 'https://moderationbias.com/about',
+        mainEntity: {
+            '@type': 'Organization',
+            name: 'Moderation Bias',
+            url: 'https://moderationbias.com',
+            logo: 'https://moderationbias.com/og-image.jpeg',
+            founder: [
+                {
+                    '@type': 'Person',
+                    name: 'Jacob Kandel',
+                    url: 'https://github.com/jacobkandel'
+                },
+                {
+                    '@type': 'Person',
+                    name: 'Lydia Kandel',
+                    url: 'https://github.com/lydiakandel-byte'
+                }
+            ]
+        }
+    };
+
     return (
         <main className="max-w-4xl mx-auto py-12 space-y-16">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
 
             <header className="space-y-3">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">About the Project</p>

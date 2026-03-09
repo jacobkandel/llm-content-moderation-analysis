@@ -7,6 +7,13 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Censorship Triggers — Moderation Bias',
+    description: 'Discover the specific words and linguistic patterns that automatically trigger AI refusals.',
+};
+
 export default function TriggersPage() {
     const { triggerData, loading, ensureTriggers } = useAnalysis();
     useEffect(() => { ensureTriggers(); }, []);

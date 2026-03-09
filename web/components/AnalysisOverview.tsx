@@ -17,6 +17,7 @@ export default function AnalysisOverview({ title, description, importance, metri
         '@type': 'Article',
         headline: title,
         description: description,
+        image: 'https://moderationbias.com/assets/heatmap.png',
         author: {
             '@type': 'Organization',
             name: 'Moderation Bias'

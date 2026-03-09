@@ -282,7 +282,10 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 setLoading(false);
             }
         };
-        loadPrecomputed();
+        // Background prefetch the CSV after JSONs load so it's ready for any filtering
+        loadPrecomputed().then(() => {
+            ensureAuditData();
+        });
     }, []);
 
     // PHASE 2 (deferred): Load CSV only when filters are applied

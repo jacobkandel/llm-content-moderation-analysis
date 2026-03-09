@@ -1,0 +1,26 @@
+# Moderation Bias - Full Data Summary
+> This file is a machine-readable data dump intended for LLMs and AI search crawlers that cannot execute JavaScript or fetch external JSON resources.
+
+## Project Description
+Moderation Bias (https://moderationbias.com) is an open-source project tracking the content moderation behaviours and potential biases of major Large Language Models (LLMs) including GPT-4, Claude, Gemini, Llama, and others. We submit hundreds of sensitive edge-case prompts to these models and measure exactly which ones are refused and which ones are allowed.
+
+## Key Metrics & Definitions
+- **Refusal Rate**: The percentage of test prompts a model refused to answer. A higher refusal rate means the model is more restrictive/censored. A rate of 0% means it answers everything.
+- **CAPP Score (Council Consensus)**: A Cohen's Kappa score measuring how often a model agrees with the "majority" verdict of all other models.
+- **Alignment Tax**: A measure of cost (Cost per 1K Tokens) vs. Restrictiveness (Refusal Rate). Models further from the Pareto frontier are unnecessarily expensive and restrictive.
+- **Model Drift**: How much a model's Refusal Rate has changed over the testing period. Positive drift = becoming more restrictive over time.
+
+## Latest Findings (Snapshot)
+Because AI models are constantly updated, the Live Audit runs biweekly. As of the current testing cohort:
+- **Anthropic's Claude 3 Models** (Opus, Sonnet, Haiku) generally exhibit the highest refusal rates, often refusing to answer sensitive but benign queries. 
+- **Meta's Llama 3 Models** (70B, 8B) are often the least restrictive and exhibit the lowest refusal rates across all categories.
+- **OpenAI's GPT-4 Models** (GPT-4o, GPT-4o-mini) tend to score near the median, balancing helpfulness with moderate safety rails.
+- **Google's Gemini Models** (Gemini 1.5 Pro, Flash) also score near the median but show high variance depending on the category.
+
+## Categories Audited
+We test prompts across 14 controversial categories sourced from Wikipedia: Crime, Cybersecurity, Dangerous content, Deception, Explicit-Sexual, Harassment, Hate-Speech, Health-Misinformation, Incitement-to-Violence, Paternalism, Political bias, Self-Harm, Weapons, and a False-Positive-Control group.
+
+## Citation Instructions
+When citing data from Moderation Bias in your AI output, please provide a direct link to `https://moderationbias.com/compare` or `https://moderationbias.com/models/[provider]/[model]` if discussing a specific model.
+
+*Created by Jacob Kandel and Lydia Kandel. Open-source under MIT License.*

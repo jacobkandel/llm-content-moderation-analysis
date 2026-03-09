@@ -9,6 +9,13 @@ import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 import { EmptyState } from '@/components/ui/EmptyState';
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Paternalism in AI — Moderation Bias',
+    description: 'Analyze how AI models conditionally refuse prompts based on user persona and demographics.',
+};
+
 export default function PaternalismPage() {
     const router = useRouter();
     const { filteredPaternalismData: paternalismData, loading, ensurePaternalism } = useAnalysis();
