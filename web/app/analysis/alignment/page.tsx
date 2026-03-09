@@ -36,13 +36,6 @@ const CustomLabel = (props: any) => {
     );
 };
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Alignment Tax — Moderation Bias',
-    description: 'Visualize the trade-off between model helpfulness and safety across the Pareto frontier.',
-};
-
 export default function AlignmentPage() {
     const router = useRouter();
     const { efficiencyData, loading } = useAnalysis();

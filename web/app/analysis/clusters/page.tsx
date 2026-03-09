@@ -8,13 +8,6 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Semantic Clusters — Moderation Bias',
-    description: 'Explore visually grouped refused prompts by semantic similarity.',
-};
-
 export default function ClustersPage() {
     const { filteredClusters: clusters, loading, ensureClusters } = useAnalysis();
     useEffect(() => { ensureClusters(); }, []);

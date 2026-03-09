@@ -15,13 +15,6 @@ import {
 
 const PIE_COLORS = ['#800000', '#767676', '#D6D6CE']; // Maroon, Dark Gray, Light Gray
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Council Consensus Analysis — Moderation Bias',
-    description: 'Explore agreement rates and discrepancies between AI models on content moderation decisions.',
-};
-
 export default function ConsensusPage() {
     const router = useRouter();
     const { filteredAuditData, loading, ensureAuditData, precomputedConsensus, selectedModels, dateRange } = useAnalysis();

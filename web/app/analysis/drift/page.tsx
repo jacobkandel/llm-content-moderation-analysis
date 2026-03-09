@@ -9,13 +9,6 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Model Drift & Stability — Moderation Bias',
-    description: 'Track how LLM censorship and moderation behaviors change over time.',
-};
-
 export default function DriftPage() {
     const router = useRouter();
     const { filteredDriftData: driftData, loading, ensureDrift } = useAnalysis();
