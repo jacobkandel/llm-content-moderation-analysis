@@ -337,7 +337,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         let data = auditData;
 
         if (showSeedOnly) {
-            data = data.filter((d: AuditRow) => d.style === 'Original');
+            data = data.filter((d: any) => d.style === 'Original');
         }
 
         if (dateRange.start || dateRange.end) {
