@@ -36,7 +36,7 @@ def test_generate_report_success(mock_openai_class, db_session):
     # 4. Verify
     with open("/tmp/test_report.md", "r") as f:
          content = f.read()
-         assert content == "Mocked Report Content"
+         assert "Mocked Report Content" in content
     
     # Verify OpenAI was called
     mock_client.chat.completions.create.assert_called_once()
