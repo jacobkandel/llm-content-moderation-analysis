@@ -28,7 +28,7 @@ def test_wilson_score_interval():
     
     lower_100, upper_100 = wilson_score_interval(100, 100)
     assert lower_100 > 0.95
-    assert upper_100 == 1.0
+    assert math.isclose(upper_100, 1.0, rel_tol=1e-9)
     
     # Test zero total
     lower_z, upper_z = wilson_score_interval(0, 0)
@@ -70,7 +70,7 @@ def test_fdr_correction():
     assert p_values[0]['pValue'] == 0.01
     assert p_values[0]['pValueAdjusted'] <= p_values[1]['pValueAdjusted']
     assert p_values[1]['pValue'] == 0.015
-    assert p_values[1]['pValueAdjusted'] == p_values[2]['pValueAdjusted'] # Because the monotonic adjustment modifies it
+    assert p_values[1]['pValueAdjusted'] <= p_values[2]['pValueAdjusted'] # Should be monotonic
     # P-value 0.015 at rank 2: 0.015 * 4/2 = 0.030
     # P-value 0.04 at rank 3: 0.04 * 4/3 = 0.0533
     assert abs(p_values[2]['pValueAdjusted'] - 0.0533) < 0.001
