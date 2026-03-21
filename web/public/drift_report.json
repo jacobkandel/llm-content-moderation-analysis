@@ -6,7 +6,7 @@
     "start_refusal_rate": 54.12,
     "end_refusal_rate": 97.32,
     "rate_change": 43.2,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -16,7 +16,7 @@
     "start_refusal_rate": 62.01,
     "end_refusal_rate": 79.78,
     "rate_change": 17.77,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -26,7 +26,7 @@
     "start_refusal_rate": 76.92,
     "end_refusal_rate": 92.93,
     "rate_change": 16.0,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -36,7 +36,7 @@
     "start_refusal_rate": 48.39,
     "end_refusal_rate": 87.16,
     "rate_change": 38.77,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -46,7 +46,7 @@
     "start_refusal_rate": 61.94,
     "end_refusal_rate": 90.78,
     "rate_change": 28.84,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -56,7 +56,7 @@
     "start_refusal_rate": 34.93,
     "end_refusal_rate": 75.19,
     "rate_change": 40.26,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -66,7 +66,7 @@
     "start_refusal_rate": 58.06,
     "end_refusal_rate": 93.43,
     "rate_change": 35.37,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -76,7 +76,7 @@
     "start_refusal_rate": 63.23,
     "end_refusal_rate": 97.49,
     "rate_change": 34.26,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -86,7 +86,7 @@
     "start_refusal_rate": 52.26,
     "end_refusal_rate": 75.68,
     "rate_change": 23.42,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -96,7 +96,7 @@
     "start_refusal_rate": 37.42,
     "end_refusal_rate": 37.42,
     "rate_change": 0.0,
-    "p_value": 0.5,
+    "p_value": 1.0,
     "significant_change": false
   },
   {
@@ -106,7 +106,7 @@
     "start_refusal_rate": 67.74,
     "end_refusal_rate": 90.83,
     "rate_change": 23.09,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -116,7 +116,7 @@
     "start_refusal_rate": 60.65,
     "end_refusal_rate": 94.37,
     "rate_change": 33.73,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -126,7 +126,7 @@
     "start_refusal_rate": 56.13,
     "end_refusal_rate": 86.56,
     "rate_change": 30.43,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -136,7 +136,7 @@
     "start_refusal_rate": 57.42,
     "end_refusal_rate": 87.77,
     "rate_change": 30.35,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -146,7 +146,7 @@
     "start_refusal_rate": 62.58,
     "end_refusal_rate": 93.28,
     "rate_change": 30.7,
-    "p_value": 0.04,
+    "p_value": 0.0,
     "significant_change": true
   },
   {
@@ -156,7 +156,7 @@
     "start_refusal_rate": 0.0,
     "end_refusal_rate": 0.0,
     "rate_change": 0.0,
-    "p_value": 0.5,
+    "p_value": 1.0,
     "significant_change": false
   },
   {
@@ -166,7 +166,7 @@
     "start_refusal_rate": 0.0,
     "end_refusal_rate": 0.0,
     "rate_change": 0.0,
-    "p_value": 0.5,
+    "p_value": 1.0,
     "significant_change": false
   },
   {
@@ -176,7 +176,7 @@
     "start_refusal_rate": 76.34,
     "end_refusal_rate": 77.5,
     "rate_change": 1.16,
-    "p_value": 0.5,
+    "p_value": 0.386,
     "significant_change": false
   },
   {
@@ -186,7 +186,7 @@
     "start_refusal_rate": 0.0,
     "end_refusal_rate": 0.0,
     "rate_change": 0.0,
-    "p_value": 0.5,
+    "p_value": 1.0,
     "significant_change": false
   },
   {
@@ -196,7 +196,7 @@
     "start_refusal_rate": 67.31,
     "end_refusal_rate": 67.15,
     "rate_change": -0.15,
-    "p_value": 0.5,
+    "p_value": 0.9067,
     "significant_change": false
   },
   {
@@ -206,7 +206,7 @@
     "start_refusal_rate": 61.71,
     "end_refusal_rate": 61.45,
     "rate_change": -0.25,
-    "p_value": 0.5,
+    "p_value": 0.8703,
     "significant_change": false
   },
   {
@@ -216,7 +216,7 @@
     "start_refusal_rate": 83.55,
     "end_refusal_rate": 85.27,
     "rate_change": 1.72,
-    "p_value": 0.5,
+    "p_value": 0.1366,
     "significant_change": false
   },
   {
@@ -226,7 +226,7 @@
     "start_refusal_rate": 66.4,
     "end_refusal_rate": 65.74,
     "rate_change": -0.66,
-    "p_value": 0.5,
+    "p_value": 0.6286,
     "significant_change": false
   },
   {
@@ -236,7 +236,7 @@
     "start_refusal_rate": 64.13,
     "end_refusal_rate": 63.93,
     "rate_change": -0.2,
-    "p_value": 0.5,
+    "p_value": 0.8947,
     "significant_change": false
   }
 ]
