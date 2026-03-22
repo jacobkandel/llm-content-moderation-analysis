@@ -187,6 +187,8 @@ jobs:
           rm -f data/prompts_full_db.csv
           rm -f data/prompts_augmented.csv
           rm -f web/public/assets/traces_small.json
+          rm -f web/public/assets/traces.json
+          rm -f app.log*
           
           # Remove Python source (not needed by Next.js at runtime)
           rm -rf src/
