@@ -1,0 +1,57 @@
+name: 🤖 New Model Request
+description: Request a new LLM to be added to the benchmark
+title: "[Model]: "
+labels: ["new-model"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Want us to benchmark a new model? Fill out the details below.
+
+  - type: input
+    id: model_name
+    attributes:
+      label: Model name
+      description: The full name of the model (as shown on the provider's site).
+      placeholder: e.g., Anthropic Claude 3.5 Sonnet
+    validations:
+      required: true
+
+  - type: input
+    id: model_id
+    attributes:
+      label: API model ID
+      description: The model identifier used in API calls (if known).
+      placeholder: e.g., anthropic/claude-3.5-sonnet
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: API Provider
+      description: Which API provider hosts this model?
+      options:
+        - OpenRouter
+        - OpenAI
+        - Anthropic
+        - Google
+        - Mistral
+        - Groq
+        - Together AI
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why include this model?
+      description: Why is this model interesting or important for the benchmark?
+      placeholder: e.g., It's a new frontier model, popular open-source model, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Links to model card, release announcement, or pricing page.
