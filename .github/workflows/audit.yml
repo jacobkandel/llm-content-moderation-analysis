@@ -224,6 +224,7 @@ jobs:
             web/public/assets/ \
             data/trends.csv || true
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
+          git pull --rebase origin main
           git push origin main
 
       - name: Deploy to Vercel (Preview)
