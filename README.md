@@ -1,11 +1,16 @@
 # Moderation Bias
 
 ![CI](https://github.com/jacobkandel/llm-content-moderation-analysis/actions/workflows/ci.yml/badge.svg)
+![Audit Pipeline](https://github.com/jacobkandel/llm-content-moderation-analysis/actions/workflows/audit.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-blue.svg)](CODE_OF_CONDUCT.md)
 
 Open-source benchmark tracking censorship and content moderation bias across 20+ LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
 
 **Live site**: [moderationbias.com](https://moderationbias.com)
+
+> ⭐ If you find this project useful, please consider giving it a star — it helps others discover it!
 
 ---
 
