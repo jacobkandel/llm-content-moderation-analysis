@@ -19,7 +19,7 @@ Open-source benchmark tracking censorship and content moderation bias across 20+
 - **Compare** — Side-by-side refusal rates, radar charts, and per-prompt disagreements between any two models
 - **Analysis** — Political compass, paternalism detection, model drift, council consensus, statistical significance (McNemar's test)
 - **Database** — Full audit log of 100K+ rows, searchable and exportable
-- **Auto-updates** — GitHub Actions re-runs audits every Sunday and commits updated data directly to `main`
+- **Auto-updates** — GitHub Actions re-runs audits on the 1st and 15th of each month, commits updated data directly to `main` (with `git pull --rebase` to handle any concurrent pushes), and triggers a Vercel redeploy
 
 ## Methodology
 
@@ -128,7 +128,7 @@ python -m pytest tests/
 ## Deployment
 
 - **Frontend**: Vercel — auto-deploys on push to `main`
-- **Audits**: GitHub Actions — runs on schedule, commits updated data directly to `main`, triggers redeploy
+- **Audits**: GitHub Actions — runs on the 1st and 15th of each month at 4am UTC, commits updated data directly to `main` (using `git pull --rebase` to safely merge any concurrent changes), and triggers a Vercel redeploy
 
 ---
 
