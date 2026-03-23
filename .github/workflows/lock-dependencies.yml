@@ -1,10 +1,11 @@
 name: Generate Requirements Lock File
 
 on:
-  workflow_dispatch:  # Run manually to refresh the lock file
+  workflow_dispatch:
   push:
     paths:
-      - requirements.txt  # Auto-regenerate when requirements.txt changes
+      - requirements.txt
+      - requirements-dev.txt
 
 jobs:
   lock:

@@ -23,13 +23,12 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        # Install from lock file for reproducible builds; fall back to requirements.txt
+        # Install from lock file for reproducible builds; fall back to dev requirements
         if [ -f requirements.lock ]; then
           pip install -r requirements.lock
         else
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
         fi
-        pip install pytest httpx pytest-cov mypy
 
     - name: Verify Python Version
       run: python -c "import sys; assert sys.version_info >= (3, 10), f'Python 3.10+ required, got {sys.version}'"
@@ -81,6 +80,10 @@ jobs:
       run: npm run lint
       working-directory: web
       continue-on-error: true
+
+    - name: TypeScript Type Check
+      run: npx tsc --noEmit
+      working-directory: web
 
     - name: Build Next.js App
       env:

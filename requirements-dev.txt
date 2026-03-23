@@ -1,0 +1,25 @@
+# Development & tooling dependencies
+# Install with: pip install -r requirements-dev.txt
+-r requirements.txt
+
+# Dashboard / visualisation (local use only)
+streamlit
+plotly
+
+# Testing
+pytest
+pytest-asyncio
+pytest-cov
+
+# Type checking
+mypy
+
+# Linting & formatting
+ruff
+black
+
+# Data version control
+dvc
+
+# Dependency locking
+pip-tools
