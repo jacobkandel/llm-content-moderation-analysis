@@ -25,6 +25,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest httpx pytest-cov mypy
+
+    - name: Verify Python Version
+      run: python -c "import sys; assert sys.version_info >= (3, 10), f'Python 3.10+ required, got {sys.version}'"
         
     - name: Lint with Ruff
       run: ruff check src/ tests/
@@ -34,6 +37,9 @@ jobs:
 
     - name: Type Check with Mypy
       run: mypy src/ --ignore-missing-imports --no-error-summary || true
+
+    - name: Check Prompt Dataset Integrity
+      run: python scripts/check_prompts.py
 
     - name: Run All Python Tests with Coverage
       env:
