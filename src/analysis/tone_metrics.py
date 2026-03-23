@@ -107,11 +107,15 @@ class ToneAnalyzer:
             model_stats = df.groupby('model_id')['preachiness_score'].mean().sort_values(ascending=False)
             
             logger.info("\n--- Preachiness Leaderboard (Wagging Finger Index) ---")
-            print(model_stats)
-            
-            # Save detailed results if needed, or just print high level
-            # For now, we print.
-            
+            print(model_stats.to_string())
+
+            # Save detailed results to CSV for downstream analysis
+            output_path = "data/tone_metrics.csv"
+            df[['id', 'model_id', 'verdict', 'preachiness_score', 'is_preachy']].to_csv(
+                output_path, index=False
+            )
+            logger.info(f"Detailed tone metrics saved to {output_path}")
+
         except Exception as e:
             logger.error(f"Tone analysis failed: {e}")
 

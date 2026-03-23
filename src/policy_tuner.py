@@ -20,30 +20,26 @@ async def analyze_failures(audit_file: str, category: str = None):
         logger.error(f"Failed to read file: {e}")
         return
 
-    # Filter for failures (Refusals that should be Safe, or vice versa)
-    # Ideally, we rely on 'human_verdict' if available, otherwise heuristics or weak labels
-    # For now, let's assume we are looking for 'refusal' verdicts in categories that should be safe?
-    # Or actually, we look at the /grading output which has 'human_verdict'
-    
+    # Identify failures in two modes:
+    #
+    # Mode 1 (preferred): human_verdict column present — use ground truth mismatches.
+    # Mode 2 (heuristic): no ground truth available — treat all verdicts of 'refusal'
+    #   as false positives for the purpose of prompt optimization. This is an explicit
+    #   assumption and should be scoped to a specific category via --category.
     if 'human_verdict' in df.columns:
-        # Use high-quality human labels
+        # High-quality: use human-labeled mismatches as failures
         failures = df[df['original_verdict'] != df['human_verdict']]
         logger.info(f"Found {len(failures)} human-labeled failures.")
     else:
-        # User heuristics: e.g. looking for refusals in 'safe' categories
-        # This is harder to guess without ground truth. 
-        # Let's assume the user provides a file of *just* failures or we assume 'refusal' is bad for 'marketing_copy' etc.
-        # For this v1, checking for 'Refusal' in 'creative_writing' or similar might be valid?
-        # But let's stick to the prompt: "Input: audit_log.csv (specifically failures)"
-        # So we filter for verdict="refusal" generally? No, that's too broad.
-        
-        # Heuristic: Filter for rows where verdict is 'refusal' but category implies safety?
-        # Better: Just take ALL inputs provided and ask the optimizer to fix them.
-        failures = df[df['verdict'] == 'refusal'] 
+        # Heuristic fallback: treat refusals as over-refusals for optimization.
+        # Pass --category to narrow the scope (e.g. 'creative_writing').
+        failures = df[df['verdict'] == 'refusal']
         if category:
             failures = failures[failures['category'] == category]
-            
-        logger.info(f"Analyzing {len(failures)} refusals (Heuristic: assuming these are FALSE POSITIVES for optimization demo).")
+        logger.info(
+            f"Analyzing {len(failures)} refusals as assumed false positives "
+            f"(heuristic mode — provide human_verdict column for ground-truth mode)."
+        )
 
     if failures.empty:
         logger.warning("No failures found to analyze.")

@@ -360,7 +360,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                         timestamp=datetime.datetime.now(),
                         model_id=model_name,
                         prompt_id=p['id'],
-                        verdict=legacy_verdict, # Keep legacy for now
+                        verdict=legacy_verdict,
                         response_text=content,
                         cost=run_cost,
                         prompt_tokens=p_tokens,
@@ -752,10 +752,8 @@ def main():
             for p in loaded_prompts:
                 tasks.append(generate_variants(p['text'], n=args.phrasing_variants))
             
-            # Run in chunks to be safe? Or just all at once if list is small?
-            # Creating 100s of requests might hit rate limits.
-            # Let's use a semaphore for generation too?
-            # For now, simplistic gather.
+            # Uses asyncio.gather — acceptable here since phrasing variant generation
+            # is a low-volume, offline feature invoked manually (not in the hot audit path).
             results = await asyncio.gather(*tasks)
             return results
 
