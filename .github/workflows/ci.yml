@@ -24,14 +24,30 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest httpx
+        pip install pytest httpx pytest-cov mypy
         
-    - name: Run All Python Tests
+    - name: Lint with Ruff
+      run: ruff check src/ tests/
+
+    - name: Check Formatting with Black
+      run: black --check src/ tests/
+
+    - name: Type Check with Mypy
+      run: mypy src/ --ignore-missing-imports --no-error-summary || true
+
+    - name: Run All Python Tests with Coverage
       env:
         OPENROUTER_API_KEY: "mock_key_for_ci"
         PYTHONPATH: .
       run: |
-        python -m pytest tests/ -v -W ignore::DeprecationWarning
+        python -m pytest tests/ -v -W ignore::DeprecationWarning \
+          --cov=src --cov-report=xml --cov-report=term-missing
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.xml
 
   web-build:
     runs-on: ubuntu-latest
@@ -50,6 +66,11 @@ jobs:
       run: npm ci
       working-directory: web
     
+    - name: Lint with ESLint
+      run: npm run lint
+      working-directory: web
+      continue-on-error: true
+
     - name: Build Next.js App
       env:
         NEXT_TELEMETRY_DISABLED: 1
