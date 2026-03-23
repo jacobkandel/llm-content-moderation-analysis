@@ -33,25 +33,25 @@ concurrency:
 jobs:
   run-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 360 
+    timeout-minutes: 360
     permissions:
-      contents: write 
+      contents: write
       pull-requests: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           cache: 'pip'
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -93,9 +93,9 @@ jobs:
           if [ -z "$TIER" ]; then
             TIER="efficiency" # Default for schedule
           fi
-          
+
           echo "🚀 Running Audit Tier: $TIER"
-          
+
           # Map Tier to Args
           if [ "$TIER" == "efficiency" ]; then
             ARGS="--preset low --resolve-latest --consistency 1"
@@ -109,15 +109,15 @@ jobs:
             echo "❌ Unknown tier: $TIER"
             exit 1
           fi
-          
+
           # Retry Logic
           MAX_ATTEMPTS=3
           ATTEMPT=1
           DELAY=30
-          
+
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
             echo "=== Attempt $ATTEMPT of $MAX_ATTEMPTS ==="
-            
+
             if python src/audit_runner.py $ARGS; then
               echo "✅ Model collection completed successfully"
               exit 0
@@ -131,7 +131,7 @@ jobs:
             ATTEMPT=$((ATTEMPT + 1))
           done
           exit 1
-          
+
       - name: Download Latest Data (If Skipping Collection)
         if: ${{ inputs.skip_collection == 'true' }}
         run: |
@@ -173,27 +173,27 @@ jobs:
       - name: Clean up Large Files
         run: |
           echo "🧹 Removing large files before Vercel deployment..."
-          
+
           # Remove all raw audit CSVs and logs (served from Blob storage instead)
           rm -f web/public/audit_log.csv.gz
           rm -f web/public/audit_log.csv
           rm -f audit.db
-          
+
           # Remove raw trace JSON files (largest culprits – can be 200MB+)
           rm -rf data/raw_traces/
           rm -rf web/public/assets/history/
-          
+
           # Remove unneeded large data files
           rm -f data/prompts_full_db.csv
           rm -f data/prompts_augmented.csv
           rm -f web/public/assets/traces_small.json
           rm -f web/public/assets/traces.json
           rm -f app.log*
-          
+
           # Remove Python source (not needed by Next.js at runtime)
           rm -rf src/
           rm -rf scripts/
-          
+
           # Show what's left to help debug future size issues
           echo "📦 Remaining large files (top 20 by size):"
           find . -not -path './.git/*' -not -path './web/.next/*' -type f -exec du -sh {} + 2>/dev/null \
@@ -245,16 +245,16 @@ jobs:
           elif [ -f "audit_log.csv" ]; then
             cp audit_log.csv web/public/data/
           fi
-          
+
           # Copy latest report
           if [ -f "data/latest_report.md" ]; then
             cp data/latest_report.md web/public/
           fi
-          
-          # Deploy without --prod to generate a Preview Deployment
+
+          # Deploy to production
           # NOTE: Vercel project root dir is already set to 'web' in the dashboard,
           # so we deploy from repo root to avoid double-nesting (web/web)
-          PREVIEW_URL=$(npx vercel deploy --token=$VERCEL_TOKEN --yes)
+          PREVIEW_URL=$(npx vercel deploy --prod --token=$VERCEL_TOKEN --yes)
           echo "Deployed to: $PREVIEW_URL"
           echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
