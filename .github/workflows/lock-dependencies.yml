@@ -1,0 +1,42 @@
+name: Generate Requirements Lock File
+
+on:
+  workflow_dispatch:  # Run manually to refresh the lock file
+  push:
+    paths:
+      - requirements.txt  # Auto-regenerate when requirements.txt changes
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install pip-tools
+      run: pip install pip-tools
+
+    - name: Compile lock file
+      run: |
+        pip-compile requirements.txt \
+          --output-file requirements.lock \
+          --no-header \
+          --quiet
+
+    - name: Commit lock file if changed
+      run: |
+        git config user.name  "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        if git diff --quiet requirements.lock; then
+          echo "No changes to requirements.lock"
+        else
+          git add requirements.lock
+          git commit -m "chore: regenerate requirements.lock [skip ci]"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+        fi
