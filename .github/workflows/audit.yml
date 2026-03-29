@@ -212,6 +212,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # Use HTTPS with token — avoids SSH host key verification entirely
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+
+          # Fetch latest remote state first, before staging anything
+          git fetch origin main
+
           git add \
             web/public/models.json \
             web/public/summary_stats.json \
@@ -227,9 +231,14 @@ jobs:
             web/public/significance_pairwise.json \
             web/public/assets/ \
             data/trends.csv || true
+
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
-          git pull --rebase origin main
-          git push origin main
+
+          # Rebase on top of the freshly-fetched main, auto-stashing any uncommitted changes
+          git rebase --autostash origin/main
+
+          # Push — use --force-with-lease as a safe fallback if rebase still diverges
+          git push origin main || git push --force-with-lease origin main
 
       - name: Deploy to Vercel (Preview)
         id: vercel_deploy
