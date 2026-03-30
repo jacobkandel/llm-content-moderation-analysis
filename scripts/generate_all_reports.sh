@@ -23,10 +23,6 @@ $PYTHON_CMD src/analysis/significance.py
 echo "📈 Analyzing Model Drift over time..."
 $PYTHON_CMD src/analysis/drift.py
 
-# 4. Bias Compass Analysis
-echo "⚖️ Analyzing Refusal Bias (requires API key)..."
-$PYTHON_CMD src/analysis/bias.py
-
 # 5. Political Compass Chart (MOCK MODE enabled for quick viz)
 echo "🧭 Generating Political Compass Chart (Mock Mode)..."
 $PYTHON_CMD src/analysis/political_compass.py --mock
@@ -39,9 +35,6 @@ $PYTHON_CMD src/analysis/plot_paternalism.py
 echo "📉 Generating Alignment Tax Chart..."
 $PYTHON_CMD scripts/visuals/plot_pareto.py
 
-# 8. Evidence Locker Data (Traces JSON)
-echo "📂 Generating Evidence Locker Data (traces.json)..."
-$PYTHON_CMD scripts/create_sample_traces.py
 
 # 9. AI Analyst & Semantic Clusters
 if [ "$SKIP_LLM_ANALYSIS" != "true" ]; then
