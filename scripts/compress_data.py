@@ -604,7 +604,10 @@ def compress_csv():
     print(f"   - Generating lite version (no prompt/response) to {OUTPUT_FILE_LITE}...")
     try:
         import pandas as pd
-        df = pd.read_csv(INPUT_FILE)
+        df = pd.read_csv(INPUT_FILE, on_bad_lines='skip')
+        
+        # Rewrite the clean CSV back to disk to permanently remove corrupted rows
+        df.to_csv(INPUT_FILE, index=False)
 
         drop_cols = ['prompt', 'response', 'prompt_text', 'response_text', 'text', 'prompt_text,response_text']
         cols_to_drop = [c for c in drop_cols if c in df.columns]
@@ -620,10 +623,10 @@ def compress_csv():
 
     except ImportError:
         print("❌ Pandas not found. Cannot generate lite version. Skipping.")
-        return
+        sys.exit(1)
     except Exception as e:
         print(f"❌ Failed to generate lite version: {e}")
-        return
+        sys.exit(1)
 
     # 3. Generate pre-computed JSON files
     try:
@@ -632,6 +635,7 @@ def compress_csv():
         print(f"⚠️ Failed to generate pre-computed JSON: {e}")
         import traceback
         traceback.print_exc()
+        sys.exit(1)
 
     # Stats
     original_size = os.path.getsize(INPUT_FILE) / (1024 * 1024)

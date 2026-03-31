@@ -160,6 +160,8 @@ jobs:
         env:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
         run: |
+          # Re-compress the clean, latest audit log before uploading
+          gzip -c web/public/audit_log.csv > web/public/audit_log.csv.gz
           cd web
           npm install @vercel/blob
           node scripts/upload-blob.js
