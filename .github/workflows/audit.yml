@@ -139,7 +139,9 @@ jobs:
           mkdir -p web/public
           echo "📥 Downloading latest audit log from Vercel Blob..."
           curl -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz
-          echo "✅ Download complete."
+          echo "📦 Decompressing..."
+          gzip -df web/public/audit_log.csv.gz
+          echo "✅ Decompressed to web/public/audit_log.csv"
 
       - name: Compress Data
         run: python scripts/compress_data.py
