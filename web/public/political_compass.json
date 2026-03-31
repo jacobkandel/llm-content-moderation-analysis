@@ -1,132 +1,132 @@
 [
   {
     "model": "openai/gpt-4o",
-    "economic": -4.387303896831268,
-    "social": -6.124930369921483
+    "economic": -7.573179597670213,
+    "social": 3.2774863295933443
   },
   {
     "model": "openai/gpt-4o-mini",
-    "economic": -2.5184713915656936,
-    "social": 0.38047645813706765
+    "economic": 3.333376146913709,
+    "social": -3.676221962687544
   },
   {
     "model": "anthropic/claude-3.5-sonnet",
-    "economic": 1.6893883217875878,
-    "social": -4.893453345692741
+    "economic": -3.1462151431665433,
+    "social": 2.7181628535387166
   },
   {
     "model": "anthropic/claude-3-haiku",
-    "economic": -0.6763862451614955,
-    "social": -2.526513502639057
+    "economic": -0.07608793960907256,
+    "social": -1.6515166049558143
   },
   {
     "model": "google/gemini-2.0-flash-001",
-    "economic": 3.2729779974647712,
-    "social": 0.4740594168254493
+    "economic": 7.769353532045269,
+    "social": -5.7729735572321825
   },
   {
     "model": "deepseek/deepseek-chat",
-    "economic": -3.878158108505472,
-    "social": 2.834636985191521
+    "economic": 3.9997622835046514,
+    "social": -6.54034582022957
   },
   {
     "model": "qwen/qwen-2.5-72b-instruct",
-    "economic": -6.921412594541133,
-    "social": -7.862657620763676
+    "economic": 4.351671474870377,
+    "social": 7.194141364759377
   },
   {
     "model": "qwen/qwen-2.5-7b-instruct",
-    "economic": 5.089508984431442,
-    "social": -1.1756186798763935
+    "economic": 2.745674860090899,
+    "social": -1.435252345862498
   },
   {
     "model": "01-ai/yi-lightning",
-    "economic": 0.5854507417832338,
-    "social": 6.759193388707931
+    "economic": 3.2641270416375345,
+    "social": 7.0463224915242115
   },
   {
     "model": "mistralai/mistral-large",
-    "economic": -2.4530555261229274,
-    "social": 2.0545910867498165
+    "economic": -4.021142744051042,
+    "social": 7.985833430409169
   },
   {
     "model": "mistralai/mistral-small-3.1-24b-instruct",
-    "economic": 1.775674315790443,
-    "social": -6.628938884304459
+    "economic": 3.632750520516961,
+    "social": -7.563708236366123
   },
   {
     "model": "google/gemini-2.5-pro",
-    "economic": 5.127814811976961,
-    "social": -6.476562590269602
+    "economic": -3.2446785948058885,
+    "social": 2.94403195325342
   },
   {
     "model": "google/gemini-2.0-flash-lite-001",
-    "economic": 1.547537003857009,
-    "social": 7.942125849891898
+    "economic": 7.316307948025251,
+    "social": 3.067200138381075
   },
   {
     "model": "anthropic/claude-3.5-haiku",
-    "economic": 7.7367969982673515,
-    "social": 1.259403814314343
+    "economic": -2.742986586810135,
+    "social": -2.6564277389614475
   },
   {
     "model": "mistralai/mistral-small-24b-instruct-2501",
-    "economic": -4.009746325662345,
-    "social": 1.912308196525661
+    "economic": 7.306348982726266,
+    "social": -4.278582549660422
   },
   {
     "model": "mistralai/ministral-8b",
-    "economic": 2.662160554143508,
-    "social": -5.777331149596423
+    "economic": 7.116226668923273,
+    "social": 4.4800094741661525
   },
   {
     "model": "qwen/qwen-plus",
-    "economic": -6.350366304700826,
-    "social": 3.822847479660922
+    "economic": 2.648783338318143,
+    "social": 6.994077924487037
   },
   {
     "model": "x-ai/grok-3",
-    "economic": -7.659560658140203,
-    "social": 7.456471617311811
+    "economic": 3.3165490705896357,
+    "social": -6.506070703351666
   },
   {
     "model": "x-ai/grok-3-mini",
-    "economic": -6.32404583217879,
-    "social": -1.0785047537744212
+    "economic": -5.555253998033395,
+    "social": 1.2518328647217292
   },
   {
     "model": "openai/o3-mini",
-    "economic": -1.298742892919753,
-    "social": -7.387989783301654
+    "economic": 0.7045236307794216,
+    "social": -4.798163498877162
   },
   {
     "model": "deepseek/deepseek-r1:free",
-    "economic": 4.336085034040934,
-    "social": 6.427796541183497
+    "economic": -5.948712998241271,
+    "social": -7.155080755158599
   },
   {
     "model": "meta-llama/llama-3.3-70b-instruct:free",
-    "economic": -2.1452777966321825,
-    "social": 5.696957193923533
+    "economic": 0.6658222834265839,
+    "social": 0.12998324318279408
   },
   {
     "model": "mistralai/mistral-small-3.1-24b-instruct:free",
-    "economic": -5.476614656659255,
-    "social": 2.6598543501484535
+    "economic": 2.0359963534175343,
+    "social": 5.870271822840095
   },
   {
     "model": "google/gemma-3-27b-it:free",
-    "economic": -1.9913767058303886,
-    "social": -2.20496082146534
+    "economic": 1.7348143892702357,
+    "social": 7.578793127654096
   },
   {
     "model": "nousresearch/hermes-3-llama-3.1-405b:free",
-    "economic": -5.519367348353905,
-    "social": -7.489452532672717
+    "economic": -6.403141427584387,
+    "social": -4.7417538381498705
   },
   {
     "model": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
-    "economic": 7.96045286155908,
-    "social": -5.0183490006959985
+    "economic": 3.11813262405372,
+    "social": 6.463360957112124
   }
 ]
