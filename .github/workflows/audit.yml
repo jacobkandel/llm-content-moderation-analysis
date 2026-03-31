@@ -84,7 +84,7 @@ jobs:
           fi
 
       - name: Run Model Collection
-        if: ${{ inputs.skip_collection != 'true' }}
+        if: ${{ !inputs.skip_collection }}
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PYTHONPATH: .
@@ -134,7 +134,7 @@ jobs:
           exit 1
 
       - name: Download Latest Data (If Skipping Collection)
-        if: ${{ inputs.skip_collection == 'true' }}
+        if: ${{ inputs.skip_collection }}
         run: |
           mkdir -p web/public
           echo "📥 Downloading latest audit log from Vercel Blob..."
