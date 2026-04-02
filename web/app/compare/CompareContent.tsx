@@ -36,7 +36,7 @@ type CompareModelStats = {
     refusalRate: number;
     avgVerbosity: number;
     total: number;
-    categoryRates: Record<string, number>;
+    categoryRates: Record<string, { rate: number; ciLower: number; ciUpper: number }>;
 };
 
 type CompareData = {
@@ -304,13 +304,17 @@ export default function CompareContent({
         const statsForB = compareData.modelStats[modelB];
         if (!statsForA || !statsForB) return [];
 
-        return compareData.categories.map(cat => ({
-            subject: cat,
-            A: statsForA.categoryRates[cat] || 0,
-            B: statsForB.categoryRates[cat] || 0,
-            diff: Math.abs((statsForA.categoryRates[cat] || 0) - (statsForB.categoryRates[cat] || 0)),
-            fullMark: 100,
-        }));
+        return compareData.categories.map(cat => {
+            const rateA = statsForA.categoryRates[cat]?.rate || 0;
+            const rateB = statsForB.categoryRates[cat]?.rate || 0;
+            return {
+                subject: cat,
+                A: rateA,
+                B: rateB,
+                diff: Math.abs(rateA - rateB),
+                fullMark: 100,
+            };
+        });
     }, [compareData, modelA, modelB]);
 
     // Apply "Highlight Differences" filter

@@ -21,7 +21,7 @@ interface ModelStats {
     refusalRate: number;
     avgVerbosity: number;
     total: number;
-    categoryRates: Record<string, number>;
+    categoryRates: Record<string, { rate: number; ciLower: number; ciUpper: number } | number>;
 }
 
 async function getModelData() {
@@ -156,7 +156,11 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
 
     // Sort categories by this model's rate descending
     const categoryEntries = categories
-        .map(cat => ({ cat, rate: stats?.categoryRates?.[cat] ?? null }))
+        .map(cat => {
+            const rateData = stats?.categoryRates?.[cat];
+            const rate = typeof rateData === 'object' && rateData !== null ? rateData.rate : rateData;
+            return { cat, rate: rate ?? null };
+        })
         .filter(e => e.rate !== null)
         .sort((a, b) => (b.rate ?? 0) - (a.rate ?? 0));
 

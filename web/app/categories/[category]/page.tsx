@@ -76,7 +76,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
         modelRankings = compare.models
             .map((id: string) => {
-                const rate = compare.modelStats?.[id]?.categoryRates?.[label];
+                const rateData = compare.modelStats?.[id]?.categoryRates?.[label];
+                const rate = typeof rateData === 'object' && rateData !== null ? rateData.rate : rateData;
                 const info = modelMap.get(id);
                 return { id, name: info?.display_name || id.split('/').pop() || id, rate: rate ?? null };
             })

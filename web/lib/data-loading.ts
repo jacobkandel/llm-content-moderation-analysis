@@ -45,8 +45,8 @@ export async function fetchAuditData(useRecent = false, lite = false): Promise<A
     const d = new Date();
     const cacheVersion = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 
-    // Vercel Blob URL for the main audit log
-    const blobName = lite ? 'audit_log_lite.csv.gz' : 'audit_log.csv.gz';
+    // Vercel Blob URL for the main audit log. We now use the standard 16-column CSV.
+    const blobName = 'audit_log.csv.gz';
     let BLOB_URL = `https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/${blobName}`;
 
     // Use local file in development
@@ -57,7 +57,7 @@ export async function fetchAuditData(useRecent = false, lite = false): Promise<A
     // Try compressed first
     // If not using recent data, use the Blob URL (with daily cache version)
     const gzFile = useRecent
-        ? `/audit_recent.csv.gz?v=${cacheVersion}` // Local recent (unlikely lite)
+        ? `/audit_recent.csv.gz?v=${cacheVersion}` // Local recent
         : `${BLOB_URL}?v=${cacheVersion}`; // Blob URL
 
     // Fallback for uncompressed
