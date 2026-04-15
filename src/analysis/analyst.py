@@ -12,9 +12,11 @@ from sqlalchemy import select
 
 def generate_weekly_report(output_dir=".", report_file="web/public/latest_report.md"):
     """
-    Analyst 3.0: Generates a rich, longitudinal research report using all available statistics.
+    Analyst 4.0: Generates a comprehensive, data-rich research report using
+    all available benchmark statistics. Designed to produce genuinely useful
+    overviews every time the audit pipeline runs.
     """
-    logger.info("📊 Starting AI Analyst 3.0 Analysis...")
+    logger.info("📊 Starting AI Analyst 4.0 Analysis...")
 
     session = get_session()
     try:
@@ -63,9 +65,16 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
             model_stats["refusals"] / model_stats["total"] * 100
         ).round(1)
         model_stats = model_stats.sort_values("refusal_rate", ascending=False)
-        model_refusal_text = "\n".join(
-            f"  - {model}: {row['refusal_rate']}% refusal rate ({row['total']} evals)"
-            for model, row in model_stats.iterrows()
+
+        # Build structured model table for the prompt
+        model_table_lines = []
+        for model, row in model_stats.iterrows():
+            model_table_lines.append(
+                f"| {model} | {row['refusal_rate']}% | {int(row['total'])} |"
+            )
+        model_table = (
+            "| Model | Refusal Rate | Evaluations |\n"
+            "|---|---|---|\n" + "\n".join(model_table_lines)
         )
 
         # --- 3. Robustness / Phrasing Sensitivity ---
@@ -95,35 +104,33 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
                 disagreement_examples.append(f"Prompt {idx}: {dict(valid)}")
         top_disagreements = "\n".join(disagreement_examples[:8])
 
-        # --- 5. Load supplementary pre-computed data (drift + consensus) ---
+        # --- 5. Load supplementary pre-computed data ---
+
+        # Drift data
         drift_context = ""
         drift_path = os.path.join("web", "public", "drift_report.json")
         if os.path.exists(drift_path):
             with open(drift_path) as f:
                 drift_data = json.load(f)
-            # Highlight the most dramatic shifts
             significant = [
                 d
                 for d in drift_data
-                if d.get("significant_change") and abs(d.get("rate_change", 0)) > 5
+                if d.get("significant_change") and abs(d.get("rate_change", 0)) > 3
             ]
             significant.sort(key=lambda x: abs(x.get("rate_change", 0)), reverse=True)
             if significant:
-                drift_lines = []
-                for d in significant[:8]:
-                    direction = "increased" if d["rate_change"] > 0 else "decreased"
-                    drift_lines.append(
-                        f"  - {d['model']}: refusal rate {direction} by {abs(d['rate_change']):.1f}pp "
-                        f"({d['start_refusal_rate']:.1f}% → {d['end_refusal_rate']:.1f}%), "
-                        f"{d['start_date']} to {d['end_date']}"
-                    )
+                drift_lines = [
+                    f"| {d['model']} | {d['start_refusal_rate']:.1f}% | {d['end_refusal_rate']:.1f}% | {d['rate_change']:+.1f}% | {d['start_date']} → {d['end_date']} |"
+                    for d in significant[:12]
+                ]
                 drift_context = (
-                    "Statistically significant longitudinal changes (p<0.05):\n"
-                    + "\n".join(drift_lines)
+                    "| Model | Start | End | Change | Period |\n"
+                    "|---|---|---|---|---|\n" + "\n".join(drift_lines)
                 )
             else:
                 drift_context = "No statistically significant longitudinal drift detected in this period."
 
+        # Consensus data
         consensus_context = ""
         consensus_path = os.path.join("web", "public", "consensus_stats.json")
         if os.path.exists(consensus_path):
@@ -131,43 +138,109 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
                 cons = json.load(f)
             total = cons.get("totalPrompts", 0)
             dist = {d["name"]: d["value"] for d in cons.get("distribution", [])}
-            full_agree = dist.get("Full Agreement (≥90%)", 0)
-            split = dist.get("Split Decision (<60%)", 0)
             per_model = cons.get("perModel", [])
-            # Identify outliers (lowest kappa)
-            outliers = sorted(per_model, key=lambda x: x.get("kappa", 1))[:4]
-            outlier_lines = [
-                f"  - {m['shortName']}: κ={m['kappa']:.3f}, {m['agreementRate']:.1f}% agreement"
-                for m in outliers
+            # Best and worst aligned
+            best = per_model[:5] if per_model else []
+            worst = per_model[-5:] if per_model else []
+            best_lines = [
+                f"| {m['shortName']} | {m['agreementRate']:.1f}% | {m['kappa']:.3f} |"
+                for m in best
+            ]
+            worst_lines = [
+                f"| {m['shortName']} | {m['agreementRate']:.1f}% | {m['kappa']:.3f} |"
+                for m in worst
             ]
             consensus_context = (
-                f"Cross-model consensus across {total} prompts: "
-                f"{full_agree} ({(full_agree / total * 100):.1f}%) show full agreement (≥90%), "
-                f"{split} ({(split / total * 100):.1f}%) are genuine split decisions (<60%).\n"
-                f"Lowest-consensus models (worst inter-rater alignment):\n"
-                + "\n".join(outlier_lines)
+                f"Total multi-model prompts: {total}\n"
+                f"Distribution: {json.dumps(dist)}\n\n"
+                f"**Most aligned with majority:**\n"
+                f"| Model | Agreement | κ |\n|---|---|---|\n"
+                + "\n".join(best_lines)
+                + "\n\n"
+                "**Most divergent from majority:**\n"
+                "| Model | Agreement | κ |\n|---|---|---|\n" + "\n".join(worst_lines)
+            )
+
+        # Summary stats
+        summary_context = ""
+        summary_path = os.path.join("web", "public", "summary_stats.json")
+        if os.path.exists(summary_path):
+            with open(summary_path) as f:
+                summary = json.load(f)
+            summary_context = (
+                f"Total evaluations: {summary.get('totalEvaluations', 'N/A')}\n"
+                f"Total unique test cases: {summary.get('totalCases', 'N/A')}\n"
+                f"Models tested: {summary.get('modelsCount', 'N/A')}\n"
+                f"Date range: {summary.get('dateRange', {}).get('start', '?')} to {summary.get('dateRange', {}).get('end', '?')}\n"
+                f"Last updated: {summary.get('lastUpdated', '?')}\n"
+                f"MDES (80% power): {summary.get('statisticalPowerMDES', 'N/A')}%\n"
+                f"Prompt distribution: {json.dumps(summary.get('distribution', []))}"
+            )
+
+        # Spectrum data (for CI bands)
+        spectrum_context = ""
+        spectrum_path = os.path.join("web", "public", "spectrum_data.json")
+        if os.path.exists(spectrum_path):
+            with open(spectrum_path) as f:
+                spectrum = json.load(f)
+            spectrum_sorted = sorted(
+                spectrum, key=lambda x: x.get("refusalRate", 0), reverse=True
+            )
+            top5 = spectrum_sorted[:5]
+            bottom5 = spectrum_sorted[-5:]
+            top_lines = [
+                f"| {m['name']} | {m['refusalRate']}% | {m.get('refusalRateCILower','?')}–{m.get('refusalRateCIUpper','?')}% |"
+                for m in top5
+            ]
+            bottom_lines = [
+                f"| {m['name']} | {m['refusalRate']}% | {m.get('refusalRateCILower','?')}–{m.get('refusalRateCIUpper','?')}% |"
+                for m in bottom5
+            ]
+            spectrum_context = (
+                "**Most Restrictive (Top 5):**\n"
+                "| Model | Refusal Rate | 95% CI |\n|---|---|---|\n"
+                + "\n".join(top_lines)
+                + "\n\n"
+                "**Least Restrictive (Bottom 5):**\n"
+                "| Model | Refusal Rate | 95% CI |\n|---|---|---|\n"
+                + "\n".join(bottom_lines)
             )
 
         # --- 6. Compose the prompt ---
         today = date.today().isoformat()
-        prompt = f"""You are an expert AI Safety Researcher writing a concise but substantive "AI Analyst Weekly Report" for a live content moderation benchmark dashboard. Your audience is technical — researchers, engineers, and policy analysts who follow AI safety.
+        n_models = len(model_stats)
+        total_evals = int(df.shape[0])
 
-You have access to the following real benchmark statistics:
+        prompt = f"""You are an expert AI Safety Researcher writing the "AI Analyst Report" for
+moderationbias.com — a live benchmark dashboard that tracks content moderation behavior
+across {n_models} large language models using {total_evals:,} evaluations.
 
---- GLOBAL RELIABILITY ---
-Inter-Rater Reliability (Fleiss' Kappa): {kappa:.4f} ({kappa_interpretation})
-This measures how consistently the {len(model_stats)} models in the benchmark agree with each other across all prompts.
+Your audience is a mix of AI researchers, engineers, and policy analysts who want to
+quickly understand the current state of LLM content moderation. The report should be
+substantive, data-rich, and genuinely useful — not generic filler.
+
+You have access to the following real benchmark data:
+
+--- BENCHMARK OVERVIEW ---
+{summary_context}
+
+--- INTER-RATER RELIABILITY ---
+Fleiss' Kappa: {kappa:.4f} ({kappa_interpretation})
+This measures how consistently {n_models} models agree on content moderation across all prompts.
+
+--- REFUSAL RATE SPECTRUM (with confidence intervals) ---
+{spectrum_context}
+
+--- ALL MODEL REFUSAL RATES ---
+{model_table}
 
 --- PHRASING ROBUSTNESS ---
 {robustness_text}
 
---- PER-MODEL REFUSAL RATES (this audit cycle) ---
-{model_refusal_text}
-
---- LONGITUDINAL DRIFT (week-over-week changes) ---
+--- TEMPORAL DRIFT (statistically significant changes over time) ---
 {drift_context}
 
---- CROSS-MODEL CONSENSUS DISTRIBUTION ---
+--- CROSS-MODEL CONSENSUS ---
 {consensus_context}
 
 --- NOTABLE DISAGREEMENTS (sample) ---
@@ -177,29 +250,48 @@ This measures how consistently the {len(model_stats)} models in the benchmark ag
 
 ## YOUR TASK
 
-Write a professional, insightful "AI Analyst Weekly Report" in the following EXACT structure. Use ONLY paragraph form — absolutely NO bullet points, NO numbered lists, NO dashes, NO markdown lists of any kind. Every section must be written as flowing prose.
+Write a comprehensive, data-driven "AI Analyst Report" in clean Markdown. The report must
+be genuinely useful to someone trying to understand the current state of LLM censorship.
+Use the following structure:
 
-### Section 1: Longitudinal Trends
-One cohesive paragraph (80–120 words) describing which models have drifted the most since the previous period, in which direction, and what this might signal about their underlying policy changes. Reference specific model names and rate changes from the drift data.
+## Executive Summary
+A 3-4 bullet summary of the most important findings. Include hard numbers.
 
-### Section 2: Consensus & Reliability
-One paragraph (60–90 words) interpreting the Fleiss' Kappa score and the consensus distribution. Which models are the outliers in terms of inter-rater agreement? Are any models systematically misaligned with the benchmark consensus?
+## The Censorship Spectrum
+Organize models into tiers (High Restriction >80%, Moderate 30-80%, Low <5%).
+Use markdown tables with the model name, refusal rate, and confidence interval.
+Discuss what the spread between most and least restrictive models tells us.
 
-### Section 3: Safety Anomalies
-One paragraph (60–90 words) discussing the most notable prompt-level disagreements. Which categories of content appear most contested? Are there models that are systematically more permissive or restrictive on edge cases?
+## Temporal Drift — Are Models Getting More or Less Restrictive?
+Use a markdown table showing the top 8-10 models with the largest statistically
+significant drift. Discuss the overall trend — are models tightening or loosening?
+Call out any models that moved against the trend.
 
-### Section 4: Vibe Check
-One single sentence — a direct, candid "Vibe Check" for the research team summarizing the overall health and trajectory of the benchmark ecosystem this week.
+## Consensus & Disagreement
+Interpret the Fleiss' Kappa score. Use markdown tables showing the 5 most aligned
+and 5 most divergent models. Discuss what the low/high agreement means practically.
+
+## Category Analysis
+Which categories have the widest model disagreement? Where do models agree most?
+Discuss what this tells us about the boundaries of "safety".
+
+## Statistical Power
+Briefly state the MDES and what it means for the benchmark's ability to detect real differences.
+
+## Methodology Notes
+3-4 bullet points documenting the statistical methods used.
 
 ---
 
 CRITICAL FORMATTING RULES:
-- Absolutely no bullet points, no dashes as list items, no numbered lists. Violating this will make the report unusable.
-- Write in analytical third-person prose, like a research memo.
-- Use precise numbers from the data (percentages, kappa values, model names).
+- Use markdown tables for data. Never use inline data dumps.
+- Use bold for emphasis on key numbers.
+- Use > blockquotes for interpretive commentary.
+- Include section headers exactly as specified above.
+- Target 600-900 words total. Be concise but substantive.
+- Use precise numbers from the data. Never fabricate statistics.
+- Do NOT add a top-level title — the UI already provides one.
 - Do NOT use emojis.
-- Total length: 250–400 words.
-- Do not add a title heading — the UI already adds one.
 """
 
         client = OpenAI(
@@ -211,17 +303,20 @@ CRITICAL FORMATTING RULES:
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a precise, data-driven AI safety analyst who writes in dense, informative prose. You never use bullet points.",
+                    "content": "You are a precise, data-driven AI safety analyst who writes comprehensive research reports with tables, statistics, and clear interpretive commentary. Every claim must be backed by the data provided.",
                 },
                 {"role": "user", "content": prompt},
             ],
-            temperature=0.4,
+            temperature=0.3,
+            max_tokens=4096,
         )
 
         report_content = response.choices[0].message.content
 
         # Prepend a metadata header (used by the UI to show generation date and stats)
-        metadata_header = f"<!-- generated:{today} kappa:{kappa:.4f} models:{len(model_stats)} -->\n\n"
+        metadata_header = (
+            f"<!-- generated:{today} kappa:{kappa:.4f} models:{n_models} -->\n\n"
+        )
         final_output = metadata_header + report_content
 
         # Write output
@@ -230,7 +325,7 @@ CRITICAL FORMATTING RULES:
         with open(full_path, "w") as f:
             f.write(final_output)
 
-        logger.info(f"✅ Generated Analyst 3.0 Report: {full_path}")
+        logger.info(f"✅ Generated Analyst 4.0 Report: {full_path}")
 
     except Exception as e:
         logger.error(f"⚠️ Failed to generate analyst report: {e}")
