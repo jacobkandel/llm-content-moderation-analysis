@@ -36,7 +36,7 @@ type CompareModelStats = {
     refusalRate: number;
     avgVerbosity: number;
     total: number;
-    categoryRates: Record<string, { rate: number; ciLower: number; ciUpper: number }>;
+    categoryRates: Record<string, { rate: number; ciLower: number; ciUpper: number } | number>;
 };
 
 type CompareData = {
@@ -305,8 +305,10 @@ export default function CompareContent({
         if (!statsForA || !statsForB) return [];
 
         return compareData.categories.map(cat => {
-            const rateA = statsForA.categoryRates[cat]?.rate || 0;
-            const rateB = statsForB.categoryRates[cat]?.rate || 0;
+            const rawA = statsForA.categoryRates[cat];
+            const rawB = statsForB.categoryRates[cat];
+            const rateA = typeof rawA === 'object' && rawA !== null ? rawA.rate : (rawA ?? 0);
+            const rateB = typeof rawB === 'object' && rawB !== null ? rawB.rate : (rawB ?? 0);
             return {
                 subject: cat,
                 A: rateA,
