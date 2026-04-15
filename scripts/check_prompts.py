@@ -67,7 +67,18 @@ def main():
         sys.exit(1)
 
     with open(PROMPTS_FILE, newline="", encoding="utf-8") as f:
-        rows = list(csv.DictReader(f))
+        reader = csv.DictReader(f)
+        # Normalize column names to lowercase for case-insensitive matching
+        rows = []
+        for row in reader:
+            rows.append({k.lower(): v for k, v in row.items()})
+
+    # Map common column name variants
+    for row in rows:
+        if "prompt_id" in row and "id" not in row:
+            row["id"] = row["prompt_id"]
+        if "prompt_text" in row and "text" not in row:
+            row["text"] = row["prompt_text"]
 
     print(f"📋 Checking {len(rows)} prompts in {PROMPTS_FILE.name}...")
 
