@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Case-insensitive column matching in `scripts/check_prompts.py` — dataset integrity check now handles `Prompt_ID`/`Category`/`Prompt_Text` headers alongside lowercase variants
 - Contributing guide (CONTRIBUTING.md)
 - Code of Conduct (CODE_OF_CONDUCT.md)
 - Security policy (SECURITY.md)
@@ -23,6 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fixed GitHub Actions workflow unable to push to `main` due to branch protection rules
 - Fixed audit pipeline failing to push results after long runs with `git pull --rebase` before push (prevents non-fast-forward rejection)
 - Fixed CI build failing with `TypeError: require(...) is not a function` caused by ESM-incompatible `require()` calls in `next.config.ts`
+- Resolved all Ruff lint errors across 33 files: F401 (unused imports), E701 (inline statements), E722 (bare excepts), F841 (unused variables), E402 (import order)
+- Auto-formatted 15 Python files with Black to pass CI formatting checks
+- Fixed `check_prompts.py` failing in CI due to case-sensitive CSV column name matching
 
 ### Security
 - Updated Next.js from 16.1.6 to 16.2.1 to fix `undici` and `next` vulnerabilities
