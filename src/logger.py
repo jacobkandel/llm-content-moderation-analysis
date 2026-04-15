@@ -3,10 +3,11 @@ import sys
 from logging.handlers import RotatingFileHandler
 import os
 
+
 def setup_logger(name="audit_logger", log_file="app.log"):
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG) 
-    
+    logger.setLevel(logging.DEBUG)
+
     # Avoid duplicate logs if re-initialized
     if logger.handlers:
         return logger
@@ -14,20 +15,20 @@ def setup_logger(name="audit_logger", log_file="app.log"):
     # 1. Console Handler (INFO+)
     c_handler = logging.StreamHandler(sys.stdout)
     c_handler.setLevel(logging.INFO)
-    c_format = logging.Formatter('%(levelname)s: %(message)s')
+    c_format = logging.Formatter("%(levelname)s: %(message)s")
     c_handler.setFormatter(c_format)
 
     # 2. File Handler (DEBUG+) with Rotation
     # Max size 5MB, keep 3 backup files
-    f_handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=3)
+    f_handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=3)
     f_handler.setLevel(logging.DEBUG)
-    f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     f_handler.setFormatter(f_format)
 
-
     logger.addHandler(f_handler)
-    
+
     return logger
+
 
 def log_raw_trace(run_id, model, prompt, response_text, full_payload=None):
     """
@@ -36,37 +37,39 @@ def log_raw_trace(run_id, model, prompt, response_text, full_payload=None):
     try:
         trace_dir = "data/raw_traces"
         os.makedirs(trace_dir, exist_ok=True)
-        
+
         filename = f"{trace_dir}/{run_id}.json"
-        
+
         import json
+
         data = {
             "run_id": run_id,
-            "timestamp": "TODO", # Ideally passed in or generated
+            "timestamp": "TODO",  # Ideally passed in or generated
             "model": model,
             "prompt": prompt,
             "response": response_text,
-            "full_payload": full_payload or {}
+            "full_payload": full_payload or {},
         }
-        
+
         def safe_serialize(obj):
             """fallback for non-serializable objects"""
             # Check for Pydantic models (OpenAI V1 uses them)
-            if hasattr(obj, 'model_dump'):
+            if hasattr(obj, "model_dump"):
                 return obj.model_dump()
-            if hasattr(obj, 'dict'):
+            if hasattr(obj, "dict"):
                 return obj.dict()
             # Check for generic objects
-            if hasattr(obj, '__dict__'):
+            if hasattr(obj, "__dict__"):
                 return obj.__dict__
             # Fallback to string
             return str(obj)
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2, default=safe_serialize)
-            
+
     except Exception as e:
         print(f"Failed to log raw trace: {e}")
+
 
 # Singleton instance
 logger = setup_logger()
