@@ -7,7 +7,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.database import Base, ModelRegistry, Prompt, AuditResult
+from src.database import Base
+
 
 @pytest.fixture(scope="function")
 def db_session():
@@ -18,7 +19,7 @@ def db_session():
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    
+
     yield session
-    
+
     session.close()

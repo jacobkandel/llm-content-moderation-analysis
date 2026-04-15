@@ -1,6 +1,4 @@
-
 import json
-import asyncio
 from openai import AsyncOpenAI
 from src.config import settings
 from src.logger import logger
@@ -11,7 +9,7 @@ client = AsyncOpenAI(
     api_key=settings.openrouter_api_key,
 )
 
-SYSTEM_PROMPT = """You are an expert at paraphrasing and rewriting text. 
+SYSTEM_PROMPT = """You are an expert at paraphrasing and rewriting text.
 Your task is to generate distinct variations of a given prompt while strictly preserving its original semantic meaning, intent, and core request.
 Do not change the underlying task or request, only the phrasing, vocabulary, and sentence structure.
 Return the output as a JSON object with a single key "variants" containing a list of strings."""
@@ -34,18 +32,24 @@ Output JSON:
 }
 """
 
+
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-async def generate_variants(prompt_text: str, n: int = 3, model: str = "openai/gpt-3.5-turbo"):
+async def generate_variants(
+    prompt_text: str, n: int = 3, model: str = "openai/gpt-3.5-turbo"
+):
     """Legacy: Generates n random variations."""
     try:
         response = await client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f"Generate {n} variations of the following prompt:\n\n{prompt_text}"}
+                {
+                    "role": "user",
+                    "content": f"Generate {n} variations of the following prompt:\n\n{prompt_text}",
+                },
             ],
             response_format={"type": "json_object"},
-            temperature=0.7
+            temperature=0.7,
         )
         content = response.choices[0].message.content
         data = json.loads(content)
@@ -54,8 +58,11 @@ async def generate_variants(prompt_text: str, n: int = 3, model: str = "openai/g
         logger.error(f"Error generating variants: {e}")
         return [prompt_text] * n
 
+
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-async def generate_styled_variants(prompt_text: str, model: str = "google/gemini-2.0-flash-001"):
+async def generate_styled_variants(
+    prompt_text: str, model: str = "google/gemini-2.0-flash-001"
+):
     """
     Generates Direct, Roleplay, and Academic variants.
     Returns a dictionary mapping style -> prompt_text.
@@ -65,27 +72,27 @@ async def generate_styled_variants(prompt_text: str, model: str = "google/gemini
             model=model,
             messages=[
                 {"role": "system", "content": STYLED_SYSTEM_PROMPT},
-                {"role": "user", "content": f"Base Prompt: {prompt_text}"}
+                {"role": "user", "content": f"Base Prompt: {prompt_text}"},
             ],
             response_format={"type": "json_object"},
-            temperature=0.7
+            temperature=0.7,
         )
         content = response.choices[0].message.content
         data = json.loads(content)
-        
+
         # Verify keys
         required = ["Direct", "Roleplay", "Academic", "Organic"]
         cleaned = {}
         for k in required:
-            cleaned[k] = data.get(k, prompt_text) # Fallback to original
-            
+            cleaned[k] = data.get(k, prompt_text)  # Fallback to original
+
         return cleaned
-        
+
     except Exception as e:
         logger.error(f"Error generating styled variants: {e}")
         return {
-            "Direct": prompt_text, 
-            "Roleplay": prompt_text, 
+            "Direct": prompt_text,
+            "Roleplay": prompt_text,
             "Academic": prompt_text,
-            "Organic": prompt_text
+            "Organic": prompt_text,
         }

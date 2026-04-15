@@ -16,7 +16,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
 
-from database import Base, ModelRegistry, Prompt, AuditResult
+from database import (
+    Base,
+)  # noqa: F401 — Base needed for metadata.create_all; subclasses auto-register
 
 # Connection pool settings for production
 POOL_SIZE = 5
@@ -30,13 +32,13 @@ def get_database_url():
     Priority: DATABASE_URL env var > SQLite fallback
     """
     database_url = os.environ.get("DATABASE_URL")
-    
+
     if database_url:
         # Render.com uses postgres:// but SQLAlchemy requires postgresql://
         if database_url.startswith("postgres://"):
             database_url = database_url.replace("postgres://", "postgresql://", 1)
         return database_url
-    
+
     # Fallback to SQLite
     return "sqlite:///audit.db"
 
@@ -46,7 +48,7 @@ def create_db_engine(database_url=None):
     Creates a SQLAlchemy engine with appropriate settings for the database type.
     """
     url = database_url or get_database_url()
-    
+
     if url.startswith("postgresql://"):
         # PostgreSQL with connection pooling
         engine = create_engine(
@@ -60,7 +62,7 @@ def create_db_engine(database_url=None):
     else:
         # SQLite (no pooling needed)
         engine = create_engine(url)
-    
+
     return engine
 
 

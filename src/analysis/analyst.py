@@ -1,7 +1,6 @@
 import os
 import json
 import pandas as pd
-import numpy as np
 from datetime import date
 from openai import OpenAI
 from src.database import get_session, AuditResult
@@ -10,46 +9,60 @@ from src.logger import logger
 from src.statistics import calculate_fleiss_kappa, interpret_kappa
 from sqlalchemy import select
 
+
 def generate_weekly_report(output_dir=".", report_file="web/public/latest_report.md"):
     """
     Analyst 3.0: Generates a rich, longitudinal research report using all available statistics.
     """
     logger.info("📊 Starting AI Analyst 3.0 Analysis...")
-    
+
     session = get_session()
     try:
         # --- Fetch raw audit data ---
-        query = select(AuditResult.model_id.label("model"),
-                       AuditResult.verdict,
-                       AuditResult.prompt_id,
-                       AuditResult.response_text,
-                       AuditResult.cost)
+        query = select(
+            AuditResult.model_id.label("model"),
+            AuditResult.verdict,
+            AuditResult.prompt_id,
+            AuditResult.response_text,
+            AuditResult.cost,
+        )
         df = pd.read_sql(query, session.bind)
-        
-        if df.empty: 
+
+        if df.empty:
             logger.warning("⚠️ No audit log found to analyze.")
             return
 
         # Filter out hard errors (keep BLOCKED = API safety filter)
-        df = df[df['verdict'] != 'ERROR'].copy()
+        df = df[df["verdict"] != "ERROR"].copy()
         if df.empty:
             logger.warning("⚠️ No valid data after filtering errors.")
             return
 
         # --- 1. Reliability Analysis (Fleiss' Kappa) ---
-        verdict_counts = df.pivot_table(index='prompt_id', columns='verdict', aggfunc='size', fill_value=0)
-        relevant_cols = [c for c in verdict_counts.columns if c in ['ALLOWED', 'BLOCKED', 'REFUSAL', 'REMOVED']]
+        verdict_counts = df.pivot_table(
+            index="prompt_id", columns="verdict", aggfunc="size", fill_value=0
+        )
+        relevant_cols = [
+            c
+            for c in verdict_counts.columns
+            if c in ["ALLOWED", "BLOCKED", "REFUSAL", "REMOVED"]
+        ]
         ratings_matrix = verdict_counts[relevant_cols].to_numpy()
         kappa = calculate_fleiss_kappa(ratings_matrix)
         kappa_interpretation = interpret_kappa(kappa)
 
         # --- 2. Per-model refusal rates ---
-        model_stats = df.groupby('model').agg(
-            total=('verdict', 'count'),
-            refusals=('verdict', lambda x: (x.isin(['REMOVED', 'REFUSAL', 'BLOCKED'])).sum())
+        model_stats = df.groupby("model").agg(
+            total=("verdict", "count"),
+            refusals=(
+                "verdict",
+                lambda x: (x.isin(["REMOVED", "REFUSAL", "BLOCKED"])).sum(),
+            ),
         )
-        model_stats['refusal_rate'] = (model_stats['refusals'] / model_stats['total'] * 100).round(1)
-        model_stats = model_stats.sort_values('refusal_rate', ascending=False)
+        model_stats["refusal_rate"] = (
+            model_stats["refusals"] / model_stats["total"] * 100
+        ).round(1)
+        model_stats = model_stats.sort_values("refusal_rate", ascending=False)
         model_refusal_text = "\n".join(
             f"  - {model}: {row['refusal_rate']}% refusal rate ({row['total']} evals)"
             for model, row in model_stats.iterrows()
@@ -58,20 +71,23 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
         # --- 3. Robustness / Phrasing Sensitivity ---
         def get_base_id(pid):
             return pid.split("-V")[0] if "-V" in pid else pid
-        df['base_id'] = df['prompt_id'].apply(get_base_id)
-        robustness = df.groupby(['model', 'base_id'])['verdict'].nunique().reset_index()
-        base_id_counts = df.groupby('base_id')['prompt_id'].nunique()
+
+        df["base_id"] = df["prompt_id"].apply(get_base_id)
+        robustness = df.groupby(["model", "base_id"])["verdict"].nunique().reset_index()
+        base_id_counts = df.groupby("base_id")["prompt_id"].nunique()
         valid_bases = base_id_counts[base_id_counts > 1].index
-        robustness_valid = robustness[robustness['base_id'].isin(valid_bases)]
+        robustness_valid = robustness[robustness["base_id"].isin(valid_bases)]
         if not robustness_valid.empty:
-            flips = robustness_valid[robustness_valid['verdict'] > 1]
+            flips = robustness_valid[robustness_valid["verdict"] > 1]
             flip_rate = (len(flips) / len(robustness_valid)) * 100
             robustness_text = f"{flip_rate:.1f}% of phrasing variant groups triggered inconsistent verdicts across rewordings of the same underlying prompt."
         else:
             robustness_text = "No phrasing variant groups detected in this batch."
 
         # --- 4. Disagreement examples ---
-        pivot = df.pivot_table(index='prompt_id', columns='model', values='verdict', aggfunc='first')
+        pivot = df.pivot_table(
+            index="prompt_id", columns="model", values="verdict", aggfunc="first"
+        )
         disagreement_examples = []
         for idx, row in pivot.iterrows():
             valid = row.dropna()
@@ -86,18 +102,25 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
             with open(drift_path) as f:
                 drift_data = json.load(f)
             # Highlight the most dramatic shifts
-            significant = [d for d in drift_data if d.get("significant_change") and abs(d.get("rate_change", 0)) > 5]
+            significant = [
+                d
+                for d in drift_data
+                if d.get("significant_change") and abs(d.get("rate_change", 0)) > 5
+            ]
             significant.sort(key=lambda x: abs(x.get("rate_change", 0)), reverse=True)
             if significant:
                 drift_lines = []
                 for d in significant[:8]:
-                    direction = "increased" if d['rate_change'] > 0 else "decreased"
+                    direction = "increased" if d["rate_change"] > 0 else "decreased"
                     drift_lines.append(
                         f"  - {d['model']}: refusal rate {direction} by {abs(d['rate_change']):.1f}pp "
                         f"({d['start_refusal_rate']:.1f}% → {d['end_refusal_rate']:.1f}%), "
                         f"{d['start_date']} to {d['end_date']}"
                     )
-                drift_context = "Statistically significant longitudinal changes (p<0.05):\n" + "\n".join(drift_lines)
+                drift_context = (
+                    "Statistically significant longitudinal changes (p<0.05):\n"
+                    + "\n".join(drift_lines)
+                )
             else:
                 drift_context = "No statistically significant longitudinal drift detected in this period."
 
@@ -113,12 +136,16 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
             per_model = cons.get("perModel", [])
             # Identify outliers (lowest kappa)
             outliers = sorted(per_model, key=lambda x: x.get("kappa", 1))[:4]
-            outlier_lines = [f"  - {m['shortName']}: κ={m['kappa']:.3f}, {m['agreementRate']:.1f}% agreement" for m in outliers]
+            outlier_lines = [
+                f"  - {m['shortName']}: κ={m['kappa']:.3f}, {m['agreementRate']:.1f}% agreement"
+                for m in outliers
+            ]
             consensus_context = (
                 f"Cross-model consensus across {total} prompts: "
-                f"{full_agree} ({(full_agree/total*100):.1f}%) show full agreement (≥90%), "
-                f"{split} ({(split/total*100):.1f}%) are genuine split decisions (<60%).\n"
-                f"Lowest-consensus models (worst inter-rater alignment):\n" + "\n".join(outlier_lines)
+                f"{full_agree} ({(full_agree / total * 100):.1f}%) show full agreement (≥90%), "
+                f"{split} ({(split / total * 100):.1f}%) are genuine split decisions (<60%).\n"
+                f"Lowest-consensus models (worst inter-rater alignment):\n"
+                + "\n".join(outlier_lines)
             )
 
         # --- 6. Compose the prompt ---
@@ -176,41 +203,43 @@ CRITICAL FORMATTING RULES:
 """
 
         client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=settings.openrouter_api_key
+            base_url="https://openrouter.ai/api/v1", api_key=settings.openrouter_api_key
         )
 
         response = client.chat.completions.create(
             model="openai/gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a precise, data-driven AI safety analyst who writes in dense, informative prose. You never use bullet points."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are a precise, data-driven AI safety analyst who writes in dense, informative prose. You never use bullet points.",
+                },
+                {"role": "user", "content": prompt},
             ],
             temperature=0.4,
         )
-        
+
         report_content = response.choices[0].message.content
 
         # Prepend a metadata header (used by the UI to show generation date and stats)
-        metadata_header = (
-            f"<!-- generated:{today} kappa:{kappa:.4f} models:{len(model_stats)} -->\n\n"
-        )
+        metadata_header = f"<!-- generated:{today} kappa:{kappa:.4f} models:{len(model_stats)} -->\n\n"
         final_output = metadata_header + report_content
-        
+
         # Write output
         full_path = os.path.join(output_dir, report_file)
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
         with open(full_path, "w") as f:
             f.write(final_output)
-            
+
         logger.info(f"✅ Generated Analyst 3.0 Report: {full_path}")
-        
+
     except Exception as e:
         logger.error(f"⚠️ Failed to generate analyst report: {e}")
         import traceback
+
         traceback.print_exc()
     finally:
         session.close()
+
 
 if __name__ == "__main__":
     generate_weekly_report()

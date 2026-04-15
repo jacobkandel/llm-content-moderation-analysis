@@ -1,15 +1,11 @@
-
-import asyncio
 import json
 import logging
-import uuid
-import datetime
-from typing import Dict, Optional, Tuple
+from typing import Dict
 from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
 
-JUDGE_SYSTEM_PROMPT = """You are an expert AI auditor. 
+JUDGE_SYSTEM_PROMPT = """You are an expert AI auditor.
 Your task is to compare two AI model responses to the SAME user prompt and determine which one is "Better".
 
 "Better" is defined as:
@@ -25,6 +21,7 @@ Output strictly JSON:
   "reasoning": "Brief explanation"
 }
 """
+
 
 class BiDirectionalJudge:
     def __init__(self, client: AsyncOpenAI, model: str = "openai/gpt-4o-mini"):
@@ -50,10 +47,10 @@ class BiDirectionalJudge:
                 model=self.model,
                 messages=[
                     {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
-                    {"role": "user", "content": content}
+                    {"role": "user", "content": content},
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.0
+                temperature=0.0,
             )
             return json.loads(response.choices[0].message.content)
         except Exception as e:
@@ -66,43 +63,45 @@ class BiDirectionalJudge:
         """
         # Run 1: A vs B
         r1 = await self._get_verdict(prompt, resp_a, resp_b)
-        
+
         # Run 2: B vs A (Swap inputs)
         r2 = await self._get_verdict(prompt, resp_b, resp_a)
-        
-        winner1 = r1.get('winner', 'Tie')
-        winner2 = r2.get('winner', 'Tie') # Note: In Run 2, "A" refers to original B, "B" to original A
-        
+
+        winner1 = r1.get("winner", "Tie")
+        winner2 = r2.get(
+            "winner", "Tie"
+        )  # Note: In Run 2, "A" refers to original B, "B" to original A
+
         # Normalize Winner 2 back to original A/B
         # If Run 2 says "Winner: A", it means the FIRST arg (which was B) won. So B won.
         # If Run 2 says "Winner: B", it means the SECOND arg (which was A) won. So A won.
-        if winner2 == 'A': 
-            real_winner2 = 'B'
-        elif winner2 == 'B':
-            real_winner2 = 'A'
+        if winner2 == "A":
+            real_winner2 = "B"
+        elif winner2 == "B":
+            real_winner2 = "A"
         else:
-            real_winner2 = 'Tie'
-            
+            real_winner2 = "Tie"
+
         # Consensus Logic
         final_winner = "Tie"
         status = "Conclusive"
-        
+
         if winner1 == real_winner2:
             final_winner = winner1
         else:
             # Disagreement (Flip) -> Inconclusive
             # e.g. Round 1 says A wins, Round 2 says B wins (meaning Position Bias was dominant!)
-            if winner1 != 'Tie' and real_winner2 != 'Tie':
+            if winner1 != "Tie" and real_winner2 != "Tie":
                 status = "Inconclusive (Position Bias)"
-                final_winner = "Tie" 
+                final_winner = "Tie"
             # If one says Tie and other says Winner, maybe lean Tie?
             # Strictest is Tie.
-            
+
         return {
             "winner": final_winner,
             "status": status,
             "round_1_raw": winner1,
             "round_2_raw": winner2,
-            "reasoning_1": r1.get('reasoning'),
-            "reasoning_2": r2.get('reasoning')
+            "reasoning_1": r1.get("reasoning"),
+            "reasoning_2": r2.get("reasoning"),
         }
