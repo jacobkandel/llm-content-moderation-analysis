@@ -22,10 +22,10 @@
   {
     "model": "qwen/qwen-2.5-7b-instruct",
     "start_date": "2026-01-16",
-    "end_date": "2026-01-23",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 76.92,
-    "end_refusal_rate": 92.93,
-    "rate_change": 16.0,
+    "end_refusal_rate": 87.48,
+    "rate_change": 10.56,
     "p_value": 0.0,
     "significant_change": true
   },
@@ -172,10 +172,10 @@
   {
     "model": "x-ai/grok-3-mini",
     "start_date": "2026-01-27",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 76.34,
-    "end_refusal_rate": 91.32,
-    "rate_change": 14.98,
+    "end_refusal_rate": 91.52,
+    "rate_change": 15.18,
     "p_value": 0.0,
     "significant_change": true
   },
@@ -202,21 +202,21 @@
   {
     "model": "anthropic/claude-haiku-4.5",
     "start_date": "2026-02-12",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 61.71,
-    "end_refusal_rate": 66.63,
-    "rate_change": 4.93,
-    "p_value": 0.0012,
+    "end_refusal_rate": 66.73,
+    "rate_change": 5.03,
+    "p_value": 0.0009,
     "significant_change": true
   },
   {
     "model": "mistralai/ministral-14b-2512",
     "start_date": "2026-02-12",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 83.55,
-    "end_refusal_rate": 85.79,
-    "rate_change": 2.23,
-    "p_value": 0.0503,
+    "end_refusal_rate": 85.04,
+    "rate_change": 1.49,
+    "p_value": 0.1974,
     "significant_change": false
   },
   {
@@ -232,17 +232,17 @@
   {
     "model": "google/gemini-3.1-flash-lite-preview",
     "start_date": "2026-03-04",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 64.13,
-    "end_refusal_rate": 68.88,
-    "rate_change": 4.75,
-    "p_value": 0.0015,
+    "end_refusal_rate": 69.83,
+    "rate_change": 5.7,
+    "p_value": 0.0001,
     "significant_change": true
   },
   {
     "model": "meta-llama/llama-3.3-70b-instruct:free",
     "start_date": "2026-03-05",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 1.56,
     "end_refusal_rate": 0.0,
     "rate_change": -1.56,
@@ -252,7 +252,7 @@
   {
     "model": "mistralai/mistral-small-3.1-24b-instruct:free",
     "start_date": "2026-03-05",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 1.19,
     "end_refusal_rate": 0.0,
     "rate_change": -1.19,
@@ -262,7 +262,7 @@
   {
     "model": "google/gemma-3-27b-it:free",
     "start_date": "2026-03-05",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 1.44,
     "end_refusal_rate": 0.0,
     "rate_change": -1.44,
@@ -272,7 +272,7 @@
   {
     "model": "nousresearch/hermes-3-llama-3.1-405b:free",
     "start_date": "2026-03-05",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 2.6,
     "end_refusal_rate": 0.0,
     "rate_change": -2.6,
@@ -282,11 +282,21 @@
   {
     "model": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
     "start_date": "2026-03-05",
-    "end_date": "2026-04-01",
+    "end_date": "2026-04-15",
     "start_refusal_rate": 0.76,
     "end_refusal_rate": 0.0,
     "rate_change": -0.76,
     "p_value": 0.0001,
     "significant_change": true
+  },
+  {
+    "model": "openai/gpt-5.4-mini",
+    "start_date": "2026-04-01",
+    "end_date": "2026-04-15",
+    "start_refusal_rate": 65.49,
+    "end_refusal_rate": 63.24,
+    "rate_change": -2.24,
+    "p_value": 0.1379,
+    "significant_change": false
   }
 ]
