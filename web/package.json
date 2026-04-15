@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node scripts/generate-traces.js && next dev",
     "dev:secure": "node scripts/generate-traces.js && next dev --experimental-https",
-    "build": "node scripts/generate-traces.js && next build --webpack",
+    "build": "node -e \"process.env.VERCEL ? console.log('Skipping generate-traces.js on Vercel') : require('child_process').execSync('node scripts/generate-traces.js', {stdio:'inherit'})\" && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
