@@ -14,7 +14,7 @@ scipy
 numpy
 tabulate
 psycopg2-binary
-celery>=5.3.0
-redis>=5.0.0
+celery>=5.6.3
+redis>=7.4.0
 seaborn
 matplotlib
