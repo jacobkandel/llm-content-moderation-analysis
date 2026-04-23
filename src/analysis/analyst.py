@@ -18,17 +18,40 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
     """
     logger.info("📊 Starting AI Analyst 4.0 Analysis...")
 
-    session = get_session()
+    session = None
     try:
         # --- Fetch raw audit data ---
-        query = select(
-            AuditResult.model_id.label("model"),
-            AuditResult.verdict,
-            AuditResult.prompt_id,
-            AuditResult.response_text,
-            AuditResult.cost,
-        )
-        df = pd.read_sql(query, session.bind)
+        # Prefer CSV (always available in CI after model collection)
+        csv_path = os.path.join("web", "public", "audit_log.csv")
+        csv_gz_path = csv_path + ".gz"
+
+        if os.path.exists(csv_path):
+            logger.info(f"📄 Reading audit data from CSV: {csv_path}")
+            df = pd.read_csv(csv_path)
+            # Normalize column names to match expected schema
+            col_map = {"run_cost": "cost"}
+            df = df.rename(
+                columns={k: v for k, v in col_map.items() if k in df.columns}
+            )
+        elif os.path.exists(csv_gz_path):
+            logger.info(f"📄 Reading audit data from compressed CSV: {csv_gz_path}")
+            df = pd.read_csv(csv_gz_path, compression="gzip")
+            col_map = {"run_cost": "cost"}
+            df = df.rename(
+                columns={k: v for k, v in col_map.items() if k in df.columns}
+            )
+        else:
+            # Fallback to SQLite for local development
+            logger.info("📄 No CSV found, falling back to SQLite database")
+            session = get_session()
+            query = select(
+                AuditResult.model_id.label("model"),
+                AuditResult.verdict,
+                AuditResult.prompt_id,
+                AuditResult.response_text,
+                AuditResult.cost,
+            )
+            df = pd.read_sql(query, session.bind)
 
         if df.empty:
             logger.warning("⚠️ No audit log found to analyze.")
@@ -189,11 +212,11 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
             top5 = spectrum_sorted[:5]
             bottom5 = spectrum_sorted[-5:]
             top_lines = [
-                f"| {m['name']} | {m['refusalRate']}% | {m.get('refusalRateCILower','?')}–{m.get('refusalRateCIUpper','?')}% |"
+                f"| {m['name']} | {m['refusalRate']}% | {m.get('refusalRateCILower', '?')}–{m.get('refusalRateCIUpper', '?')}% |"
                 for m in top5
             ]
             bottom_lines = [
-                f"| {m['name']} | {m['refusalRate']}% | {m.get('refusalRateCILower','?')}–{m.get('refusalRateCIUpper','?')}% |"
+                f"| {m['name']} | {m['refusalRate']}% | {m.get('refusalRateCILower', '?')}–{m.get('refusalRateCIUpper', '?')}% |"
                 for m in bottom5
             ]
             spectrum_context = (
@@ -333,7 +356,8 @@ CRITICAL FORMATTING RULES:
 
         traceback.print_exc()
     finally:
-        session.close()
+        if session is not None:
+            session.close()
 
 
 if __name__ == "__main__":
