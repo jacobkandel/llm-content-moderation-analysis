@@ -133,8 +133,6 @@ export default function SignificancePage() {
         return results;
     }, [filteredAuditData, sortBy, hasFilters, precomputedSignificance]);
 
-    if (loading) return <SkeletonLoader />;
-
     const displayed = showAll ? pairwiseResults : pairwiseResults.slice(0, 50);
     const sigCount = pairwiseResults.filter(r => r.significant).length;
 
@@ -152,7 +150,11 @@ export default function SignificancePage() {
                 ]}
             />
 
-            {/* Summary stats */}
+            {loading ? (
+                <SkeletonLoader />
+            ) : (
+                <>
+                    {/* Summary stats */}
             <div className="flex gap-4 flex-wrap">
                 <div className="bg-card rounded-xl border border-border p-4 flex-1 min-w-[200px]">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Pairs</p>
@@ -249,6 +251,8 @@ export default function SignificancePage() {
                     </button>
                 )}
             </div>
+               </>
+            )}
 
             <RelatedPages
                 title="Political Compass"

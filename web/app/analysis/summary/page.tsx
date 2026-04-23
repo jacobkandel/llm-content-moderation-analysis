@@ -102,11 +102,6 @@ export default function SummaryPage() {
         })).sort((a: any, b: any) => b.totalEvaluations - a.totalEvaluations);
     }, [efficiencyData, precomputedLongitudinal]);
 
-    if (loading) return <SkeletonLoader />;
-
-
-
-
     return (
         <div>
             {/* Share button */}
@@ -130,11 +125,13 @@ export default function SummaryPage() {
 
             {/* Category-Stratified Heatmap (Primary View) */}
             <div className="mb-8">
-                <CensorshipHeatmap
-                    data={filteredAuditData}
-                    title="Category-Stratified Refusal Rates"
-                    description="Detailed breakdown of refusal rates per model and category. Hate Speech and Misinformation dominate the sample, so viewing by category provides a truer picture of model alignment than aggregate scores."
-                />
+                {loading ? <SkeletonLoader /> : (
+                    <CensorshipHeatmap
+                        data={filteredAuditData}
+                        title="Category-Stratified Refusal Rates"
+                        description="Detailed breakdown of refusal rates per model and category. Hate Speech and Misinformation dominate the sample, so viewing by category provides a truer picture of model alignment than aggregate scores."
+                    />
+                )}
             </div>
 
             {/* Restrictiveness Spectrum (Aggregate) */}

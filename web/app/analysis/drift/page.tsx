@@ -14,8 +14,6 @@ export default function DriftPage() {
     const { filteredDriftData: driftData, loading, ensureDrift } = useAnalysis();
     useEffect(() => { ensureDrift(); }, []);
 
-    if (loading) return <SkeletonLoader />;
-
     return (
         <div className="space-y-6">
             <AnalysisOverview
@@ -28,10 +26,12 @@ export default function DriftPage() {
                     "Stability Score: Lower drift values indicate more stable, predictable moderation policies"
                 ]}
             />
-            <ModelDrift
-                data={driftData}
-                onModelClick={(modelId: string) => router.push(`/models/${modelId}`)}
-            />
+            {loading ? <SkeletonLoader /> : (
+                <ModelDrift
+                    data={driftData}
+                    onModelClick={(modelId: string) => router.push(`/models/${modelId}`)}
+                />
+            )}
 
             <RelatedPages
                 title="Statistical Significance"
