@@ -41,6 +41,10 @@ export const metadata: Metadata = {
       'application/rss+xml': '/feed.xml',
     },
   },
+  icons: {
+    icon: '/icons/icon-192x192.png',
+    apple: '/apple-touch-icon.png',
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
