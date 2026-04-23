@@ -149,13 +149,12 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const loadFullDetails = async () => {
         if (!isLite || isLoadingFull) return; // Already full or loading
 
-        console.log("🚀 Triggering FULL data load...");
+
         setIsLoadingFull(true);
         try {
             const fullData = await fetchAuditData(false, false); // lite=false
             setAuditData(fullData);
             setIsLite(false);
-            console.log("✅ FULL data loaded (replaced lite data)");
         } catch (e) {
             console.error("Failed to load full data", e);
         } finally {
@@ -256,12 +255,10 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const ensureAuditData = useCallback(async () => {
         if (loaded.current.csv) return;
         loaded.current.csv = true;
-        console.log('📦 Loading lite CSV...');
         try {
             const data = await fetchAuditData(false, true);
             setAuditData(data);
             setIsLite(true);
-            console.log('✅ Lite CSV loaded');
         } catch (e) {
             console.error('Failed to load CSV', e);
         }
@@ -293,12 +290,6 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 if (consensus) setPrecomputedConsensus(consensus);
                 if (reliability) setPrecomputedReliability(reliability);
                 if (longitudinal) setPrecomputedLongitudinal(longitudinal);
-
-                console.log('⚡ Pre-computed JSON loaded', {
-                    summary: !!summary, spectrum: !!spectrum, heatmap: !!heatmap,
-                    consensus: !!consensus,
-                    reliability: !!reliability, longitudinal: !!longitudinal,
-                });
             } catch (err) {
                 console.error("Failed to load pre-computed data", err);
             } finally {

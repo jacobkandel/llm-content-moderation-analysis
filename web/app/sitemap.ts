@@ -35,6 +35,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.5,
         },
+        {
+            url: `${BASE_URL}/data`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.7,
+        },
         // Analysis Deep Dives
         ...[
             'consensus', 'political', 'drift', 'paternalism', 'significance', 'summary', 'overview', 'triggers', 'clusters', 'alignment', 'reliability'
