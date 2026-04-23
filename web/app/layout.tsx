@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import dynamic from 'next/dynamic';
-
-const Footer = dynamic(() => import('@/components/ui/Footer').then(mod => mod.Footer), { ssr: false });
-const BackToTop = dynamic(() => import('@/components/ui/BackToTop').then(mod => mod.BackToTop), { ssr: false });
-const KeyboardShortcuts = dynamic(() => import('@/components/ui/KeyboardShortcuts').then(mod => mod.KeyboardShortcuts), { ssr: false });
+import { Footer } from "@/components/ui/Footer";
+import { BackToTop } from "@/components/ui/BackToTop";
+import { KeyboardShortcuts } from "@/components/ui/KeyboardShortcuts";
 
 import SkipLink from "@/components/SkipLink";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
