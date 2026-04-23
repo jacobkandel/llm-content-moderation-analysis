@@ -29,14 +29,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://moderationbias.com'),
+  metadataBase: new URL('https://www.moderationbias.com'),
   title: 'Moderation Bias - Into the Black Box',
   description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
   keywords: ['LLM', 'AI Bias', 'Content Moderation', 'Censorship', 'Llama-3', 'GPT-4', 'Claude', 'AI Safety', 'Red Teaming'],
   authors: [{ name: 'Jacob Kandel', url: 'https://github.com/jacobkandel' }],
   creator: 'Jacob Kandel',
   alternates: {
-    canonical: 'https://moderationbias.com',
+    canonical: 'https://www.moderationbias.com',
     types: {
       'application/rss+xml': '/feed.xml',
     },
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'LLM Censorship Benchmark: Live Audit',
     description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
-    url: 'https://moderationbias.com',
+    url: 'https://www.moderationbias.com',
     siteName: 'Moderation Bias',
     images: [
       {

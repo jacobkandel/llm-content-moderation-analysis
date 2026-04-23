@@ -17,7 +17,7 @@ export default function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Moderation Bias',
-    url: 'https://moderationbias.com',
+    url: 'https://www.moderationbias.com',
     description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
     author: {
       '@type': 'Person',

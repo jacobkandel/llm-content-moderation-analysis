@@ -10,11 +10,11 @@ export default function JsonLd() {
             '@context': 'https://schema.org',
             '@type': 'WebSite',
             name: 'Moderation Bias - Into the Black Box',
-            url: 'https://moderationbias.com',
+            url: 'https://www.moderationbias.com',
             description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude.',
             potentialAction: {
                 '@type': 'SearchAction',
-                target: 'https://moderationbias.com/?q={search_term_string}',
+                target: 'https://www.moderationbias.com/?q={search_term_string}',
                 'query-input': 'required name=search_term_string',
             },
         },
@@ -23,7 +23,7 @@ export default function JsonLd() {
             '@type': 'Dataset',
             name: 'LLM Content Moderation Audit Log',
             description: 'A comprehensive benchmark of content moderation biases in LLMs like Llama-3, GPT-4, and Claude.',
-            url: 'https://moderationbias.com/data/audit_log.csv',
+            url: 'https://www.moderationbias.com/data/audit_log.csv',
             sameAs: 'https://github.com/jacobkandel/llm-content-moderation-analysis',
             license: 'https://creativecommons.org/licenses/by/4.0/',
             creator: {
@@ -35,7 +35,7 @@ export default function JsonLd() {
                 {
                     '@type': 'DataDownload',
                     encodingFormat: 'text/csv',
-                    contentUrl: 'https://moderationbias.com/data/audit_log.csv',
+                    contentUrl: 'https://www.moderationbias.com/data/audit_log.csv',
                 },
             ],
         },
@@ -86,7 +86,7 @@ export default function JsonLd() {
                 '@type': 'ListItem',
                 position: 1,
                 name: 'Home',
-                item: 'https://moderationbias.com',
+                item: 'https://www.moderationbias.com',
             },
         ];
 
@@ -105,7 +105,7 @@ export default function JsonLd() {
                 '@type': 'ListItem',
                 position: index + 2,
                 name: decodeURIComponent(name),
-                item: `https://moderationbias.com${currentPath}`,
+                item: `https://www.moderationbias.com${currentPath}`,
             });
         });
 

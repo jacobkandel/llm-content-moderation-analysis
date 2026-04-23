@@ -95,19 +95,19 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 '@type': 'ListItem',
                 position: 1,
                 name: 'Home',
-                item: 'https://moderationbias.com/'
+                item: 'https://www.moderationbias.com/'
             },
             {
                 '@type': 'ListItem',
                 position: 2,
                 name: 'Categories',
-                item: 'https://moderationbias.com/categories'
+                item: 'https://www.moderationbias.com/categories'
             },
             {
                 '@type': 'ListItem',
                 position: 3,
                 name: label,
-                item: `https://moderationbias.com/categories/${category}`
+                item: `https://www.moderationbias.com/categories/${category}`
             }
         ]
     };

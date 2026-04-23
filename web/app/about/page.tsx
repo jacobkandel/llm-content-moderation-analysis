@@ -7,12 +7,12 @@ export default function AboutPage() {
         '@type': 'AboutPage',
         name: 'About Moderation Bias',
         description: 'Moderation Bias is an open-source research platform that audits how LLMs handle content moderation.',
-        url: 'https://moderationbias.com/about',
+        url: 'https://www.moderationbias.com/about',
         mainEntity: {
             '@type': 'Organization',
             name: 'Moderation Bias',
-            url: 'https://moderationbias.com',
-            logo: 'https://moderationbias.com/og-image.jpeg',
+            url: 'https://www.moderationbias.com',
+            logo: 'https://www.moderationbias.com/og-image.jpeg',
             founder: [
                 {
                     '@type': 'Person',
@@ -312,13 +312,13 @@ export default function AboutPage() {
                 <pre className="text-xs bg-background border border-border rounded-lg p-4 overflow-x-auto text-muted-foreground/90 whitespace-pre-wrap leading-relaxed font-mono">{`@software{kandel2026moderationbias,
   author  = {Kandel, Jacob},
   title   = {{Moderation Bias}: Open-Source LLM Censorship Benchmark},
-  url     = {https://moderationbias.com},
+  url     = {https://www.moderationbias.com},
   year    = {2026},
   version = {1.0.0},
   license = {MIT}
 }`}</pre>
                 <p className="text-xs text-muted-foreground/60">
-                    APA: Kandel, J. (2026). <em>Moderation Bias: Open-source LLM censorship benchmark</em> (v1.0.0). <a href="https://moderationbias.com" className="underline hover:text-foreground">moderationbias.com</a>
+                    APA: Kandel, J. (2026). <em>Moderation Bias: Open-source LLM censorship benchmark</em> (v1.0.0). <a href="https://www.moderationbias.com" className="underline hover:text-foreground">moderationbias.com</a>
                 </p>
             </section>
 

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: ['/', '/*.json'],
             disallow: ['/private/', '/api/'],
         },
-        sitemap: 'https://moderationbias.com/sitemap.xml',
+        sitemap: 'https://www.moderationbias.com/sitemap.xml',
     };
 }

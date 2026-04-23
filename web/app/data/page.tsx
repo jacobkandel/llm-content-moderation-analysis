@@ -138,14 +138,14 @@ df = ds["train"].to_pandas()`}</pre>
                 </h2>
                 <p className="text-sm text-muted-foreground">
                     All visualisation data is available as static JSON at{' '}
-                    <code className="text-xs bg-muted px-1.5 py-0.5 rounded">https://moderationbias.com</code>.
+                    <code className="text-xs bg-muted px-1.5 py-0.5 rounded">https://www.moderationbias.com</code>.
                     These update on every weekly audit run.
                 </p>
                 <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
                     {endpoints.map(({ path, description }) => (
                         <div key={path} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 px-4 py-3 hover:bg-muted/30 transition-colors">
                             <a
-                                href={`https://moderationbias.com${path}`}
+                                href={`https://www.moderationbias.com${path}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xs font-mono text-brand hover:underline flex-shrink-0 w-56"

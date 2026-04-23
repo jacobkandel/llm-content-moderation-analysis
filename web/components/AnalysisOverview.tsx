@@ -17,7 +17,7 @@ export default function AnalysisOverview({ title, description, importance, metri
         '@type': 'Article',
         headline: title,
         description: description,
-        image: 'https://moderationbias.com/assets/heatmap.png',
+        image: 'https://www.moderationbias.com/assets/heatmap.png',
         author: {
             '@type': 'Organization',
             name: 'Moderation Bias'
@@ -27,7 +27,7 @@ export default function AnalysisOverview({ title, description, importance, metri
             name: 'Moderation Bias',
             logo: {
                 '@type': 'ImageObject',
-                url: 'https://moderationbias.com/og-image.jpeg'
+                url: 'https://www.moderationbias.com/og-image.jpeg'
             }
         },
         mainEntityOfPage: {

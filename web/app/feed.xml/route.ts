@@ -4,7 +4,7 @@ import path from 'path';
 
 export async function GET() {
   try {
-    const baseUrl = 'https://moderationbias.com';
+    const baseUrl = 'https://www.moderationbias.com';
 
     // Load models to generate feed items
     const modelsPath = path.join(process.cwd(), 'public', 'models.json');
@@ -43,7 +43,7 @@ export async function GET() {
     <language>en-us</language>
     <lastBuildDate>${lastUpdated.toUTCString()}</lastBuildDate>
     <atom:link href="${baseUrl}/feed.xml" rel="self" type="application/rss+xml" />
-    
+
     <item>
       <title>Latest Audit Data: ${lastUpdated.toLocaleDateString()}</title>
       <link>${baseUrl}/analysis/summary</link>

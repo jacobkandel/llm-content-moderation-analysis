@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'AI Overview | Moderation Bias',
         description: 'Weekly automated AI Analyst report synthesizing the latest findings, reliability scores, and safety anomalies across all tested LLMs.',
-        url: 'https://moderationbias.com/analysis/overview',
+        url: 'https://www.moderationbias.com/analysis/overview',
     },
 };
 

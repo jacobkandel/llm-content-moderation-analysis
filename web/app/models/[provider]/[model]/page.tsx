@@ -181,19 +181,19 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                 '@type': 'ListItem',
                 position: 1,
                 name: 'Home',
-                item: 'https://moderationbias.com/'
+                item: 'https://www.moderationbias.com/'
             },
             {
                 '@type': 'ListItem',
                 position: 2,
                 name: 'Models',
-                item: 'https://moderationbias.com/models'
+                item: 'https://www.moderationbias.com/models'
             },
             {
                 '@type': 'ListItem',
                 position: 3,
                 name: modelInfo.display_name,
-                item: `https://moderationbias.com/models/${id}`
+                item: `https://www.moderationbias.com/models/${id}`
             }
         ]
     };
@@ -203,7 +203,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
         '@type': 'Dataset',
         name: `${modelInfo.display_name} Content Moderation Audit`,
         description: `Independent audit of ${modelInfo.display_name}'s content moderation behavior across ${stats?.total?.toLocaleString() ?? 'multiple'} prompts in ${categories.length} categories. Refusal rate: ${stats ? Math.round(stats.refusalRate) : 'N/A'}%.`,
-        url: `https://moderationbias.com/models/${id}`,
+        url: `https://www.moderationbias.com/models/${id}`,
         creator: {
             '@type': 'Organization',
             name: modelInfo.provider,

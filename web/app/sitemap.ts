@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import models from '../public/models.json';
 
-const BASE_URL = 'https://moderationbias.com';
+const BASE_URL = 'https://www.moderationbias.com';
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const sitemapData: MetadataRoute.Sitemap = [
