@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -25,6 +25,7 @@ jobs:
           npx vercel deploy --prod --token=$VERCEL_TOKEN --yes
 
       - name: Sync to Hugging Face Hub
+        continue-on-error: true
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_REPO_ID: "jmk9494/moderation-bias-benchmark"

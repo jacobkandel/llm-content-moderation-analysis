@@ -188,6 +188,11 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
+      - name: Write pipeline heartbeat
+        run: |
+          echo '{"lastRun":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","status":"success","runId":"'${{ github.run_id }}'"}' \
+            > web/public/pipeline_status.json
+
       - name: Commit & Push Results to main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -214,6 +219,7 @@ jobs:
             web/public/paternalism.json \
             web/public/significance_pairwise.json \
             web/public/assets/ \
+            web/public/pipeline_status.json \
             data/trends.csv || true
 
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
@@ -252,6 +258,21 @@ jobs:
           echo "📦 Remaining large files (top 20 by size):"
           find . -not -path './.git/*' -not -path './web/.next/*' -type f -exec du -sh {} + 2>/dev/null \
             | sort -rh | head -20
+
+      - name: Post run summary
+        if: always()
+        run: |
+          echo "## 📊 Audit Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Date | $(date -u +%Y-%m-%d) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tier | ${{ inputs.tier || 'efficiency' }} |" >> $GITHUB_STEP_SUMMARY
+          if [ -f web/public/summary_stats.json ]; then
+            MODELS=$(python3 -c "import json; print(json.load(open('web/public/summary_stats.json'))['modelsCount'])" 2>/dev/null || echo "?")
+            EVALS=$(python3 -c "import json; print(json.load(open('web/public/summary_stats.json'))['totalEvaluations'])" 2>/dev/null || echo "?")
+            echo "| Models | $MODELS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Evaluations | $EVALS |" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Deploy to Vercel (Preview)
         id: vercel_deploy
@@ -331,3 +352,28 @@ jobs:
           budgetPath: ./lighthouserc.json # optional, won't fail strictly without it
           uploadArtifacts: true # save results in the action logs
           temporaryPublicStorage: true # upload HTML report to temporary public storage
+
+  notify-failure:
+    needs: run-analysis
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create failure issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 Audit Pipeline Failed — ${new Date().toISOString().split('T')[0]}`;
+            const body = `The scheduled Audit Pipeline run failed.\n\n` +
+              `**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n` +
+              `**Trigger:** ${context.eventName}\n` +
+              `**Branch:** ${context.ref}\n\n` +
+              `Please investigate the logs above.`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['bug', 'ci']
+            });

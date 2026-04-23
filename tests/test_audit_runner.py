@@ -25,7 +25,7 @@ async def test_process_prompt_success():
         mock_usage.prompt_tokens = 10
         mock_usage.completion_tokens = 5
         mock_usage.total_tokens = 15
-        mock_api.return_value = ("Test response", mock_usage)
+        mock_api.return_value = ("Test response", mock_usage, "test/model-v1")
 
         # 2. Mock Database Session to avoid actual DB writes
         with patch("src.audit_runner.Session"):

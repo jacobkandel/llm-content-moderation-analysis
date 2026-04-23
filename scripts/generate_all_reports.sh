@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Configuration
 AUDIT_LOG="web/public/audit_log.csv.gz"
