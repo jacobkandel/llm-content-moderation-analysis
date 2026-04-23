@@ -191,7 +191,7 @@ export default function HomePage() {
                       href={`/models/${m.id}`}
                       className="hover:text-foreground hover:underline underline-offset-2 transition-colors"
                     >
-                      {m.display_name} <span className="opacity-50">({m.provider})</span>
+                      {m.display_name} <span className="opacity-80">({m.provider})</span>
                     </Link>
                   </li>
                 ))}

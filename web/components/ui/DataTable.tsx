@@ -275,7 +275,7 @@ export function DataTable<TData, TValue>({
                 </div>
                 <div className="flex items-center gap-1">
                     <button
-                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed text-foreground"
+                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-80 disabled:cursor-not-allowed text-foreground"
                         onClick={() => table.setPageIndex(0)}
                         disabled={!table.getCanPreviousPage()}
                         aria-label="First page"
@@ -283,7 +283,7 @@ export function DataTable<TData, TValue>({
                         <ChevronsLeft className="h-4 w-4" />
                     </button>
                     <button
-                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed text-foreground"
+                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-80 disabled:cursor-not-allowed text-foreground"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
                         aria-label="Previous page"
@@ -294,7 +294,7 @@ export function DataTable<TData, TValue>({
                         Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
                     </span>
                     <button
-                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed text-foreground"
+                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-80 disabled:cursor-not-allowed text-foreground"
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                         aria-label="Next page"
@@ -302,7 +302,7 @@ export function DataTable<TData, TValue>({
                         <ChevronRight className="h-4 w-4" />
                     </button>
                     <button
-                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed text-foreground"
+                        className="h-9 w-9 flex items-center justify-center rounded-md border border-border hover:bg-muted/50 disabled:opacity-80 disabled:cursor-not-allowed text-foreground"
                         onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                         disabled={!table.getCanNextPage()}
                         aria-label="Last page"

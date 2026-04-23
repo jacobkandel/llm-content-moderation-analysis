@@ -90,7 +90,7 @@ export default function ExportButton({
             <button
                 onClick={() => setShowMenu(!showMenu)}
                 disabled={isExporting}
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-80 disabled:cursor-not-allowed"
             >
                 {isExporting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

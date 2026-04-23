@@ -245,7 +245,7 @@
     "id": "mistralai/mistral-small-3.1-24b-instruct:free",
     "strict_id": "mistralai/mistral-small-3.1-24b-instruct:free",
     "name": "Mistral Small 3.1 24B",
-    "display_name": "Mistral Small 3.1",
+    "display_name": "Mistral Small 3.1 (Free)",
     "provider": "Mistral AI",
     "region": "Europe",
     "tier": "Low",
