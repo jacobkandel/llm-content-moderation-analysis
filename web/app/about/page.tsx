@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Github, Linkedin, ArrowRight, BookOpen, Target, FlaskConical } from 'lucide-react';
 
 export default function AboutPage() {
@@ -54,7 +55,7 @@ export default function AboutPage() {
                     <div className="p-6 flex flex-col gap-4">
                         <div className="flex items-center gap-4">
                             <div className="h-14 w-14 rounded-xl bg-muted border border-border flex items-center justify-center text-brand text-lg font-black select-none flex-shrink-0 overflow-hidden">
-                                <img src="https://github.com/jacobkandel.png" alt="Jacob Kandel" className="h-full w-full object-cover" />
+                                <Image src="https://github.com/jacobkandel.png" alt="Jacob Kandel" width={56} height={56} className="h-full w-full object-cover" />
                             </div>
                             <div>
                                 <h2 className="text-base font-black text-foreground">Jacob Kandel</h2>
@@ -87,7 +88,7 @@ export default function AboutPage() {
                     <div className="p-6 flex flex-col gap-4">
                         <div className="flex items-center gap-4">
                             <div className="h-14 w-14 rounded-xl bg-muted border border-border flex items-center justify-center text-brand text-lg font-black select-none flex-shrink-0 overflow-hidden">
-                                <img src="https://github.com/lydiakandel-byte.png" alt="Lydia Kandel" className="h-full w-full object-cover" />
+                                <Image src="https://github.com/lydiakandel-byte.png" alt="Lydia Kandel" width={56} height={56} className="h-full w-full object-cover" />
                             </div>
                             <div>
                                 <h2 className="text-base font-black text-foreground">Lydia Kandel</h2>

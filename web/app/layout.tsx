@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import { Footer } from "@/components/ui/Footer";
+import dynamic from 'next/dynamic';
+
+const Footer = dynamic(() => import('@/components/ui/Footer').then(mod => mod.Footer), { ssr: false });
+const BackToTop = dynamic(() => import('@/components/ui/BackToTop').then(mod => mod.BackToTop), { ssr: false });
+const KeyboardShortcuts = dynamic(() => import('@/components/ui/KeyboardShortcuts').then(mod => mod.KeyboardShortcuts), { ssr: false });
+
 import SkipLink from "@/components/SkipLink";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -14,9 +19,7 @@ import { BrandBar } from "@/components/layout/BrandBar";
 import { NavBar } from "@/components/layout/NavBar";
 import { FocusManager } from "@/components/layout/FocusManager";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { BackToTop } from "@/components/ui/BackToTop";
 import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegister";
-import { KeyboardShortcuts } from "@/components/ui/KeyboardShortcuts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

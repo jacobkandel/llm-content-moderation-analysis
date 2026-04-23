@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { ArrowRight, BarChart2, Zap, RefreshCw, ChevronRight } from 'lucide-react';
 import modelsJson from '../public/models.json';
 import summaryStats from '../public/summary_stats.json';
