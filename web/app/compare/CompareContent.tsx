@@ -215,20 +215,39 @@ export default function CompareContent({
     }, []);
 
     useEffect(() => {
-        if (!disagreeRef.current || !compareData) return;
+        if (!isClient || !disagreeRef.current || !compareData) return;
 
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    loadFullData();
-                    observer.disconnect();
-                }
-            },
-            { rootMargin: '200px' } // Start loading 200px before visible
-        );
-        observer.observe(disagreeRef.current);
-        return () => observer.disconnect();
-    }, [compareData, loadFullData]);
+        // Use rAF to ensure layout is complete before checking position
+        const rafId = requestAnimationFrame(() => {
+            if (!disagreeRef.current) return;
+
+            // If the element is already in the viewport (short pages), load immediately
+            const rect = disagreeRef.current.getBoundingClientRect();
+            if (rect.top < window.innerHeight + 200) {
+                loadFullData();
+                return;
+            }
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting) {
+                        loadFullData();
+                        observer.disconnect();
+                    }
+                },
+                { rootMargin: '200px', threshold: 0 }
+            );
+            observer.observe(disagreeRef.current!);
+            // Store cleanup
+            cleanupRef.current = () => observer.disconnect();
+        });
+
+        const cleanupRef = { current: () => {} };
+        return () => {
+            cancelAnimationFrame(rafId);
+            cleanupRef.current();
+        };
+    }, [isClient, compareData, loadFullData]);
 
     useEffect(() => {
         if (selectedCategory !== 'all' || selectedDate !== 'all' || deferredSearch !== '') {

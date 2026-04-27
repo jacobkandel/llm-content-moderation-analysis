@@ -4,7 +4,7 @@
 Our study relies on `gpt-4o-mini` as the primary judge for classifying refusal types. While we implemented position-swapping to mitigate ordering bias, there remains a potential "Self-Preference Bias" where the model may favor responses similar to its own training distribution.
 
 ## 2. Stochasticity
-LLM outputs are inherently non-deterministic. Although we conducted audits with `N=5` variants per prompt and set `temperature=0.7`, edge cases of transient refusals may persist.
+LLM outputs are inherently non-deterministic. Although we conducted audits with `N=5` variants per prompt and set `temperature=0.0` for deterministic reproducibility, edge cases of transient refusals may persist due to non-determinism in model serving infrastructure.
 
 ## 3. Scope of Modality
 This instrument evaluates **text-only** inputs and outputs. Multimodal safety filters (e.g., image generation refusal) are outside the scope of this work.

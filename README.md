@@ -3,7 +3,7 @@
 ![CI](https://github.com/jacobkandel/llm-content-moderation-analysis/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-Open-source benchmark tracking censorship and content moderation bias across 20+ LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
+Open-source benchmark tracking censorship and content moderation bias across 31 LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
 
 **Live site**: [moderationbias.com](https://moderationbias.com)
 
@@ -13,12 +13,12 @@ Open-source benchmark tracking censorship and content moderation bias across 20+
 
 - **Compare** — Side-by-side refusal rates, radar charts, and per-prompt disagreements between any two models
 - **Analysis** — Political compass, paternalism detection, model drift, council consensus, statistical significance (McNemar's test)
-- **Database** — Full audit log of 100K+ rows, searchable and exportable
-- **Auto-updates** — GitHub Actions re-runs audits every Sunday and commits updated data directly to `main`
+- **Database** — Full audit log of 2.3M+ rows, searchable and exportable
+- **Auto-updates** — GitHub Actions re-runs audits biweekly (1st & 15th) and commits updated data directly to `main`
 
 ## Methodology
 
-2,000+ prompts across 6 categories (Hate Speech, Health Misinformation, Incitement to Violence, Explicit/Sexual, Paternalism, Political), grounded in Wikipedia's *List of Controversial Issues* and filtered by search volume to minimize selection bias. Every model receives an identical system prompt at `temperature=0` for reproducibility. Verdicts (ALLOWED / REMOVED) are scored by an independent judge model. Exact model version strings are logged per run for drift attribution.
+2,293 prompts across 16 categories (Hate Speech, Health Misinformation, Misinformation, Incitement to Violence, Explicit/Sexual, Violence, Crime, Cybersecurity, Harassment, Self-Harm, Deception, Theft, Dangerous, Medical Misinformation, International Controversy, and False Positive Controls), grounded in Wikipedia's *List of Controversial Issues* and filtered by search volume to minimize selection bias. Every model receives an identical system prompt at `temperature=0` for reproducibility. Verdicts (ALLOWED / REMOVED) are scored by an independent judge model. Exact model version strings are logged per run for drift attribution. Minimum n ≥ 30 per model×category cell for statistical significance. See [METHODOLOGY.md](METHODOLOGY.md) and [LIMITATIONS.md](LIMITATIONS.md) for full details.
 
 ---
 
@@ -35,8 +35,8 @@ Open-source benchmark tracking censorship and content moderation bias across 20+
 │   ├── lib/                # Utilities and design system
 │   └── public/             # Precomputed JSON data assets
 ├── data/
-│   ├── prompts.csv         # 2,000+ test prompts by category
-│   └── models.json         # Model registry (24 models)
+│   ├── prompts.csv         # 2,293 test prompts by category
+│   └── models.json         # Model registry (31 models)
 └── .github/workflows/      # CI and scheduled audits
 ```
 
@@ -124,6 +124,23 @@ python -m pytest tests/
 
 - **Frontend**: Vercel — auto-deploys on push to `main`
 - **Audits**: GitHub Actions — runs on schedule, commits updated data directly to `main`, triggers redeploy
+
+---
+
+## Cite this work
+
+```bibtex
+@software{kandel2026moderationbias,
+  title     = {Moderation Bias: LLM Content Moderation Analysis Platform},
+  author    = {Kandel, J.},
+  year      = {2026},
+  url       = {https://moderationbias.com},
+  version   = {2.0.0},
+  license   = {MIT}
+}
+```
+
+See [CITATION.cff](CITATION.cff) for structured citation metadata.
 
 ---
 

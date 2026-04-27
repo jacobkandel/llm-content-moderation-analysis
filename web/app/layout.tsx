@@ -31,8 +31,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://moderationbias.com'),
   title: 'Moderation Bias - Into the Black Box',
-  description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
-  keywords: ['LLM', 'AI Bias', 'Content Moderation', 'Censorship', 'Llama-3', 'GPT-4', 'Claude', 'AI Safety', 'Red Teaming'],
+  description: 'Open-source benchmark tracking censorship and content moderation bias across 26+ LLMs including GPT-4o, Claude, Gemini, Llama 4, DeepSeek, and Mistral. Biweekly automated audits with statistical significance testing.',
+  keywords: ['LLM', 'AI Bias', 'Content Moderation', 'Censorship', 'GPT-4o', 'Claude', 'Gemini', 'Llama 4', 'DeepSeek', 'Mistral', 'AI Safety', 'Red Teaming', 'LLM Benchmark', 'AI Research'],
   authors: [{ name: 'Jacob Kandel', url: 'https://github.com/jacobkandel' }],
   creator: 'Jacob Kandel',
   alternates: {
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'LLM Censorship Benchmark: Live Audit',
-    description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
+    description: 'Open-source benchmark tracking censorship and content moderation bias across 26+ LLMs. Biweekly automated audits with statistical significance testing.',
     url: 'https://moderationbias.com',
     siteName: 'Moderation Bias',
     images: [

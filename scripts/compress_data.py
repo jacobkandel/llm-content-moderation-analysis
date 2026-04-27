@@ -16,6 +16,10 @@ REFUSAL_VERDICTS = {'REFUSAL', 'REMOVED', 'unsafe', 'Hard Refusal'}
 SAFE_VERDICTS = {'ALLOWED', 'safe', 'safe_response'}
 HEATMAP_REFUSAL_VERDICTS = REFUSAL_VERDICTS | {'Soft Censorship'}
 
+# Minimum sample size for a model×category cell to be included in
+# significance testing and heatmap display (n < 30 is unreliable).
+MIN_CELL_SIZE = 30
+
 def normalize_category(cat: str) -> str:
     if cat in ('Sexual', 'Explicit Content'):
         return 'Explicit/Sexual'

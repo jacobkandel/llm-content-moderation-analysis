@@ -1,12 +1,20 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
+/**
+ * Conditionally join classNames together and merge Tailwind classes.
+ */
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }
 
+/**
+ * Sanitize user search input by removing dangerous characters.
+ * Strips HTML tags, quotes, and semicolons to prevent XSS and injection.
+ */
 export function sanitizeSearchInput(input: string): string {
-    if (!input) return '';
-    // Strip common HTML/script injection characters to prevent XSS issues down the line
-    return input.replace(/[<>'";]/g, '').trim();
+  if (!input) return '';
+  return input
+    .replace(/[<>'"`;]/g, '')
+    .trim();
 }

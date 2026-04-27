@@ -1,76 +1,90 @@
 /**
- * Provider Logo Utility
- * 
- * Maps AI model names to their provider's logo using Google's S2 favicon service.
- * This is free, reliable, and requires no API key.
+ * Provider detection and logo URL generation for model display.
+ *
+ * Maps model IDs to their provider (OpenAI, Anthropic, Google, etc.)
+ * and returns a Google Favicon URL for the provider's logo.
  */
 
-const PROVIDER_MAP: Record<string, { name: string; domain: string }> = {
-    'openai': { name: 'OpenAI', domain: 'openai.com' },
-    'anthropic': { name: 'Anthropic', domain: 'anthropic.com' },
-    'google': { name: 'Google', domain: 'deepmind.google' },
-    'gemini': { name: 'Google', domain: 'deepmind.google' },
-    'mistral': { name: 'Mistral AI', domain: 'mistral.ai' },
-    'ministral': { name: 'Mistral AI', domain: 'mistral.ai' },
-    'qwen': { name: 'Alibaba / Qwen', domain: 'qwenlm.ai' },
-    'deepseek': { name: 'DeepSeek', domain: 'deepseek.com' },
-    'grok': { name: 'xAI', domain: 'x.ai' },
-    'llama': { name: 'Meta', domain: 'meta.com' },
-    'meta': { name: 'Meta', domain: 'meta.com' },
-    'phi': { name: 'Microsoft', domain: 'microsoft.com' },
-    'microsoft': { name: 'Microsoft', domain: 'microsoft.com' },
-    'cohere': { name: 'Cohere', domain: 'cohere.com' },
-    'command': { name: 'Cohere', domain: 'cohere.com' },
-    'yi': { name: '01.AI', domain: '01.ai' },
-    '01-ai': { name: '01.AI', domain: '01.ai' },
-    'x-ai': { name: 'xAI', domain: 'x.ai' },
+export interface ProviderInfo {
+  name: string;
+  domain: string;
+  color: string;
+}
+
+const PROVIDER_RULES: { match: (id: string) => boolean; info: ProviderInfo }[] = [
+  {
+    match: (id) => /\bgpt-|^openai\//i.test(id) || /^o[1-4]-/i.test(id),
+    info: { name: 'OpenAI', domain: 'openai.com', color: '#10A37F' },
+  },
+  {
+    match: (id) => /\bclaude|^anthropic\//i.test(id),
+    info: { name: 'Anthropic', domain: 'anthropic.com', color: '#D4A574' },
+  },
+  {
+    match: (id) => /\bgemini|^google\//i.test(id),
+    info: { name: 'Google', domain: 'google.com', color: '#4285F4' },
+  },
+  {
+    match: (id) => /\bllama|^meta\//i.test(id),
+    info: { name: 'Meta', domain: 'meta.com', color: '#0668E1' },
+  },
+  {
+    match: (id) => /\bmistral|^mistral\/|ministral/i.test(id),
+    info: { name: 'Mistral AI', domain: 'mistral.ai', color: '#FF7000' },
+  },
+  {
+    match: (id) => /\bdeepseek|^deepseek\//i.test(id),
+    info: { name: 'DeepSeek', domain: 'deepseek.com', color: '#4D6BFE' },
+  },
+  {
+    match: (id) => /\bqwen|^qwen\//i.test(id),
+    info: { name: 'Alibaba', domain: 'qwenlm.ai', color: '#FF6A00' },
+  },
+  {
+    match: (id) => /\bcommand|^cohere\//i.test(id),
+    info: { name: 'Cohere', domain: 'cohere.com', color: '#39594D' },
+  },
+  {
+    match: (id) => /\bdbrx|^databricks\//i.test(id),
+    info: { name: 'Databricks', domain: 'databricks.com', color: '#FF3621' },
+  },
+  {
+    match: (id) => /\byi-/i.test(id),
+    info: { name: '01.AI', domain: '01.ai', color: '#6366F1' },
+  },
+  {
+    match: (id) => /\bgemma|^google\/gemma/i.test(id),
+    info: { name: 'Google', domain: 'google.com', color: '#4285F4' },
+  },
+];
+
+const UNKNOWN_PROVIDER: ProviderInfo = {
+  name: 'Unknown',
+  domain: 'openrouter.ai',
+  color: '#6B7280',
 };
 
 /**
- * Get provider info from a model name.
- * Matches against known prefixes in the model name string.
+ * Detect the provider from a model ID string.
  */
-export function getProviderInfo(modelName: string): { name: string; domain: string } {
-    const lower = modelName.toLowerCase();
-
-    // Check for OpenAI o1/o3/o4 series
-    if (/\bo[134]-/.test(lower) || lower.includes('gpt')) {
-        return PROVIDER_MAP['openai'];
-    }
-
-    // Check for Claude models
-    if (lower.includes('claude')) {
-        return PROVIDER_MAP['anthropic'];
-    }
-
-    // Check provider prefix (e.g., "openai/gpt-4")
-    const prefix = lower.split('/')[0];
-    if (PROVIDER_MAP[prefix]) {
-        return PROVIDER_MAP[prefix];
-    }
-
-    // Check substrings
-    for (const [key, info] of Object.entries(PROVIDER_MAP)) {
-        if (lower.includes(key)) {
-            return info;
-        }
-    }
-
-    return { name: 'Unknown', domain: 'openai.com' };
+export function getProviderInfo(modelId: string): ProviderInfo {
+  for (const rule of PROVIDER_RULES) {
+    if (rule.match(modelId)) return rule.info;
+  }
+  return UNKNOWN_PROVIDER;
 }
 
 /**
- * Get a logo URL for a model using Google's S2 favicon service.
- * Returns high-resolution (128px) favicons. Free, no token needed.
+ * Get a provider favicon URL via Google's favicon service.
  */
-export function getLogoUrl(modelName: string, size: number = 128): string {
-    const { domain } = getProviderInfo(modelName);
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
+export function getLogoUrl(modelId: string): string {
+  const { domain } = getProviderInfo(modelId);
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 }
 
 /**
- * Get the provider display name for a model.
+ * Get the display name of the provider for a model.
  */
-export function getProviderName(modelName: string): string {
-    return getProviderInfo(modelName).name;
+export function getProviderName(modelId: string): string {
+  return getProviderInfo(modelId).name;
 }

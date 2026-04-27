@@ -202,6 +202,10 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
+
+      - name: Validate JSON outputs
+        run: python scripts/validate_outputs.py --dir web/public
+
       - name: Commit & Push Results to main
         run: |
           git config user.name "github-actions[bot]"

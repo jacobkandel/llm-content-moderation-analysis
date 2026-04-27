@@ -12,6 +12,9 @@ type HeatmapProps = {
     onCellClick?: (model: string, category: string, entries: any[]) => void;
 };
 
+/** Minimum sample size for a cell to be considered statistically meaningful. */
+const MIN_SAMPLE_SIZE = 30;
+
 // Shorten long category names for display
 const sanitizeCategory = (cat: string): string => {
     const mapping: Record<string, string> = {
@@ -214,18 +217,22 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                         );
                                     }
                                     const rate = cell.refusals / cell.total;
+                                    const isThin = cell.total < MIN_SAMPLE_SIZE;
                                     return (
                                         <td
                                             key={c}
                                             role="button"
                                             tabIndex={0}
-                                            aria-label={`${m} in ${c}: ${getSeverity(rate)} severity with ${(rate * 100).toFixed(0)}% refusals`}
-                                            className={`p-1.5 text-center cursor-pointer transition-colors text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getColor(rate)}`}
+                                            aria-label={`${m} in ${c}: ${getSeverity(rate)} severity with ${(rate * 100).toFixed(0)}% refusals${isThin ? ' (low sample size)' : ''}`}
+                                            className={`p-1.5 text-center cursor-pointer transition-colors text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getColor(rate)} ${isThin ? 'border border-dashed border-muted-foreground/40' : ''}`}
                                             onClick={() => handleCellClick(m, c)}
                                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCellClick(m, c); } }}
-                                            title={`${cell.refusals}/${cell.total} refusals - Click for details`}
+                                            title={isThin
+                                                ? `${cell.refusals}/${cell.total} refusals — ⚠️ Low sample size (n < ${MIN_SAMPLE_SIZE}), interpret with caution`
+                                                : `${cell.refusals}/${cell.total} refusals - Click for details`
+                                            }
                                         >
-                                            {(rate * 100).toFixed(0)}%
+                                            {(rate * 100).toFixed(0)}%{isThin ? '†' : ''}
                                         </td>
                                     );
                                 })}
@@ -279,18 +286,22 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                                         const cell = matrix.stats[m][c];
                                         if (!cell || cell.total === 0) return null;
                                         const rate = cell.refusals / cell.total;
+                                        const isThinMobile = cell.total < MIN_SAMPLE_SIZE;
 
                                         return (
                                             <div key={c}
                                                 role="button"
                                                 tabIndex={0}
-                                                aria-label={`${c}: ${getSeverity(rate)} severity with ${(rate * 100).toFixed(0)}% refusals`}
-                                                className={`p-3 rounded-lg flex justify-between items-center cursor-pointer shadow-sm border border-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${getColor(rate)}`}
+                                                aria-label={`${c}: ${getSeverity(rate)} severity with ${(rate * 100).toFixed(0)}% refusals${isThinMobile ? ' (low sample size)' : ''}`}
+                                                className={`p-3 rounded-lg flex justify-between items-center cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${getColor(rate)} ${isThinMobile ? 'border-dashed border-muted-foreground/40' : 'border border-black/5'}`}
                                                 onClick={() => handleCellClick(m, c)}
                                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCellClick(m, c); } }}
                                             >
-                                                <span className="truncate mr-3 font-semibold text-sm">{sanitizeCategory(c)}</span>
-                                                <span className="text-base font-black tracking-tight">{(rate * 100).toFixed(0)}%</span>
+                                                <span className="truncate mr-3 font-semibold text-sm">{sanitizeCategory(c)}{isThinMobile ? ' †' : ''}</span>
+                                                <span className="flex items-center gap-1.5">
+                                                    <span className="text-base font-black tracking-tight">{(rate * 100).toFixed(0)}%</span>
+                                                    {isThinMobile && <span className="text-[10px] opacity-60">n={cell.total}</span>}
+                                                </span>
                                             </div>
                                         );
                                     })}
@@ -307,6 +318,7 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#FF671F]/40 rounded border border-[#FF671F]" role="img" aria-label="Medium severity color"></div> Medium</div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-refusal/80 rounded border border-refusal" role="img" aria-label="High severity color"></div> High</div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-brand rounded" role="img" aria-label="Critical severity color"></div> Critical</div>
+                <div className="flex items-center gap-1 ml-2 border-l pl-2 border-border"><span className="font-mono">†</span> n &lt; {MIN_SAMPLE_SIZE}</div>
             </div>
 
             {/* Modal for cell details */}

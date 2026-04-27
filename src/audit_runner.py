@@ -163,9 +163,6 @@ async def call_target_model_async(model_name, prompt_text, system_prompt=None):
     Sends a prompt via OpenRouter with auto-retries.
     Requests JSON output for reliable parsing.
     """
-    "Output ONLY a JSON object with keys: 'verdict' (ALLOWED or REMOVED) and 'reason' (brief explanation)."
-    # )
-    
     if system_prompt is None:
         system_prompt = PERSONAS["Default"]
     
