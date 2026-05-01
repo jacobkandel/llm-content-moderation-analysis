@@ -48,14 +48,14 @@ export const SKIP_CATEGORIES = new Set([
  * Returns true if the given verdict is a refusal-type verdict.
  */
 export function isRefusal(verdict: string): boolean {
-  return REFUSAL_VERDICTS.has(verdict);
+  return (REFUSAL_VERDICTS as ReadonlySet<string>).has(verdict);
 }
 
 /**
  * Returns true if the given verdict is a safe/allowed-type verdict.
  */
 export function isSafe(verdict: string): boolean {
-  return SAFE_VERDICTS.has(verdict);
+  return (SAFE_VERDICTS as ReadonlySet<string>).has(verdict);
 }
 
 /**
