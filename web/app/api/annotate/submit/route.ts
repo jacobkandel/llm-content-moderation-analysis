@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
             access: 'public',
             addRandomSuffix: false,
             contentType: 'application/x-ndjson',
+            allowOverwrite: true,
         });
 
         return NextResponse.json({
