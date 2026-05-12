@@ -33,9 +33,11 @@ async function loadPrompts(baseUrl: string): Promise<PromptItem[]> {
 }
 
 export async function GET(request: NextRequest) {
-    // Determine base URL from the request
+    // If on a Vercel preview deployment, Vercel Protection blocks server-to-server fetches.
+    // To fix this, we fetch the prompts from the public production URL or localhost.
     const url = new URL(request.url);
-    const baseUrl = `${url.protocol}//${url.host}`;
+    const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    const baseUrl = isLocal ? `${url.protocol}//${url.host}` : 'https://www.moderationbias.com';
 
     const prompts = await loadPrompts(baseUrl);
 
