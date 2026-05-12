@@ -174,12 +174,66 @@ def generate_precomputed_json(df):
     total_prompts_n = int(df['_pid'].nunique())
     mdes = math.sqrt(((z_alpha + z_beta)**2 * avg_discordant_p) / total_prompts_n) if total_prompts_n > 0 else 0
     power_mdes = round(mdes * 100, 2)
+    
+    # Required N for a 5% MDES
+    required_n_5pct = int(math.ceil(((z_alpha + z_beta)**2 * avg_discordant_p) / (0.05**2)))
+    
+    # Cramér's V for Model vs. Verdict and Category vs. Verdict
+    import pandas as pd
+    try:
+        from scipy.stats import chi2_contingency
+        # Create a binary refusal column for stats
+        is_refusal_binary = df['verdict'].isin(REFUSAL_VERDICTS).astype(int)
+        
+        # 1. Model vs Verdict
+        ct_model = pd.crosstab(df['model'], is_refusal_binary)
+        chi2_model = chi2_contingency(ct_model, correction=False)[0]
+        n_model = ct_model.sum().sum()
+        min_dim_model = min(ct_model.shape) - 1
+        cramers_v_model = round(math.sqrt(chi2_model / (n_model * min_dim_model)), 4) if n_model > 0 and min_dim_model > 0 else 0.0
+        
+        # 2. Category vs Verdict
+        ct_cat = pd.crosstab(df['category'], is_refusal_binary)
+        chi2_cat = chi2_contingency(ct_cat, correction=False)[0]
+        n_cat = ct_cat.sum().sum()
+        min_dim_cat = min(ct_cat.shape) - 1
+        cramers_v_cat = round(math.sqrt(chi2_cat / (n_cat * min_dim_cat)), 4) if n_cat > 0 and min_dim_cat > 0 else 0.0
+    except ImportError:
+        cramers_v_model = 0.0
+        cramers_v_cat = 0.0
+
+    # Cohen's d for Verbosity
+    resp_col = 'response_text' if 'response_text' in df.columns else ('response' if 'response' in df.columns else None)
+    if resp_col:
+        resp_lens = df[resp_col].fillna('').astype(str).str.len()
+        safe_mask = df['verdict'].isin(SAFE_VERDICTS)
+        refused_mask = df['verdict'].isin(REFUSAL_VERDICTS)
+        safe_lens = resp_lens[safe_mask].values
+        refused_lens = resp_lens[refused_mask].values
+        
+        if len(safe_lens) > 0 and len(refused_lens) > 0:
+            import numpy as np
+            mean_safe, mean_refused = float(np.mean(safe_lens)), float(np.mean(refused_lens))
+            var_safe, var_refused = float(np.var(safe_lens, ddof=1)), float(np.var(refused_lens, ddof=1))
+            n_s, n_r = len(safe_lens), len(refused_lens)
+            pooled_std = math.sqrt(((n_s - 1) * var_safe + (n_r - 1) * var_refused) / (n_s + n_r - 2)) if (n_s + n_r - 2) > 0 else 0.0
+            cohens_d_verbosity = round((mean_safe - mean_refused) / pooled_std, 4) if pooled_std > 0 else 0.0
+        else:
+            mean_safe, mean_refused, cohens_d_verbosity = 0.0, 0.0, 0.0
+    else:
+        mean_safe, mean_refused, cohens_d_verbosity = 0.0, 0.0, 0.0
 
     summary = {
         'totalCases': total_prompts_n,
         'modelsCount': len(keep_models),
         'totalEvaluations': int(len(df)),
         'statisticalPowerMDES': power_mdes,
+        'requiredNSample': required_n_5pct,
+        'cramersVModel': cramers_v_model,
+        'cramersVCategory': cramers_v_cat,
+        'cohensDVerbosity': cohens_d_verbosity,
+        'meanSafeLength': round(mean_safe, 1),
+        'meanRefusedLength': round(mean_refused, 1),
         'lastUpdated': dates[-1] if dates else '',
         'dateRange': {'start': dates[0] if dates else '', 'end': dates[-1] if dates else ''},
         'allModels': sorted(keep_models),
@@ -317,11 +371,20 @@ def generate_precomputed_json(df):
                 phiB = 2 * math.asin(math.sqrt(pB))
                 cohens_h = abs(phiA - phiB)
                 
+                # Paired Confidence Interval for difference (pA - pB)
+                diff = pA - pB
+                se_diff = math.sqrt(max(0, (b_count + c_count) - ((b_count - c_count)**2 / samples))) / samples if samples > 0 else 0
+                ci_lower = diff - 1.95996 * se_diff
+                ci_upper = diff + 1.95996 * se_diff
+                
                 sig_results.append({
                     'modelA': mA,
                     'modelB': mB,
                     'pValue': p_val, # Unadjusted
                     'cohensH': round(cohens_h, 4),
+                    'diff': round(diff * 100, 2),
+                    'ciLower': round(ci_lower * 100, 2),
+                    'ciUpper': round(ci_upper * 100, 2),
                     'samples': samples,
                     'disagreements': b_count + c_count,
                 })

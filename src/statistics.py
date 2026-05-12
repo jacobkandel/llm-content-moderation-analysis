@@ -415,3 +415,28 @@ def two_proportion_z_test(
         "significant": significant,
         "label": label,
     }
+
+
+def calculate_cramers_v(confusion_matrix: np.ndarray) -> float:
+    """
+    Calculate Cramér's V effect size for association between two categorical variables.
+    
+    Args:
+        confusion_matrix: A 2D numpy array containing frequency counts.
+        
+    Returns:
+        Cramér's V effect size (0 to 1, where 1 indicates perfect association).
+    """
+    from scipy.stats import chi2_contingency
+    
+    chi2 = chi2_contingency(confusion_matrix, correction=False)[0]
+    n = confusion_matrix.sum()
+    
+    # Calculate min dimension - 1
+    min_dim = min(confusion_matrix.shape) - 1
+    
+    if n == 0 or min_dim == 0:
+        return 0.0
+        
+    v = np.sqrt(chi2 / (n * min_dim))
+    return float(v)

@@ -176,6 +176,67 @@ export default function SignificancePage() {
                             : 'N/A'
                         }
                     </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        {stats?.requiredNSample && stats?.totalCases
+                            ? `${stats.totalCases.toLocaleString()} prompts (needs ${stats.requiredNSample})`
+                            : ''
+                        }
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-card p-6 rounded-2xl border border-border">
+                    <h3 className="text-lg font-bold text-foreground mb-4">Categorical Effect Size (Cramér's V)</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                        Measures the strength of association between two categorical variables (0 = no association, 1 = perfect association). A larger value indicates a stronger predictor of refusal.
+                    </p>
+                    <div className="space-y-4">
+                        <div>
+                            <div className="flex justify-between text-sm mb-1">
+                                <span className="font-medium">Model vs. Verdict</span>
+                                <span className="font-mono">{stats?.cramersVModel?.toFixed(2) || 'N/A'}</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2">
+                                <div className="bg-primary h-2 rounded-full" style={{ width: `${(stats?.cramersVModel || 0) * 100}%` }}></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex justify-between text-sm mb-1">
+                                <span className="font-medium">Category vs. Verdict</span>
+                                <span className="font-mono">{stats?.cramersVCategory?.toFixed(2) || 'N/A'}</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2">
+                                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(stats?.cramersVCategory || 0) * 100}%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-card p-6 rounded-2xl border border-border">
+                    <h3 className="text-lg font-bold text-foreground mb-4">Continuous Effect Size (Cohen's d)</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                        Measures the standardized difference in mean response length (verbosity) between allowed and refused responses.
+                    </p>
+                    <div className="flex items-end gap-4">
+                        <div className="flex-1">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Verbosity Difference</p>
+                            <p className="text-3xl font-bold text-foreground">
+                                {stats?.cohensDVerbosity ? stats.cohensDVerbosity.toFixed(2) : 'N/A'}
+                                <span className="text-sm font-normal text-muted-foreground ml-2">Cohen's d</span>
+                            </p>
+                        </div>
+                        <div className="flex-1 space-y-2">
+                            <div className="text-sm">
+                                <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                Safe: <span className="font-mono">{stats?.meanSafeLength?.toLocaleString()}</span> chars
+                            </div>
+                            <div className="text-sm">
+                                <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                Refused: <span className="font-mono">{stats?.meanRefusedLength?.toLocaleString()}</span> chars
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -200,8 +261,10 @@ export default function SignificancePage() {
                                 <th className="text-left py-2">#</th>
                                 <th className="text-left py-2">Model A</th>
                                 <th className="text-left py-2">Model B</th>
-                                <th className="text-right py-2">Shared Prompts</th>
+                                <th className="text-right py-2">Shared</th>
                                 <th className="text-right py-2">Disagreements</th>
+                                <th className="text-right py-2" title="Difference in refusal rate (Model A - Model B)">Δ Rate</th>
+                                <th className="text-right py-2" title="95% Confidence Interval for the difference in proportions">95% CI</th>
                                 <th className="text-right py-2" title="Cohen's h effect size">Effect (h)</th>
                                 <th className="text-right py-2" title="Benjamini-Hochberg Adjusted P-Value">Adj. P-Value</th>
                                 <th className="text-right py-2">Significant?</th>
@@ -209,7 +272,7 @@ export default function SignificancePage() {
                         </thead>
                         <tbody>
                             {displayed.length === 0 ? (
-                                <tr><td colSpan={7} className="py-4 text-center text-muted-foreground">No pairwise data — need 2+ models with shared prompts.</td></tr>
+                                <tr><td colSpan={10} className="py-4 text-center text-muted-foreground">No pairwise data — need 2+ models with shared prompts.</td></tr>
                             ) : (
                                 displayed.map((row, i) => (
                                     <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50">
@@ -218,6 +281,10 @@ export default function SignificancePage() {
                                         <td className="py-1.5 text-foreground text-xs">{row.modelB}</td>
                                         <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{row.samples.toLocaleString()}</td>
                                         <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{row.disagreements.toLocaleString()}</td>
+                                        <td className="py-1.5 text-right font-mono text-foreground text-xs">{(row.diff !== undefined && row.diff > 0) ? '+' : ''}{row.diff !== undefined ? row.diff.toFixed(1) + '%' : '—'}</td>
+                                        <td className="py-1.5 text-right font-mono text-muted-foreground text-xs whitespace-nowrap">
+                                            {row.ciLower !== undefined ? `[${row.ciLower.toFixed(1)}%, ${row.ciUpper.toFixed(1)}%]` : '—'}
+                                        </td>
                                         <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{row.cohensH !== undefined ? row.cohensH.toFixed(2) : "—"}</td>
                                         <td className="py-1.5 text-right font-mono text-muted-foreground text-xs">{(row.pValueAdjusted ?? row.pValue).toExponential(2)}</td>
                                         <td className="py-1.5 text-right">
