@@ -51,11 +51,20 @@ export default function AnnotatePage() {
         setFeedback(null);
         setExpandPrompt(false);
         try {
-            const res = await fetch('/api/annotate');
+            // Get up to the last 200 annotated IDs to prevent URI Too Long errors
+            const rawIds = localStorage.getItem('annotated_ids') || '[]';
+            let annotatedIds: string[] = [];
+            try { annotatedIds = JSON.parse(rawIds); } catch {}
+            const excludeParam = annotatedIds.slice(-200).join(',');
+
+            const res = await fetch(`/api/annotate${excludeParam ? `?exclude=${encodeURIComponent(excludeParam)}` : ''}`);
             if (res.ok) {
                 const data = await res.json();
                 setItem(data.item);
                 setStartTime(Date.now());
+            } else {
+                 setFeedback({ type: 'error', message: 'No more new prompts available right now.' });
+                 setItem(null);
             }
         } catch {
             setFeedback({ type: 'error', message: 'Failed to load item. Please try again.' });
@@ -103,6 +112,15 @@ export default function AnnotatePage() {
             if (res.ok) {
                 setSessionCount(prev => prev + 1);
                 setFeedback({ type: 'success', message: `Recorded as ${verdict}` });
+                
+                // Save to local storage so we don't see it again
+                try {
+                    const rawIds = localStorage.getItem('annotated_ids') || '[]';
+                    const annotatedIds = JSON.parse(rawIds);
+                    annotatedIds.push(item.id);
+                    localStorage.setItem('annotated_ids', JSON.stringify(annotatedIds));
+                } catch (e) { console.error('Failed to save annotated_ids', e); }
+
                 // Auto-advance after brief feedback
                 setTimeout(() => fetchItem(), 600);
             } else {

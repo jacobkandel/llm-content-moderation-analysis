@@ -23,8 +23,28 @@ interface AnnotationPayload {
 
 const BLOB_PREFIX = 'annotations/';
 
+// Basic in-memory rate limiting (resets when serverless instance shuts down, but provides baseline protection)
+const rateLimitCache = new Map<string, { count: number, resetTime: number }>();
+const MAX_ANNOTATIONS_PER_HOUR = 200;
+
 export async function POST(request: NextRequest) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || 'unknown';
+        const now = Date.now();
+        
+        const userLimit = rateLimitCache.get(ip) || { count: 0, resetTime: now + 3600000 };
+        if (now > userLimit.resetTime) {
+            userLimit.count = 0;
+            userLimit.resetTime = now + 3600000;
+        }
+        
+        if (userLimit.count >= MAX_ANNOTATIONS_PER_HOUR) {
+            return NextResponse.json({ error: 'Rate limit exceeded. Try again later.' }, { status: 429 });
+        }
+        
+        userLimit.count++;
+        rateLimitCache.set(ip, userLimit);
+
         const body: AnnotationPayload = await request.json();
 
         // Validate required fields

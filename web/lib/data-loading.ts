@@ -50,23 +50,29 @@ export async function fetchAuditData(
   const res = await fetch('/audit_log.csv.gz');
   if (!res.ok) throw new Error(`Failed to load audit log: ${res.status}`);
 
-  const blob = await res.blob();
+  const buffer = await res.arrayBuffer();
+  let csvText = '';
 
-  // Decompress gzip
-  const ds = new DecompressionStream('gzip');
-  const decompressedStream = blob.stream().pipeThrough(ds);
-  const reader = decompressedStream.getReader();
+  const view = new Uint8Array(buffer);
+  // Check for gzip magic bytes (1F 8B)
+  if (view.length >= 2 && view[0] === 0x1F && view[1] === 0x8B) {
+    const ds = new DecompressionStream('gzip');
+    const decompressedStream = new Response(buffer).body!.pipeThrough(ds);
+    const reader = decompressedStream.getReader();
 
-  const chunks: Uint8Array[] = [];
-  let done = false;
-  while (!done) {
-    const result = await reader.read();
-    done = result.done;
-    if (result.value) chunks.push(result.value);
+    const chunks: Uint8Array[] = [];
+    let done = false;
+    while (!done) {
+      const result = await reader.read();
+      done = result.done;
+      if (result.value) chunks.push(result.value);
+    }
+    const decoder = new TextDecoder();
+    csvText = chunks.map(c => decoder.decode(c, { stream: true })).join('');
+  } else {
+    // Vercel (or the browser) already decompressed it transparently
+    csvText = new TextDecoder().decode(buffer);
   }
-
-  const decoder = new TextDecoder();
-  const csvText = chunks.map(c => decoder.decode(c, { stream: true })).join('');
 
   // Parse CSV with PapaParse
   const parsed = Papa.parse<Record<string, string>>(csvText, {

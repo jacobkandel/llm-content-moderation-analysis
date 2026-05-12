@@ -43,14 +43,22 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'No annotation items available' }, { status: 404 });
     }
 
-    // Get a specific item by ID or return a random one
     const requestedId = url.searchParams.get('id');
+    const excludeParam = url.searchParams.get('exclude');
+    const excludedIds = excludeParam ? excludeParam.split(',') : [];
+
+    // Filter out already annotated prompts
+    const availablePrompts = prompts.filter(p => !excludedIds.includes(p.id));
+
+    if (availablePrompts.length === 0) {
+        return NextResponse.json({ error: 'No more annotation items available' }, { status: 404 });
+    }
 
     let prompt: PromptItem;
     if (requestedId) {
-        prompt = prompts.find(p => p.id === requestedId) || prompts[Math.floor(Math.random() * prompts.length)];
+        prompt = prompts.find(p => p.id === requestedId) || availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
     } else {
-        prompt = prompts[Math.floor(Math.random() * prompts.length)];
+        prompt = availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
     }
 
     // Strip the "You are a content moderator..." framing to get just the user post
