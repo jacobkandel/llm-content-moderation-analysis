@@ -101,10 +101,10 @@ export async function POST(request: NextRequest) {
             message: 'Annotation saved',
             annotationId: `${body.annotatorId}_${body.itemId}`,
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Annotation submission error:', error);
         return NextResponse.json(
-            { error: 'Failed to save annotation' },
+            { error: 'Failed to save annotation', details: error.message || String(error) },
             { status: 500 }
         );
     }

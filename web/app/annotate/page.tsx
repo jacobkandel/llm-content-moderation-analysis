@@ -124,7 +124,12 @@ export default function AnnotatePage() {
                 // Auto-advance after brief feedback
                 setTimeout(() => fetchItem(), 600);
             } else {
-                setFeedback({ type: 'error', message: 'Failed to save. Please try again.' });
+                let errorMsg = 'Failed to save. Please try again.';
+                try {
+                    const data = await res.json();
+                    if (data.error) errorMsg = `${data.error}${data.details ? `: ${data.details}` : ''}`;
+                } catch (e) {}
+                setFeedback({ type: 'error', message: errorMsg });
             }
         } catch {
             setFeedback({ type: 'error', message: 'Network error. Please check your connection.' });
