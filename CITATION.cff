@@ -6,8 +6,6 @@ authors:
   - family-names: "Kandel"
     given-names: "Jacob"
     orcid: "https://orcid.org/0009-0008-8858-6072"
-  - family-names: "Kandel"
-    given-names: "Lydia"
 repository-code: "https://github.com/jacobkandel/llm-content-moderation-analysis"
 url: "https://moderationbias.com"
 abstract: "An open-source benchmark for auditing how 31 Large Language Models handle content moderation decisions across 16 harm categories and 2,293 prompts. Features biweekly automated audits, statistical significance testing (McNemar's, Fleiss' Kappa), and interactive analysis tools."

@@ -13,18 +13,11 @@ export default function AboutPage() {
             name: 'Moderation Bias',
             url: 'https://moderationbias.com',
             logo: 'https://moderationbias.com/og-image.jpeg',
-            founder: [
-                {
+            founder: {
                     '@type': 'Person',
                     name: 'Jacob Kandel',
                     url: 'https://github.com/jacobkandel'
-                },
-                {
-                    '@type': 'Person',
-                    name: 'Lydia Kandel',
-                    url: 'https://github.com/lydiakandel-byte'
-                }
-            ]
+            }
         }
     };
 
@@ -46,9 +39,7 @@ export default function AboutPage() {
             </header>
 
             {/* ── Team cards ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-                {/* Jacob */}
+            <div className="max-w-md">
                 <section className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
                     <div className="h-1.5 w-full bg-brand" aria-hidden />
                     <div className="p-6 flex flex-col gap-4">
@@ -80,38 +71,6 @@ export default function AboutPage() {
                         </div>
                     </div>
                 </section>
-
-                {/* Lydia */}
-                <section className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-                    <div className="h-1.5 w-full bg-brand" aria-hidden />
-                    <div className="p-6 flex flex-col gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="h-14 w-14 rounded-xl bg-muted border border-border flex items-center justify-center text-brand text-lg font-black select-none flex-shrink-0 overflow-hidden">
-                                <img src="https://github.com/lydiakandel-byte.png" alt="Lydia Kandel" className="h-full w-full object-cover" />
-                            </div>
-                            <div>
-                                <h2 className="text-base font-black text-foreground">Lydia Kandel</h2>
-                                <p className="text-xs text-muted-foreground">Collaborator &amp; Marketer</p>
-                            </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            Lydia is a marketer focused on startup ecosystems and growing technical communities.
-                            She helps bring Moderation Bias's research to the developers, researchers, and builders
-                            who need it most.
-                        </p>
-                        <div className="flex items-center gap-4 cursor-default">
-                            <a href="https://github.com/lydiakandel-byte" target="_blank" rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                                <Github className="h-4 w-4" /> GitHub
-                            </a>
-                            <a href="https://www.linkedin.com/in/lydiakandel" target="_blank" rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                                <Linkedin className="h-4 w-4" /> LinkedIn
-                            </a>
-                        </div>
-                    </div>
-                </section>
-
             </div>
 
 
@@ -266,8 +225,10 @@ export default function AboutPage() {
                 </div>
                 <ul className="text-sm text-muted-foreground leading-relaxed space-y-3 list-disc list-inside">
                     <li>
-                        <strong>IRB status:</strong> This research involves no human subjects. All data is collected via automated API calls to publicly available commercial AI systems.
-                        This study is exempt from IRB review under 45 CFR 46.104(d) category (4) (research involving publicly available data).
+                        <strong>IRB status:</strong> Automated auditing involves no human subjects (API calls to commercial AI systems only).
+                        Human annotations are collected via an anonymous, voluntary web interface — no personally identifiable information is recorded.
+                        Annotators receive a random browser-local ID and may participate or leave at any time.
+                        This study is exempt from IRB review under 45 CFR 46.104(d) categories (2) and (4).
                     </li>
                     <li>
                         <strong>Dual-use risk:</strong> The prompt dataset and refusal-rate data are published openly. We acknowledge that adversarial actors could theoretically use

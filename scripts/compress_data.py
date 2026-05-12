@@ -345,6 +345,18 @@ def generate_precomputed_json(df):
         res['pValue'] = round(res['pValue'], 8)
         res['pValueAdjusted'] = round(res['pValueAdjusted'], 8)
 
+    # Holm-Bonferroni step-down correction (sensitivity analysis)
+    # Results are already sorted by unadjusted pValue ascending
+    for i, res in enumerate(sig_results):
+        rank = i + 1
+        holm_adj = res['pValue'] * (m - rank + 1)
+        res['pValueHolm'] = round(min(holm_adj, 1.0), 8)
+    # Enforce monotonicity (step-down)
+    for i in range(1, m):
+        sig_results[i]['pValueHolm'] = max(sig_results[i]['pValueHolm'], sig_results[i-1]['pValueHolm'])
+    for res in sig_results:
+        res['significantHolm'] = res['pValueHolm'] < 0.05
+
     with open('web/public/significance_pairwise.json', 'w') as f:
         json.dump(sig_results, f, separators=(',', ':'))
     print(f"   ✅ significance_pairwise.json ({len(sig_results)} pairs, {os.path.getsize('web/public/significance_pairwise.json')} bytes)")

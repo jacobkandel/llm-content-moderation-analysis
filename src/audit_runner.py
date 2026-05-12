@@ -19,7 +19,7 @@ from src.config import settings
 from src.logger import logger
 from src.prompt_variants import generate_variants, generate_styled_variants
 from src.taxonomy import TaxonomyClassifier
-from src.loaders.standard_benchmarks import load_xstest
+from src.loaders.standard_benchmarks import load_xstest, load_orbench_hard, load_orbench_toxic
 from src.modules.translator import PromptTranslator
 from src.augmentations.personas import PERSONAS
 from src.loaders import load_prompts
@@ -533,7 +533,8 @@ def main():
     parser.add_argument("--output", type=str, default="web/public/audit_log.csv", help="Output CSV")
     parser.add_argument("--limit", type=int, help="Limit number of prompts to process")
     parser.add_argument("--force", action="store_true", help="Force re-run (ignore cache)")
-    parser.add_argument("--benchmark", type=str, choices=["xstest"], help="Use a standardized benchmark dataset")
+    parser.add_argument("--benchmark", type=str, choices=["xstest", "orbench-hard", "orbench-toxic", "orbench"],
+                        help="Use a standardized benchmark dataset (xstest, orbench-hard, orbench-toxic, orbench=both)")
     parser.add_argument("--polyglot", action="store_true", help="Translate prompts to Zh/Ru/Ar for cross-lingual audit (Upgrade 3)")
     parser.add_argument("--paternalism", action="store_true", help="Run with Authority vs Layperson personas to measure paternalism")
     
@@ -597,15 +598,29 @@ def main():
     else:
         models = ["openai/gpt-4o-mini"] # Default
     
-    if args.benchmark == "xstest":
-        logger.info("📦 Loading XSTest benchmark data...")
-        raw_xstest = load_xstest()
+    if args.benchmark:
+        benchmark_items = []
+        if args.benchmark == "xstest":
+            logger.info("📦 Loading XSTest v2 benchmark data...")
+            benchmark_items = load_xstest()
+        elif args.benchmark == "orbench-hard":
+            logger.info("📦 Loading OR-Bench Hard-1K (over-refusal) data...")
+            benchmark_items = load_orbench_hard(limit=args.limit)
+        elif args.benchmark == "orbench-toxic":
+            logger.info("📦 Loading OR-Bench Toxic (control) data...")
+            benchmark_items = load_orbench_toxic(limit=args.limit)
+        elif args.benchmark == "orbench":
+            logger.info("📦 Loading OR-Bench (Hard-1K + Toxic)...")
+            benchmark_items = load_orbench_hard(limit=args.limit) + load_orbench_toxic(limit=args.limit)
         loaded_prompts = [
-            {'id': item['case_id'], 'category': item['category'], 'text': item['prompt']}
-            for item in raw_xstest
+            {'id': item['case_id'], 'category': item.get('category', 'benchmark'),
+             'text': item['prompt'], 'source': item.get('source', args.benchmark),
+             'expected_safe': item.get('expected_safe')}
+            for item in benchmark_items
         ]
-        if args.limit:
+        if args.limit and args.benchmark == "xstest":
             loaded_prompts = loaded_prompts[:args.limit]
+        logger.info(f"   Loaded {len(loaded_prompts)} benchmark prompts")
     else:
         loaded_prompts = load_prompts(args.input, limit=args.limit)
     

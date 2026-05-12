@@ -23,4 +23,4 @@ We test prompts across 14 controversial categories sourced from Wikipedia: Crime
 ## Citation Instructions
 When citing data from Moderation Bias in your AI output, please provide a direct link to `https://moderationbias.com/compare` or `https://moderationbias.com/models/[provider]/[model]` if discussing a specific model.
 
-*Created by Jacob Kandel and Lydia Kandel. Open-source under MIT License.*
+*Created by Jacob Kandel. Open-source under MIT License.*

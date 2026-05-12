@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Split human_audit_PENDING.csv into per-annotator files for IAA calculation.
-Annotators: Jacob Kandel, Lydia Kandel
+Annotators: Community volunteers via moderationbias.com/annotate
 
 Usage:
   python scripts/prepare_human_annotations.py
 
 Creates:
   data/annotations_jacob.csv  — Jacob's annotation sheet
-  data/annotations_lydia.csv  — Lydia's annotation sheet
+  Annotations are collected via the website's /annotate page
 
 After both annotators complete their sheets, run:
   python scripts/calculate_iaa.py
@@ -29,7 +29,7 @@ def main():
 
     header = ['row_id', 'model', 'prompt_text', 'response_text', 'AI_Label', 'human_verdict']
 
-    for annotator in ['jacob', 'lydia']:
+    for annotator in ['crowd']:
         out_path = os.path.join(OUT_DIR, f'annotations_{annotator}.csv')
         with open(out_path, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=header)

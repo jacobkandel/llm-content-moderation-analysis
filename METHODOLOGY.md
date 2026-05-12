@@ -66,7 +66,7 @@ Verdicts are classified by an independent judge model (`gpt-4o-mini`) using a st
 Position-swapping is used to mitigate ordering bias in the judge's evaluation.
 
 ### 2.3 Inter-Annotator Agreement
-Human annotations are collected from two annotators (Jacob Kandel, Lydia Kandel) on a stratified sample of 166 prompts. Cohen's Kappa is computed between each human annotator and the model judge to validate automated verdict accuracy. Results are reported in the [IAA section](#appendix-inter-annotator-agreement) below.
+Human annotations are collected via a public annotation interface at [moderationbias.com/annotate](https://moderationbias.com/annotate), where community volunteers classify a stratified sample of prompt–response pairs. Krippendorff's Alpha is computed across all annotators and between human consensus and the model judge to validate automated verdict accuracy. Results are reported in the [IAA section](#appendix-inter-annotator-agreement) below.
 
 ---
 
@@ -78,7 +78,9 @@ Human annotations are collected from two annotators (Jacob Kandel, Lydia Kandel)
 
 ### 3.2 Pairwise Significance Testing
 - **McNemar's Test** (with continuity correction) is used for paired model comparisons on the same prompt set, testing whether disagreement patterns are symmetric
-- p < 0.05 threshold with Bonferroni correction for multiple comparisons
+- **Benjamini-Hochberg False Discovery Rate (FDR)** correction is applied to adjust p-values across all pairwise comparisons. With *k* models producing *k(k−1)/2* pairs (e.g., 27 models = 351 pairs), Bonferroni correction is prohibitively conservative (threshold ≈ 0.00014). BH-FDR controls the expected proportion of false discoveries rather than the family-wise error rate, providing greater statistical power while maintaining rigor
+- Significance threshold: adjusted p < 0.05
+- **Sensitivity analysis:** Holm-Bonferroni step-down correction is reported alongside BH-FDR to verify that key findings are robust to the choice of correction method
 
 ### 3.3 Multi-Model Agreement
 - **Fleiss' Kappa** measures inter-model agreement across all models on the same prompts
@@ -123,17 +125,51 @@ All JSON outputs pass automated validation (`scripts/validate_outputs.py`) befor
 
 | Metric | Value |
 |--------|-------|
-| Sample size | 166 |
-| Annotators | Jacob Kandel, Lydia Kandel |
-| Cohen's Kappa (Human–Human) | *TBD* |
-| Cohen's Kappa (Human–Judge) | *TBD* |
+| Sample size | 166+ |
+| Annotators | Community volunteers via moderationbias.com/annotate |
+| Krippendorff's Alpha (Human–Human) | *TBD* |
+| Krippendorff's Alpha (Human–Judge) | *TBD* |
 | Agreement Rate | *TBD* |
+
+---
+
+## 5. Comparison to Prior Work
+
+### 5.1 Baseline Benchmarks
+To validate our custom prompt corpus and position our findings within the existing literature, we evaluate all models against two established benchmarks:
+
+| Benchmark | Prompts | Purpose | Citation |
+|-----------|---------|---------|----------|
+| **XSTest v2** | 450 (250 safe, 200 unsafe) | Measures exaggerated safety behavior (over-refusal) | Röttger et al. (2024) |
+| **OR-Bench Hard-1K** | 1,000 (all safe) | Borderline prompts that trigger over-refusal in aligned models | Cui et al. (2024) |
+| **OR-Bench Toxic** | 600 (all unsafe) | Control set of genuinely harmful prompts | Cui et al. (2024) |
+
+### 5.2 Correlation Analysis
+For models evaluated on both our benchmark and external baselines, we compute **Pearson correlation** between refusal rates. This serves two purposes:
+- **High correlation (r > 0.8):** Our benchmark validates XSTest/OR-Bench findings at scale, with a larger prompt corpus and more models
+- **Low correlation (r < 0.4):** Our benchmark measures something distinct — the content moderation framing creates different refusal dynamics than direct prompting
+
+### 5.3 Precision-Recall Metrics
+Using ground truth labels from XSTest and OR-Bench, we report:
+- **False Positive Rate (FPR):** P(refuse | safe prompt) — measures over-refusal severity
+- **False Negative Rate (FNR):** P(allow | unsafe prompt) — measures under-refusal severity
+- These dual metrics allow ranking models on a **safety-helpfulness tradeoff** rather than a single refusal rate
+
+Run baseline comparisons with:
+```bash
+python src/audit_runner.py --model <model> --benchmark xstest
+python src/audit_runner.py --model <model> --benchmark orbench
+python scripts/analyze_baselines.py
+```
 
 ---
 
 ## References
 
 - Cohen, J. (1988). *Statistical Power Analysis for the Behavioral Sciences*. 2nd ed.
+- Cui, J., et al. (2024). OR-Bench: An Over-Refusal Benchmark for Large Language Models. *ICML 2024*.
 - Fleiss, J. L. (1971). Measuring nominal scale agreement among many raters. *Psychological Bulletin*, 76(5), 378–382.
 - Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. *Biometrics*, 33(1), 159–174.
+- Röttger, P., et al. (2024). XSTest: A Test Suite for Identifying Exaggerated Safety Behaviours in Large Language Models. *NAACL 2024*.
 - Wilson, E. B. (1927). Probable inference, the law of succession, and statistical inference. *Journal of the American Statistical Association*, 22(158), 209–212.
+- Xie, C., et al. (2024). SORRY-Bench: Systematically Evaluating Large Language Model Safety Refusal Behaviors. *ICLR 2025*.
