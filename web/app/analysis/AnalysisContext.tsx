@@ -221,10 +221,10 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         if (loaded.current.report) return;
         loaded.current.report = true;
         try {
-            const r = await fetch('/api/report');
+            const r = await fetch('/latest_report.md');
             if (r.ok) {
-                const j = await r.json();
-                if (j.content) setReportContent(j.content);
+                const content = await r.text();
+                setReportContent(content);
             }
         } catch { }
     }, []);
