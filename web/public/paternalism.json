@@ -32,14 +32,14 @@
   {
     "model":"anthropic\/claude-haiku-4.5",
     "persona":"Default",
-    "is_refusal":0.5389938014,
-    "refusal_rate":53.8993801355
+    "is_refusal":0.567658242,
+    "refusal_rate":56.7658242004
   },
   {
     "model":"cognitivecomputations\/dolphin-mistral-24b-venice-edition:free",
     "persona":"Default",
-    "is_refusal":0.007568113,
-    "refusal_rate":0.7568113017
+    "is_refusal":0.0037622272,
+    "refusal_rate":0.3762227239
   },
   {
     "model":"deepseek\/deepseek-chat",
@@ -74,26 +74,26 @@
   {
     "model":"google\/gemini-3.1-flash-lite-preview",
     "persona":"Default",
-    "is_refusal":0.6402623613,
-    "refusal_rate":64.0262361251
+    "is_refusal":0.6670428894,
+    "refusal_rate":66.7042889391
   },
   {
     "model":"google\/gemma-3-27b-it:free",
     "persona":"Default",
-    "is_refusal":0.0143794147,
-    "refusal_rate":1.4379414733
+    "is_refusal":0.0071482318,
+    "refusal_rate":0.7148231753
   },
   {
     "model":"meta-llama\/llama-3.3-70b-instruct:free",
     "persona":"Default",
-    "is_refusal":0.0156407669,
-    "refusal_rate":1.5640766902
+    "is_refusal":0.0077752696,
+    "refusal_rate":0.7775269626
   },
   {
     "model":"mistralai\/ministral-14b-2512",
     "persona":"Default",
-    "is_refusal":0.7820383451,
-    "refusal_rate":78.2038345106
+    "is_refusal":0.7981995079,
+    "refusal_rate":79.819950794
   },
   {
     "model":"mistralai\/ministral-8b",
@@ -122,14 +122,14 @@
   {
     "model":"mistralai\/mistral-small-3.1-24b-instruct:free",
     "persona":"Default",
-    "is_refusal":0.0118567104,
-    "refusal_rate":1.1856710394
+    "is_refusal":0.005894156,
+    "refusal_rate":0.5894156007
   },
   {
     "model":"nousresearch\/hermes-3-llama-3.1-405b:free",
     "persona":"Default",
-    "is_refusal":0.0259838547,
-    "refusal_rate":2.5983854692
+    "is_refusal":0.0129169802,
+    "refusal_rate":1.2916980186
   },
   {
     "model":"openai\/gpt-4o",
@@ -142,6 +142,12 @@
     "persona":"Default",
     "is_refusal":0.8383905013,
     "refusal_rate":83.8390501319
+  },
+  {
+    "model":"openai\/gpt-5.4-mini",
+    "persona":"Default",
+    "is_refusal":0.6436408978,
+    "refusal_rate":64.3640897756
   },
   {
     "model":"openai\/gpt-audio-mini",
@@ -158,8 +164,8 @@
   {
     "model":"qwen\/qwen-2.5-7b-instruct",
     "persona":"Default",
-    "is_refusal":0.8819925413,
-    "refusal_rate":88.1992541289
+    "is_refusal":0.8804793441,
+    "refusal_rate":88.0479344056
   },
   {
     "model":"qwen\/qwen-plus",
@@ -170,13 +176,13 @@
   {
     "model":"qwen\/qwen2.5-coder-7b-instruct",
     "persona":"Default",
-    "is_refusal":0.5692662534,
-    "refusal_rate":56.9266253424
+    "is_refusal":0.5082184017,
+    "refusal_rate":50.8218401663
   },
   {
     "model":"x-ai\/grok-3-mini",
     "persona":"Default",
-    "is_refusal":0.7018163471,
-    "refusal_rate":70.1816347124
+    "is_refusal":0.7446894191,
+    "refusal_rate":74.4689419108
   }
 ]

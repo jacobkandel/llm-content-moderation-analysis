@@ -170,6 +170,13 @@ jobs:
           npm ci
           npm run build
 
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Validate JSON outputs
+        run: python scripts/validate_outputs.py --dir web/public
+
       - name: Clean up Large Files
         run: |
           echo "🧹 Removing large files before Vercel deployment..."
@@ -197,15 +204,6 @@ jobs:
           find . -not -path './.git/*' -not -path './web/.next/*' -type f -exec du -sh {} + 2>/dev/null \
             | sort -rh | head -20
 
-
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-
-      - name: Validate JSON outputs
-        run: python scripts/validate_outputs.py --dir web/public
-
       - name: Commit & Push Results to main
         run: |
           git config user.name "github-actions[bot]"
@@ -226,7 +224,28 @@ jobs:
             web/public/assets/ \
             data/trends.csv || true
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
-          git push origin main
+
+          # Rebase onto latest main to avoid divergent histories when
+          # manual commits land while the audit pipeline is running.
+          MAX_PUSH_ATTEMPTS=3
+          for attempt in $(seq 1 $MAX_PUSH_ATTEMPTS); do
+            echo "📤 Push attempt $attempt of $MAX_PUSH_ATTEMPTS"
+            git pull --rebase origin main || {
+              echo "⚠️ Rebase conflict — ours-strategy for data files"
+              git checkout --theirs web/public/ data/trends.csv 2>/dev/null || true
+              git add web/public/ data/trends.csv 2>/dev/null || true
+              git rebase --continue || git rebase --abort
+            }
+            if git push origin main; then
+              echo "✅ Push succeeded"
+              break
+            fi
+            if [ "$attempt" -eq "$MAX_PUSH_ATTEMPTS" ]; then
+              echo "❌ Push failed after $MAX_PUSH_ATTEMPTS attempts"
+              exit 1
+            fi
+            sleep 5
+          done
 
       - name: Deploy to Vercel (Preview)
         id: vercel_deploy
