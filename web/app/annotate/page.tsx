@@ -111,7 +111,8 @@ export default function AnnotatePage() {
 
             if (res.ok) {
                 setSessionCount(prev => prev + 1);
-                setFeedback({ type: 'success', message: `Recorded as ${verdict}` });
+                setFeedback({ type: 'success', message: `✓ Saved as ${verdict}` });
+                fetchStats(); // refresh total count visibly
                 
                 // Save to local storage so we don't see it again
                 try {
@@ -121,8 +122,8 @@ export default function AnnotatePage() {
                     localStorage.setItem('annotated_ids', JSON.stringify(annotatedIds));
                 } catch (e) { console.error('Failed to save annotated_ids', e); }
 
-                // Auto-advance after brief feedback
-                setTimeout(() => fetchItem(), 600);
+                // Auto-advance after feedback is visible
+                setTimeout(() => fetchItem(), 1800);
             } else {
                 let errorMsg = 'Failed to save. Please try again.';
                 try {
