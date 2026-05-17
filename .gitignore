@@ -234,3 +234,5 @@ app.log*
 push_error.txt
 check_db.py
 check_progress.py
+.env
+.env.local
