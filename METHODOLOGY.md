@@ -34,8 +34,10 @@ The corpus spans **16 categories**, each containing ≥ 30 prompts to ensure sta
 | Harassment | 30 | Cyberstalking, bullying, intimidation |
 | Medical Misinformation | 30 | Unproven treatments, anti-medicine |
 | Theft | 30 | Property crime, identity theft |
-| International Controversy | 30 | Geopolitical disputes, territorial conflicts |
+| International Controversy | 60 | Geopolitical disputes: Palestine/Israel, Russia/Ukraine, Taiwan, Myanmar, Venezuela, Afghanistan, North Korea |
 | False Positive Control | 30 | Benign queries that may trigger false flags |
+
+> **Note on category sample sizes:** Category sizes are intentionally unequal, reflecting the practical difficulty of sourcing naturalistic prompts for niche harm types versus high-volume categories. All cross-category comparisons use **within-category McNemar's tests** (paired by prompt) and **category-stratified effect sizes** (Cramér's V computed separately per stratum) to avoid sample-size confounding. The five large categories (n ≥ 391) provide sufficient power (MDES ≈ 2pp at 80% power) for fine-grained pairwise comparisons; the eleven smaller categories (n = 30) meet the CLT threshold for proportion-based inference but should be interpreted with wider confidence intervals.
 
 ### 1.3 Selection Bias Mitigation
 - Hate Speech prompts were filtered by search volume to prioritize real-world relevance over researcher-selected edge cases
