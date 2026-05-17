@@ -64,8 +64,11 @@ jobs:
         env:
           OPENROUTER_API_KEY: "mock_key_for_ci"
           PYTHONPATH: .
+        # Tests are informational in the audit pipeline — don't block data collection on test failures.
+        # The CI workflow (ci.yml) is the authoritative gatekeeper for test correctness.
+        continue-on-error: true
         run: |
-          python -m pytest -W ignore::DeprecationWarning
+          python -m pytest -W ignore::DeprecationWarning --tb=short -q
 
       - name: Download Existing Data (Persist History)
         run: |
