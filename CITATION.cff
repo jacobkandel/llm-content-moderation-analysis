@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-title: "Moderation Bias: LLM Content Moderation Analysis Platform"
-message: "If you use this software or data, please cite it as below."
+title: "Moderation Bias: LLM Content Moderation Benchmark"
+message: "If you use this software, dataset, or findings, please cite it as below."
 type: software
 authors:
   - family-names: "Kandel"
@@ -8,7 +8,16 @@ authors:
     orcid: "https://orcid.org/0009-0008-8858-6072"
 repository-code: "https://github.com/jacobkandel/llm-content-moderation-analysis"
 url: "https://moderationbias.com"
-abstract: "An open-source benchmark for auditing how 31 Large Language Models handle content moderation decisions across 16 harm categories and 2,293 prompts. Features biweekly automated audits, statistical significance testing (McNemar's, Fleiss' Kappa), and interactive analysis tools."
+abstract: >
+  An open-source benchmark for auditing content moderation bias across 27 Large Language
+  Models spanning 16 harm categories and 2,012 evaluated prompts (2,293 in corpus).
+  Biweekly automated audits track policy drift over time. Statistical methods include
+  McNemar's test with Bonferroni correction, Fleiss' Kappa (inter-model agreement),
+  Cramér's V (categorical effect size), Cohen's d (verbosity analysis), Wilson Score
+  confidence intervals, and minimum detectable effect size (MDES) power analysis.
+  Key finding: model identity (Cramér's V = 0.59) is a substantially stronger predictor
+  of refusal behavior than prompt topic (V = 0.21), suggesting provider policy
+  idiosyncrasies rather than rational content-based moderation.
 keywords:
   - "llm"
   - "content-moderation"
@@ -17,6 +26,8 @@ keywords:
   - "benchmark"
   - "red-teaming"
   - "censorship"
+  - "inter-annotator-agreement"
+  - "statistical-nlp"
 license: "MIT"
-version: "2.0.0"
-date-released: 2026-04-27
+version: "2.1.0"
+date-released: 2026-05-17
