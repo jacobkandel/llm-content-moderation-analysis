@@ -167,17 +167,19 @@ def generate_precomputed_json(df):
         distribution[bucket] += 1
 
     # Calculate Minimum Detectable Effect Size for 80% power at alpha=0.05
-    # Assumes average discordant proportion of 0.1 for typical model pair
+    # Uses McNemar's test formula: MDES = sqrt((z_alpha + z_beta)^2 * p_disc / N)
+    # p_disc = assumed discordant proportion between model pairs (~10% baseline)
     avg_discordant_p = 0.1
-    z_alpha = 1.95996
-    z_beta = 0.84162 # 80% power
+    z_alpha = 1.95996  # two-tailed alpha=0.05
+    z_beta = 0.84162   # 80% power
     total_prompts_n = int(df['_pid'].nunique())
-    mdes = math.sqrt(((z_alpha + z_beta)**2 * avg_discordant_p) / total_prompts_n) if total_prompts_n > 0 else 0
-    power_mdes = round(mdes * 100, 2)
-    
-    # Required N for a 5% MDES
+    mdes_proportion = math.sqrt(((z_alpha + z_beta)**2 * avg_discordant_p) / total_prompts_n) if total_prompts_n > 0 else 0
+    # Convert to percentage points for interpretability (e.g. 0.0198 → 1.98 pp)
+    power_mdes = round(mdes_proportion * 100, 2)
+
+    # Required N for a 5 percentage-point MDES (0.05 as proportion)
     required_n_5pct = int(math.ceil(((z_alpha + z_beta)**2 * avg_discordant_p) / (0.05**2)))
-    
+
     # Cramér's V for Model vs. Verdict and Category vs. Verdict
     import pandas as pd
     try:

@@ -37,12 +37,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
         // Analysis Deep Dives
         ...[
-            'consensus', 'political', 'drift', 'paternalism', 'significance', 'summary', 'overview', 'triggers', 'clusters', 'alignment', 'reliability'
+            'consensus', 'political', 'drift', 'paternalism', 'significance',
+            'summary', 'overview', 'triggers', 'clusters', 'alignment', 'reliability', 'family'
         ].map(slug => ({
             url: `${BASE_URL}/analysis/${slug}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.7,
+        })),
+        // Top-level pages
+        ...[
+            '/leaderboard', '/data', '/annotate',
+        ].map(path => ({
+            url: `${BASE_URL}${path}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
         })),
         // Categories
         ...[
