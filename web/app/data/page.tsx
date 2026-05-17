@@ -60,6 +60,14 @@ const endpoints = [
         path: '/drift_report.json',
         description: 'Model drift scores: how much each model\'s behaviour has changed over time.',
     },
+    {
+        path: '/family_stats.json',
+        description: 'Provider family groupings: avg/min/max refusal rate and per-model version progression.',
+    },
+    {
+        path: '/soft_censorship_stats.json',
+        description: 'Per-model breakdown of Hard Refusal vs Soft Censorship vs Allowed verdicts.',
+    },
 ];
 
 export default function DataPage() {
@@ -94,7 +102,7 @@ export default function DataPage() {
                     Download audit_log.csv.gz
                 </a>
                 <p className="text-xs text-muted-foreground/60">
-                    Gzip-compressed CSV · ~19 MB · Updated every Sunday
+                    Gzip-compressed CSV · ~19 MB · Updated on the 1st and 15th of each month
                 </p>
                 <div className="bg-muted/40 border border-border rounded-lg p-4">
                     <p className="text-xs font-mono text-muted-foreground">
@@ -155,6 +163,36 @@ df = ds["train"].to_pandas()`}</pre>
                             <span className="text-xs text-muted-foreground">{description}</span>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* ── REST API ── */}
+            <section className="space-y-4">
+                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <FileJson className="h-5 w-5 text-brand" />
+                    REST API
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                    Two live API endpoints are available for programmatic access. Both are rate-limited and do not require authentication.
+                </p>
+                <div className="space-y-4">
+                    <div className="bg-muted/40 border border-border rounded-xl p-5 space-y-3">
+                        <div className="flex items-center gap-2">
+                            <code className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded font-bold">GET</code>
+                            <code className="text-sm font-mono text-foreground">/api/v1/audit</code>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Returns the latest audit snapshot as JSON, fetched from Vercel Blob. Cached for 1 hour.</p>
+                        <pre className="text-xs bg-background border border-border rounded-lg p-3 overflow-x-auto font-mono text-muted-foreground">{`curl https://moderationbias.com/api/v1/audit`}</pre>
+                    </div>
+                    <div className="bg-muted/40 border border-border rounded-xl p-5 space-y-3">
+                        <div className="flex items-center gap-2">
+                            <code className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded font-bold">GET</code>
+                            <code className="text-sm font-mono text-foreground">/api/annotate/submit</code>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Returns aggregate annotation statistics: total annotations, unique annotators, and verdict counts from the crowdsourced annotation campaign.</p>
+                        <pre className="text-xs bg-background border border-border rounded-lg p-3 overflow-x-auto font-mono text-muted-foreground">{`curl https://moderationbias.com/api/annotate/submit
+# Response: { "totalAnnotations": 29, "uniqueAnnotators": 5, "verdictCounts": { "ALLOWED": 23, "REMOVED": 6 } }`}</pre>
+                    </div>
                 </div>
             </section>
 

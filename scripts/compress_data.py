@@ -244,6 +244,103 @@ def generate_precomputed_json(df):
         json.dump(summary, f, separators=(',', ':'))
     print(f"   ✅ summary_stats.json ({os.path.getsize('web/public/summary_stats.json')} bytes)")
 
+    # --- 3.5. family_stats.json ---
+    # Group models into provider families, compute per-family refusal stats and intra-family progressions
+    FAMILY_MAP = {
+        'anthropic': 'Anthropic Claude',
+        'openai': 'OpenAI GPT',
+        'google': 'Google',
+        'meta-llama': 'Meta Llama',
+        'mistralai': 'Mistral AI',
+        'deepseek': 'DeepSeek',
+        'qwen': 'Qwen / Alibaba',
+        'x-ai': 'xAI Grok',
+        'nousresearch': 'Meta Llama',  # Hermes is Llama-based
+        'cognitivecomputations': 'Other',
+        'microsoft': 'Microsoft',
+        'cohere': 'Cohere',
+    }
+
+    def get_family(model_name: str) -> str:
+        provider = model_name.split('/')[0].lower() if '/' in model_name else model_name.lower()
+        for prefix, family in FAMILY_MAP.items():
+            if prefix in provider:
+                return family
+        return 'Other'
+
+    # Per-model refusal rates already computed in spectrum
+    family_models = defaultdict(list)
+    for m in spectrum:
+        fam = get_family(m['fullName'])
+        family_models[fam].append(m)
+
+    family_stats = []
+    for fam, models_in_fam in sorted(family_models.items()):
+        rates = [m['refusalRate'] for m in models_in_fam]
+        avg = round(sum(rates) / len(rates), 2) if rates else 0
+        # Sort models within family by version/name for progression chart
+        sorted_models = sorted(models_in_fam, key=lambda m: m['name'])
+        family_stats.append({
+            'family': fam,
+            'modelCount': len(models_in_fam),
+            'avgRefusalRate': avg,
+            'minRefusalRate': round(min(rates), 2),
+            'maxRefusalRate': round(max(rates), 2),
+            'spread': round(max(rates) - min(rates), 2),
+            'models': [
+                {
+                    'name': m['name'],
+                    'fullName': m['fullName'],
+                    'refusalRate': m['refusalRate'],
+                    'refusalRateCILower': m.get('refusalRateCILower'),
+                    'refusalRateCIUpper': m.get('refusalRateCIUpper'),
+                    'total': m['total'],
+                }
+                for m in sorted_models
+            ],
+        })
+    family_stats.sort(key=lambda x: x['avgRefusalRate'], reverse=True)
+
+    with open('web/public/family_stats.json', 'w') as f:
+        json.dump(family_stats, f, separators=(',', ':'))
+    print(f"   ✅ family_stats.json ({len(family_stats)} families, {os.path.getsize('web/public/family_stats.json')} bytes)")
+
+    # --- 3.6. soft_censorship_stats.json ---
+    # Per-model breakdown: Hard Refusal, Soft Censorship, Allowed
+    HARD_REFUSAL_VERDICTS = {'REFUSAL', 'REMOVED', 'unsafe', 'Hard Refusal'}
+    SOFT_CENSORSHIP_VERDICTS = {'Soft Censorship'}
+    ALLOWED_VERDICTS = {'ALLOWED', 'safe', 'safe_response'}
+
+    soft_censor_stats = []
+    for model in sorted(keep_models):
+        rows = df[df['model'] == model]
+        total = len(rows)
+        if total == 0:
+            continue
+        hard = int(rows['verdict'].isin(HARD_REFUSAL_VERDICTS).sum())
+        soft = int(rows['verdict'].isin(SOFT_CENSORSHIP_VERDICTS).sum())
+        allowed = int(rows['verdict'].isin(ALLOWED_VERDICTS).sum())
+        other = total - hard - soft - allowed
+        soft_censor_stats.append({
+            'model': model,
+            'name': model.split('/')[-1] if '/' in model else model,
+            'family': get_family(model),
+            'total': total,
+            'hardRefusal': hard,
+            'softCensorship': soft,
+            'allowed': allowed,
+            'other': other,
+            'hardRefusalRate': round(hard / total * 100, 2),
+            'softCensorshipRate': round(soft / total * 100, 2),
+            'allowedRate': round(allowed / total * 100, 2),
+            'totalRefusalRate': round((hard + soft) / total * 100, 2),
+        })
+    soft_censor_stats.sort(key=lambda x: x['totalRefusalRate'], reverse=True)
+
+    with open('web/public/soft_censorship_stats.json', 'w') as f:
+        json.dump(soft_censor_stats, f, separators=(',', ':'))
+    print(f"   ✅ soft_censorship_stats.json ({len(soft_censor_stats)} models, {os.path.getsize('web/public/soft_censorship_stats.json')} bytes)")
+
     # --- 4. consensus_stats.json ---
     # Group by prompt → collect each model's verdict
     prompt_verdicts = defaultdict(dict)  # pid -> {model: is_unsafe}

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard, FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles, ClipboardCheck
+    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles, ClipboardCheck, Layers
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -26,6 +26,7 @@ const navItems = [
             { title: 'Longitudinal Analysis', href: '/analysis/longitudinal', icon: TrendingUp },
             { title: 'Model Stability', href: '/analysis/drift', icon: TrendingUp },
             { title: 'Significance', href: '/analysis/significance', icon: Scale },
+            { title: 'Family Analysis', href: '/analysis/family', icon: Layers },
             { title: 'Political Compass', href: '/analysis/political', icon: Compass },
             { title: 'Paternalism', href: '/analysis/paternalism', icon: Shield },
             { title: 'Alignment Tax', href: '/analysis/alignment', icon: DollarSign },

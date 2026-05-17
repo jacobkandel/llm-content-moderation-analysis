@@ -3,7 +3,7 @@
 ![CI](https://github.com/jacobkandel/llm-content-moderation-analysis/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-Open-source benchmark tracking censorship and content moderation bias across 31 LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
+Open-source benchmark tracking censorship and content moderation bias across 27+ LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
 
 **Live site**: [moderationbias.com](https://moderationbias.com)
 
@@ -18,7 +18,7 @@ Open-source benchmark tracking censorship and content moderation bias across 31 
 
 ## Methodology
 
-2,293 prompts across 16 categories (Hate Speech, Health Misinformation, Misinformation, Incitement to Violence, Explicit/Sexual, Violence, Crime, Cybersecurity, Harassment, Self-Harm, Deception, Theft, Dangerous, Medical Misinformation, International Controversy, and False Positive Controls), grounded in Wikipedia's *List of Controversial Issues* and filtered by search volume to minimize selection bias. Every model receives an identical system prompt at `temperature=0` for reproducibility. Verdicts (ALLOWED / REMOVED) are scored by an independent judge model. Exact model version strings are logged per run for drift attribution. Minimum n ≥ 30 per model×category cell for statistical significance. See [METHODOLOGY.md](METHODOLOGY.md) and [LIMITATIONS.md](LIMITATIONS.md) for full details.
+2,012 evaluated prompts (2,293 in corpus) across 16 categories (Hate Speech, Health Misinformation, Misinformation, Incitement to Violence, Explicit/Sexual, Violence, Crime, Cybersecurity, Harassment, Self-Harm, Deception, Theft, Dangerous, Medical Misinformation, International Controversy, and False Positive Controls), grounded in Wikipedia's *List of Controversial Issues* and filtered by search volume to minimize selection bias. Every model receives an identical system prompt at `temperature=0` for reproducibility. Verdicts (ALLOWED / REMOVED) are scored by an independent judge model (`gpt-4o-mini`) with position-swapping to mitigate ordering bias. Exact model version strings are logged per run for drift attribution. Minimum n ≥ 30 per model×category cell for statistical validity (models with <50 total evaluations are excluded from analysis). See [METHODOLOGY.md](METHODOLOGY.md) and [LIMITATIONS.md](LIMITATIONS.md) for full details.
 
 ---
 

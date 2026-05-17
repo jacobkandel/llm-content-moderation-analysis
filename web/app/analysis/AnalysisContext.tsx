@@ -397,6 +397,15 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 prompts: Array.from({ length: precomputedSummary.totalCases || 0 }, (_, i) => String(i)),
                 distribution: precomputedSummary.distribution || [],
                 statisticalPowerMDES: precomputedSummary.statisticalPowerMDES || 0,
+                // New effect size & sample fields
+                totalCases: precomputedSummary.totalCases || 0,
+                requiredNSample: precomputedSummary.requiredNSample || 0,
+                cramersVModel: precomputedSummary.cramersVModel ?? null,
+                cramersVCategory: precomputedSummary.cramersVCategory ?? null,
+                cohensDVerbosity: precomputedSummary.cohensDVerbosity ?? null,
+                meanSafeLength: precomputedSummary.meanSafeLength ?? null,
+                meanRefusedLength: precomputedSummary.meanRefusedLength ?? null,
+                lastUpdated: precomputedSummary.lastUpdated || null,
             };
         }
         if (filteredAuditData.length === 0) return null;

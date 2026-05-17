@@ -10,6 +10,7 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import ShareButton from '@/components/ShareButton';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { RelatedPages } from '@/components/ui/RelatedPages';
+import DataFreshnessBanner from '@/components/DataFreshnessBanner';
 
 
 export default function SummaryPage() {
@@ -109,8 +110,7 @@ export default function SummaryPage() {
 
     return (
         <div>
-            {/* Share button */}
-            {/* Overview Section */}
+            <DataFreshnessBanner lastUpdated={stats?.lastUpdated ?? null} />
             {/* Overview Section */}
             <div className="mb-8">
                 <KeyMetrics
