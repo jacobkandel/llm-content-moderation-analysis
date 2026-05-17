@@ -2,6 +2,7 @@
 
 ![CI](https://github.com/jacobkandel/llm-content-moderation-analysis/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20262255.svg)](https://doi.org/10.5281/zenodo.20262255)
 
 Open-source benchmark tracking censorship and content moderation bias across 27+ LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
 
