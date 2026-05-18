@@ -228,27 +228,38 @@ jobs:
             data/trends.csv || true
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
 
-          # Rebase onto latest main to avoid divergent histories when
-          # manual commits land while the audit pipeline is running.
-          MAX_PUSH_ATTEMPTS=3
-          for attempt in $(seq 1 $MAX_PUSH_ATTEMPTS); do
-            echo "📤 Push attempt $attempt of $MAX_PUSH_ATTEMPTS"
+          # Retry push with rebase — handles commits landing during the audit run.
+          # Uses exponential backoff. Never hard-fails: data is preserved via artifact upload below.
+          PUSH_SUCCESS=false
+          for attempt in 1 2 3 4 5; do
+            echo "📤 Push attempt $attempt of 5"
             git pull --rebase origin main || {
-              echo "⚠️ Rebase conflict — ours-strategy for data files"
+              echo "⚠️ Rebase conflict — taking ours for data files"
               git checkout --theirs web/public/ data/trends.csv 2>/dev/null || true
               git add web/public/ data/trends.csv 2>/dev/null || true
               git rebase --continue || git rebase --abort
             }
             if git push origin main; then
-              echo "✅ Push succeeded"
+              echo "✅ Push succeeded on attempt $attempt"
+              PUSH_SUCCESS=true
               break
             fi
-            if [ "$attempt" -eq "$MAX_PUSH_ATTEMPTS" ]; then
-              echo "❌ Push failed after $MAX_PUSH_ATTEMPTS attempts"
-              exit 1
-            fi
-            sleep 5
+            WAIT=$((attempt * 10))
+            echo "⏳ Retrying in ${WAIT}s..."
+            sleep $WAIT
           done
+
+          if [ "$PUSH_SUCCESS" = "false" ]; then
+            echo "⚠️ Push failed after 5 attempts — data preserved in artifact below. Re-run the workflow to retry."
+          fi
+
+      - name: Upload Audit Data Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-data-backup
+          path: |
+            web/public/*.json
+            data/trends.csv
 
       - name: Deploy to Vercel (Preview)
         id: vercel_deploy
