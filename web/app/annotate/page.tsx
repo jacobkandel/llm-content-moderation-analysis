@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { CheckCircle, XCircle, SkipForward, ClipboardCheck, ArrowRight, Loader2, Shield, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle, XCircle, SkipForward, ClipboardCheck, ArrowRight, Loader2, Shield } from 'lucide-react';
 import Link from 'next/link';
 
 interface AnnotationItem {
@@ -39,14 +39,12 @@ export default function AnnotatePage() {
     const [stats, setStats] = useState<AnnotationStats | null>(null);
     const [sessionCount, setSessionCount] = useState(0);
     const [confidence, setConfidence] = useState<'high' | 'medium' | 'low'>('high');
-    const [showResponse, setShowResponse] = useState(false);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [startTime, setStartTime] = useState(Date.now());
     const [expandPrompt, setExpandPrompt] = useState(false);
 
     const fetchItem = useCallback(async () => {
         setLoading(true);
-        setShowResponse(false);
         setConfidence('high');
         setFeedback(null);
         setExpandPrompt(false);
@@ -233,38 +231,6 @@ export default function AnnotatePage() {
                                     </button>
                                 )}
                             </div>
-                        </div>
-
-                        {/* AI Response (collapsed by default for unbiased annotation) */}
-                        <div className="px-6 py-4 border-b border-border bg-muted/20">
-                            <button
-                                onClick={() => setShowResponse(!showResponse)}
-                                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
-                            >
-                                <Eye className="h-3.5 w-3.5" />
-                                <span className="font-bold uppercase tracking-widest">AI's Response</span>
-                                <span className="text-[10px] ml-1">(optional — decide first, then check)</span>
-                                {showResponse ? <ChevronUp className="h-3 w-3 ml-auto" /> : <ChevronDown className="h-3 w-3 ml-auto" />}
-                            </button>
-                            {showResponse && (
-                                <div className="mt-3 bg-background border border-border rounded-lg p-4">
-                                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                                        {item.responseText}
-                                    </p>
-                                    {item.aiLabel && (
-                                        <div className="mt-3 flex items-center gap-2">
-                                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">AI Verdict:</span>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                                                item.aiLabel === 'ALLOWED'
-                                                    ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
-                                                    : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                                            }`}>
-                                                {item.aiLabel}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
                         </div>
 
                         {/* Confidence selector */}
