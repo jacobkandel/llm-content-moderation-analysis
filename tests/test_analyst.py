@@ -33,10 +33,10 @@ def test_generate_report_success(mock_openai_class, db_session):
     with patch("src.analysis.analyst.get_session", return_value=db_session):
         generate_weekly_report(output_dir="/tmp", report_file="test_report.md")
     
-    # 4. Verify
+    # 4. Verify — analyst prepends a metadata comment; check content is present
     with open("/tmp/test_report.md", "r") as f:
          content = f.read()
-         assert content == "Mocked Report Content"
+         assert "Mocked Report Content" in content
     
     # Verify OpenAI was called
     mock_client.chat.completions.create.assert_called_once()
