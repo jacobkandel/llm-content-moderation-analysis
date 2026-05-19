@@ -111,8 +111,12 @@ export default function AnnotatePage() {
 
             if (res.ok) {
                 setSessionCount(prev => prev + 1);
+                // Optimistically increment the displayed total so the counter updates
+                // immediately — fetchStats() takes ~2s (reads all Blob files) which is
+                // longer than the 1.8s auto-advance, so users would never see the update.
+                setStats(prev => prev ? { ...prev, totalAnnotations: prev.totalAnnotations + 1 } : prev);
                 setFeedback({ type: 'success', message: `✓ Saved as ${verdict}` });
-                fetchStats(); // refresh total count visibly
+                fetchStats(); // background sync to reconcile true count
                 
                 // Save to local storage so we don't see it again
                 try {
