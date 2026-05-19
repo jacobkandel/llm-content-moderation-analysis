@@ -2,7 +2,7 @@
 import os
 import unittest
 from unittest.mock import patch, MagicMock
-from src.loaders.standard_benchmarks import download_xstest, load_xstest, CACHE_FILE
+from src.loaders.standard_benchmarks import download_xstest, load_xstest, XSTEST_CACHE
 
 class TestStandardBenchmarks(unittest.TestCase):
     
@@ -15,12 +15,12 @@ class TestStandardBenchmarks(unittest.TestCase):
         mock_get.return_value = mock_response
         
         # Ensure cache file is removed before test
-        if os.path.exists(CACHE_FILE):
-            os.remove(CACHE_FILE)
+        if os.path.exists(XSTEST_CACHE):
+            os.remove(XSTEST_CACHE)
             
         path = download_xstest()
         self.assertTrue(os.path.exists(path))
-        self.assertEqual(path, CACHE_FILE)
+        self.assertEqual(path, XSTEST_CACHE)
         
         # Test loading
         prompts = load_xstest()
