@@ -233,12 +233,17 @@ jobs:
           PUSH_SUCCESS=false
           for attempt in 1 2 3 4 5; do
             echo "📤 Push attempt $attempt of 5"
+            # Stash any dirty working tree (e.g. deletions from the clean-up step)
+            # so that git pull --rebase can run without complaining about unstaged changes.
+            git stash --include-untracked --quiet 2>/dev/null || true
             git pull --rebase origin main || {
               echo "⚠️ Rebase conflict — taking ours for data files"
               git checkout --theirs web/public/ data/trends.csv 2>/dev/null || true
               git add web/public/ data/trends.csv 2>/dev/null || true
               git rebase --continue || git rebase --abort
             }
+            # Restore any stashed changes (ignored if stash was empty)
+            git stash pop --quiet 2>/dev/null || true
             if git push origin main; then
               echo "✅ Push succeeded on attempt $attempt"
               PUSH_SUCCESS=true
