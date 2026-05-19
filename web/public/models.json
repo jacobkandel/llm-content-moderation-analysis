@@ -6,7 +6,7 @@
     "display_name": "GPT-4o",
     "provider": "OpenAI",
     "region": "US",
-    "tier": "Manual",
+    "tier": "High",
     "cost_per_m_in": 5.0,
     "cost_per_m_out": 15.0
   },
@@ -28,7 +28,7 @@
     "display_name": "Claude 3.5 Sonnet",
     "provider": "Anthropic",
     "region": "US",
-    "tier": "Manual",
+    "tier": "High",
     "cost_per_m_in": 3.0,
     "cost_per_m_out": 15.0
   },
@@ -88,15 +88,15 @@
     "cost_per_m_out": 0.05
   },
   {
-    "id": "01-ai/yi-34b-chat",
-    "strict_id": "01-ai/yi-34b-chat",
-    "name": "Yi 34B",
-    "display_name": "Yi 34B",
+    "id": "01-ai/yi-lightning",
+    "strict_id": "01-ai/yi-lightning",
+    "name": "Yi Lightning",
+    "display_name": "Yi Lightning",
     "provider": "01.AI",
     "region": "China",
     "tier": "Mid",
-    "cost_per_m_in": 0.2,
-    "cost_per_m_out": 0.2
+    "cost_per_m_in": 0.14,
+    "cost_per_m_out": 0.14
   },
   {
     "id": "mistralai/mistral-large",
@@ -105,20 +105,20 @@
     "display_name": "Mistral Large",
     "provider": "Mistral AI",
     "region": "Europe",
-    "tier": "Manual",
+    "tier": "High",
     "cost_per_m_in": 2.0,
     "cost_per_m_out": 6.0
   },
   {
-    "id": "mistralai/mistral-medium",
-    "strict_id": "mistralai/mistral-medium",
-    "name": "Mistral Medium",
-    "display_name": "Mistral Medium",
+    "id": "mistralai/mistral-small-3.1-24b-instruct",
+    "strict_id": "mistralai/mistral-small-3.1-24b-instruct",
+    "name": "Mistral Small 3.1",
+    "display_name": "Mistral Small 3.1",
     "provider": "Mistral AI",
     "region": "Europe",
-    "tier": "Manual",
-    "cost_per_m_in": 0.6,
-    "cost_per_m_out": 1.8
+    "tier": "Mid",
+    "cost_per_m_in": 0.1,
+    "cost_per_m_out": 0.3
   },
   {
     "id": "google/gemini-2.5-pro",
@@ -127,7 +127,7 @@
     "display_name": "Gemini 2.5 Pro",
     "provider": "Google",
     "region": "US",
-    "tier": "Manual",
+    "tier": "High",
     "cost_per_m_in": 2.5,
     "cost_per_m_out": 7.5
   },
@@ -149,7 +149,7 @@
     "display_name": "Claude 3.5 Haiku",
     "provider": "Anthropic",
     "region": "US",
-    "tier": "Manual",
+    "tier": "Mid",
     "cost_per_m_in": 0.8,
     "cost_per_m_out": 4.0
   },
@@ -193,7 +193,7 @@
     "display_name": "Grok 3",
     "provider": "xAI",
     "region": "US",
-    "tier": "Manual",
+    "tier": "High",
     "cost_per_m_in": 3.0,
     "cost_per_m_out": 15.0
   },
@@ -207,6 +207,28 @@
     "tier": "Low",
     "cost_per_m_in": 0.3,
     "cost_per_m_out": 0.5
+  },
+  {
+    "id": "openai/o3-mini",
+    "strict_id": "openai/o3-mini",
+    "name": "o3 Mini",
+    "display_name": "o3 Mini",
+    "provider": "OpenAI",
+    "region": "US",
+    "tier": "High",
+    "cost_per_m_in": 1.1,
+    "cost_per_m_out": 4.4
+  },
+  {
+    "id": "deepseek/deepseek-r1:free",
+    "strict_id": "deepseek/deepseek-r1:free",
+    "name": "DeepSeek R1",
+    "display_name": "DeepSeek R1",
+    "provider": "DeepSeek",
+    "region": "China",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
   },
   {
     "id": "meta-llama/llama-3.3-70b-instruct:free",
@@ -259,6 +281,61 @@
     "display_name": "Dolphin Mistral 24B",
     "provider": "CognitiveComputations",
     "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
+  },
+  {
+    "id": "meta-llama/llama-4-scout:free",
+    "strict_id": "meta-llama/llama-4-scout:free",
+    "name": "Llama 4 Scout",
+    "display_name": "Llama 4 Scout",
+    "provider": "Meta",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
+  },
+  {
+    "id": "meta-llama/llama-4-maverick:free",
+    "strict_id": "meta-llama/llama-4-maverick:free",
+    "name": "Llama 4 Maverick",
+    "display_name": "Llama 4 Maverick",
+    "provider": "Meta",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.0,
+    "cost_per_m_out": 0.0
+  },
+  {
+    "id": "google/gemini-3.1-flash",
+    "strict_id": "google/gemini-3.1-flash",
+    "name": "Gemini 3.1 Flash",
+    "display_name": "Gemini 3.1 Flash",
+    "provider": "Google",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.075,
+    "cost_per_m_out": 0.3
+  },
+  {
+    "id": "openai/gpt-4.1-mini",
+    "strict_id": "openai/gpt-4.1-mini",
+    "name": "GPT-4.1 Mini",
+    "display_name": "GPT-4.1 Mini",
+    "provider": "OpenAI",
+    "region": "US",
+    "tier": "Low",
+    "cost_per_m_in": 0.15,
+    "cost_per_m_out": 0.6
+  },
+  {
+    "id": "qwen/qwen3-30b-a3b:free",
+    "strict_id": "qwen/qwen3-30b-a3b:free",
+    "name": "Qwen 3 30B",
+    "display_name": "Qwen 3 30B",
+    "provider": "Alibaba",
+    "region": "China",
     "tier": "Low",
     "cost_per_m_in": 0.0,
     "cost_per_m_out": 0.0
