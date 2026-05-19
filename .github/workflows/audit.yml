@@ -31,18 +31,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run-analysis:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Job 1: Expensive model collection → Blob upload.
+  # No git write needed. If this fails, data is safe; sync-results is not run.
+  # Skipped entirely when skip_collection=true.
+  # ───────────────────────────────────────────────────────────────────────────
+  run-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 360 
+    timeout-minutes: 360
+    if: ${{ inputs.skip_collection != true }}
     permissions:
-      contents: write 
-      pull-requests: write
+      contents: read   # read-only — no git commits in this job
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -64,42 +70,30 @@ jobs:
         env:
           OPENROUTER_API_KEY: "mock_key_for_ci"
           PYTHONPATH: .
-        # Tests are informational in the audit pipeline — don't block data collection on test failures.
-        # The CI workflow (ci.yml) is the authoritative gatekeeper for test correctness.
         continue-on-error: true
-        run: |
-          python -m pytest -W ignore::DeprecationWarning --tb=short -q
+        run: python -m pytest -W ignore::DeprecationWarning --tb=short -q
 
       - name: Download Existing Data (Persist History)
         run: |
           mkdir -p web/public
           echo "📥 Downloading existing audit log from Vercel Blob..."
-          # Download the compressed log
           if curl -f -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz; then
             echo "✅ Download successful."
-            # Decompress it so the runner can append to it
-            echo "📦 Decompressing..."
             gzip -df web/public/audit_log.csv.gz
             echo "✅ Decompressed to web/public/audit_log.csv"
           else
-            echo "⚠️ Failed to download existing data (or file doesn't exist yet). Starting fresh."
+            echo "⚠️ No existing data found. Starting fresh."
           fi
 
       - name: Run Model Collection
-        if: ${{ inputs.skip_collection != 'true' }}
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PYTHONPATH: .
         run: |
-          # Determine Tier
           TIER="${{ inputs.tier }}"
-          if [ -z "$TIER" ]; then
-            TIER="efficiency" # Default for schedule
-          fi
-          
+          if [ -z "$TIER" ]; then TIER="efficiency"; fi
           echo "🚀 Running Audit Tier: $TIER"
-          
-          # Map Tier to Args
+
           if [ "$TIER" == "efficiency" ]; then
             ARGS="--preset low --resolve-latest --consistency 1"
           elif [ "$TIER" == "low" ]; then
@@ -109,39 +103,106 @@ jobs:
           elif [ "$TIER" == "high" ]; then
             ARGS="--preset high"
           else
-            echo "❌ Unknown tier: $TIER"
-            exit 1
+            echo "❌ Unknown tier: $TIER"; exit 1
           fi
-          
-          # Retry Logic
-          MAX_ATTEMPTS=3
-          ATTEMPT=1
-          DELAY=30
-          
+
+          MAX_ATTEMPTS=3; ATTEMPT=1; DELAY=30
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
             echo "=== Attempt $ATTEMPT of $MAX_ATTEMPTS ==="
-            
             if python src/audit_runner.py $ARGS; then
-              echo "✅ Model collection completed successfully"
-              exit 0
-            else
-              echo "❌ Attempt $ATTEMPT failed"
-              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
-                sleep $DELAY
-                DELAY=$((DELAY * 2))
-              fi
+              echo "✅ Model collection completed"; exit 0
             fi
+            echo "❌ Attempt $ATTEMPT failed"
+            [ $ATTEMPT -lt $MAX_ATTEMPTS ] && sleep $DELAY && DELAY=$((DELAY * 2))
             ATTEMPT=$((ATTEMPT + 1))
           done
           exit 1
-          
-      - name: Download Latest Data (If Skipping Collection)
-        if: ${{ inputs.skip_collection == 'true' }}
+
+      - name: Run XSTest Over-Refusal Benchmark
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PYTHONPATH: .
+        run: |
+          echo "📐 Running XSTest over-refusal benchmark (100 safe prompts)..."
+          python src/audit_runner.py \
+            --benchmark xstest \
+            --limit 100 \
+            --preset low \
+            --resolve-latest \
+            --consistency 1 \
+            --output web/public/xstest_results.csv \
+          || echo "⚠️ XSTest benchmark failed (non-critical, skipping)"
+
+      - name: Upload Data to Vercel Blob
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          cd web
+          npm install @vercel/blob
+          node scripts/upload-blob.js
+          cd ..
+
+      - name: Upload Benchmark Results Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: web/public/xstest_results.csv
+          if-no-files-found: ignore
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Job 2: Report generation + git commit + deploy.
+  # Always starts from a FRESH checkout → clean working tree → push never fails.
+  # Runs on success OR when run-audit was skipped (skip_collection=true).
+  # ───────────────────────────────────────────────────────────────────────────
+  sync-results:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: run-audit
+    if: always() && (needs.run-audit.result == 'success' || needs.run-audit.result == 'skipped')
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download Audit Data from Blob
         run: |
           mkdir -p web/public
           echo "📥 Downloading latest audit log from Vercel Blob..."
-          curl -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz
-          echo "✅ Download complete."
+          if curl -f -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz; then
+            gzip -df web/public/audit_log.csv.gz
+            echo "✅ audit_log.csv ready ($(wc -l < web/public/audit_log.csv) rows)"
+          else
+            echo "❌ Could not download audit log from Blob — nothing to sync."
+            exit 1
+          fi
+
+      - name: Download Benchmark Results Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-results
+          path: web/public/
+        continue-on-error: true  # xstest_results.csv is optional
 
       - name: Compress Data
         run: python scripts/compress_data.py
@@ -155,15 +216,6 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PYTHONPATH: .
         run: bash scripts/generate_all_reports.sh
-
-      - name: Upload Data to Vercel Blob
-        env:
-          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
-        run: |
-          cd web
-          npm install @vercel/blob
-          node scripts/upload-blob.js
-          cd ..
 
       - name: Build Next.js App
         env:
@@ -182,32 +234,24 @@ jobs:
 
       - name: Clean up Large Files
         run: |
-          echo "🧹 Removing large files before Vercel deployment..."
-          
-          # Remove all raw audit CSVs and logs (served from Blob storage instead)
+          echo "🧹 Removing large files before git commit..."
           rm -f web/public/audit_log.csv.gz
           rm -f web/public/audit_log.csv
+          rm -f web/public/xstest_results.csv
           rm -f audit.db
-          
-          # Remove raw trace JSON files (largest culprits – can be 200MB+)
           rm -rf data/raw_traces/
           rm -rf web/public/assets/history/
-          
-          # Remove unneeded large data files
           rm -f data/prompts_full_db.csv
           rm -f data/prompts_augmented.csv
           rm -f web/public/assets/traces_small.json
-          
-          # Remove Python source (not needed by Next.js at runtime)
           rm -rf src/
           rm -rf scripts/
-          
-          # Show what's left to help debug future size issues
           echo "📦 Remaining large files (top 20 by size):"
-          find . -not -path './.git/*' -not -path './web/.next/*' -type f -exec du -sh {} + 2>/dev/null \
-            | sort -rh | head -20
+          find . -not -path './.git/*' -not -path './web/.next/*' -type f \
+            -exec du -sh {} + 2>/dev/null | sort -rh | head -20
 
       - name: Commit & Push Results to main
+        # Fresh checkout = no dirty files = git push always succeeds first try.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -224,39 +268,16 @@ jobs:
             web/public/political_compass.json \
             web/public/paternalism.json \
             web/public/significance_pairwise.json \
+            web/public/overrefusal_stats.json \
+            web/public/compare_data.json \
+            web/public/soft_censorship_stats.json \
+            web/public/family_stats.json \
+            web/public/prompts_list.json \
             web/public/assets/ \
             data/trends.csv || true
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
-
-          # Retry push with rebase — handles commits landing during the audit run.
-          # Uses exponential backoff. Never hard-fails: data is preserved via artifact upload below.
-          PUSH_SUCCESS=false
-          for attempt in 1 2 3 4 5; do
-            echo "📤 Push attempt $attempt of 5"
-            # Stash any dirty working tree (e.g. deletions from the clean-up step)
-            # so that git pull --rebase can run without complaining about unstaged changes.
-            git stash --include-untracked --quiet 2>/dev/null || true
-            git pull --rebase origin main || {
-              echo "⚠️ Rebase conflict — taking ours for data files"
-              git checkout --theirs web/public/ data/trends.csv 2>/dev/null || true
-              git add web/public/ data/trends.csv 2>/dev/null || true
-              git rebase --continue || git rebase --abort
-            }
-            # Restore any stashed changes (ignored if stash was empty)
-            git stash pop --quiet 2>/dev/null || true
-            if git push origin main; then
-              echo "✅ Push succeeded on attempt $attempt"
-              PUSH_SUCCESS=true
-              break
-            fi
-            WAIT=$((attempt * 10))
-            echo "⏳ Retrying in ${WAIT}s..."
-            sleep $WAIT
-          done
-
-          if [ "$PUSH_SUCCESS" = "false" ]; then
-            echo "⚠️ Push failed after 5 attempts — data preserved in artifact below. Re-run the workflow to retry."
-          fi
+          git pull --rebase origin main
+          git push origin main
 
       - name: Upload Audit Data Backup
         uses: actions/upload-artifact@v4
@@ -274,21 +295,9 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           mkdir -p web/public/data
-          # Copy compressed audit log
-          if [ -f "web/public/audit_log.csv.gz" ]; then
-            cp web/public/audit_log.csv.gz web/public/data/
-          elif [ -f "audit_log.csv" ]; then
-            cp audit_log.csv web/public/data/
-          fi
-          
-          # Copy latest report
           if [ -f "data/latest_report.md" ]; then
             cp data/latest_report.md web/public/
           fi
-          
-          # Deploy without --prod to generate a Preview Deployment
-          # NOTE: Vercel project root dir is already set to 'web' in the dashboard,
-          # so we deploy from repo root to avoid double-nesting (web/web)
           PREVIEW_URL=$(npx vercel deploy --token=$VERCEL_TOKEN --yes)
           echo "Deployed to: $PREVIEW_URL"
           echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
@@ -298,31 +307,19 @@ jobs:
           echo "🔔 Notifying search engines via IndexNow..."
           INDEXNOW_KEY="f5108eb2ee8a474e8b2c5ef375f7dad1"
           BASE_URL="https://moderationbias.com"
-
-          # Build the list of URLs that were just updated
           URLS=$(cat <<EOF
           [
-            "${BASE_URL}/",
-            "${BASE_URL}/compare",
-            "${BASE_URL}/analysis/summary",
-            "${BASE_URL}/analysis/overview",
-            "${BASE_URL}/analysis/drift",
-            "${BASE_URL}/analysis/consensus",
-            "${BASE_URL}/analysis/political",
-            "${BASE_URL}/analysis/reliability",
-            "${BASE_URL}/analysis/longitudinal",
-            "${BASE_URL}/analysis/alignment",
-            "${BASE_URL}/analysis/clusters",
-            "${BASE_URL}/analysis/paternalism",
-            "${BASE_URL}/analysis/significance",
-            "${BASE_URL}/analysis/triggers",
-            "${BASE_URL}/data",
-            "${BASE_URL}/feed.xml"
+            "${BASE_URL}/", "${BASE_URL}/compare",
+            "${BASE_URL}/analysis/summary", "${BASE_URL}/analysis/overview",
+            "${BASE_URL}/analysis/drift", "${BASE_URL}/analysis/consensus",
+            "${BASE_URL}/analysis/political", "${BASE_URL}/analysis/reliability",
+            "${BASE_URL}/analysis/longitudinal", "${BASE_URL}/analysis/alignment",
+            "${BASE_URL}/analysis/clusters", "${BASE_URL}/analysis/paternalism",
+            "${BASE_URL}/analysis/significance", "${BASE_URL}/analysis/triggers",
+            "${BASE_URL}/data", "${BASE_URL}/feed.xml"
           ]
           EOF
           )
-
-          # Submit to IndexNow (Bing endpoint – shared with Yandex and DuckDuckGo)
           curl -s -X POST "https://api.indexnow.org/IndexNow" \
             -H "Content-Type: application/json" \
             -d "{
@@ -330,7 +327,7 @@ jobs:
               \"key\": \"${INDEXNOW_KEY}\",
               \"keyLocation\": \"${BASE_URL}/${INDEXNOW_KEY}.txt\",
               \"urlList\": ${URLS}
-            }" && echo "✅ IndexNow ping sent successfully" || echo "⚠️ IndexNow ping failed (non-critical)"
+            }" && echo "✅ IndexNow ping sent" || echo "⚠️ IndexNow ping failed (non-critical)"
 
       - name: Sync to Hugging Face Hub
         env:
@@ -347,6 +344,6 @@ jobs:
             ${{ steps.vercel_deploy.outputs.PREVIEW_URL }}
             ${{ steps.vercel_deploy.outputs.PREVIEW_URL }}/compare
             ${{ steps.vercel_deploy.outputs.PREVIEW_URL }}/audit
-          budgetPath: ./lighthouserc.json # optional, won't fail strictly without it
-          uploadArtifacts: true # save results in the action logs
-          temporaryPublicStorage: true # upload HTML report to temporary public storage
+          budgetPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true

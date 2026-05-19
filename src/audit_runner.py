@@ -384,7 +384,9 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                         'total_tokens': t_tokens,
                         'run_cost': run_cost,
                         'confidence': classification['confidence_score'],
-                        'reasoning': classification['reasoning']
+                        'reasoning': classification['reasoning'],
+                        'expected_safe': p.get('expected_safe'),     # XSTest/OR-Bench ground truth
+                        'benchmark_source': p.get('source'),         # e.g. 'xstest', 'orbench-hard'
                     }
                 except Exception as e:
                     logger.error(f"DB Save Error: {e}")
@@ -468,7 +470,8 @@ async def run_audit_async(prompts, models, output_file, policy_version=None):
     """Orchestrates the audit across multiple models."""
     
     headers = ['test_date', 'model', 'model_version', 'prompt_id', 'category', 'style', 'persona', 'system_prompt', 'verdict', 'classification',
-               'prompt_text', 'response_text', 'prompt_tokens', 'completion_tokens', 'total_tokens', 'run_cost', 'confidence', 'reasoning']
+               'prompt_text', 'response_text', 'prompt_tokens', 'completion_tokens', 'total_tokens', 'run_cost', 'confidence', 'reasoning',
+               'expected_safe', 'benchmark_source']  # benchmark metadata (None for standard prompts)
     
     # Initialize file with headers if needed
     file_exists = os.path.isfile(output_file)

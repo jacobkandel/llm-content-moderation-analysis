@@ -426,19 +426,20 @@ def generate_precomputed_json(df):
     import math
 
     def mcnemars_test(b, c):
+        """McNemar's test with continuity correction. Returns exact p-value via scipy."""
         if b + c == 0:
-            return 1.0, False
-        chi2 = ((abs(b - c) - 1) ** 2) / (b + c)
-        # Approximate p-value from chi2 with 1 df: p ≈ erfc(sqrt(chi2/2))
-        x = math.sqrt(chi2 / 2)
-        # Error function approximation (Abramowitz and Stegun)
-        a1, a2, a3, a4, a5, p_coeff = 0.254829592, -0.284496736, 1.421413741, -1.453152027, 1.061405429, 0.3275911
-        sign = -1 if x < 0 else 1
-        t = 1.0 / (1.0 + p_coeff * abs(x))
-        y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * math.exp(-x * x)
-        erf_val = sign * y
-        p_value = max(0, min(1, 1 - erf_val))
-        return p_value, p_value < 0.05
+            return 1.0
+        chi2_stat = ((abs(b - c) - 1) ** 2) / (b + c)
+        try:
+            from scipy.stats import chi2 as _chi2
+            return float(_chi2.sf(chi2_stat, df=1))
+        except ImportError:
+            # Fallback: Abramowitz & Stegun erfc approximation
+            x = math.sqrt(chi2_stat / 2)
+            a1, a2, a3, a4, a5, p_c = 0.254829592, -0.284496736, 1.421413741, -1.453152027, 1.061405429, 0.3275911
+            t = 1.0 / (1.0 + p_c * abs(x))
+            y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * math.exp(-x * x)
+            return max(0.0, min(1.0, 1 - y))
 
     all_models_sorted = sorted(keep_models)
     sig_results = []
@@ -459,7 +460,7 @@ def generate_precomputed_json(df):
                     if not a_unsafe and b_unsafe:
                         c_count += 1
             if samples > 0:
-                p_val, _ = mcnemars_test(b_count, c_count)
+                p_val = mcnemars_test(b_count, c_count)
                 
                 # Calculate Cohen's h effect size
                 pA = a_total_unsafe / samples
@@ -763,6 +764,90 @@ def generate_precomputed_json(df):
     with open('web/public/prompts_list.json', 'w') as f:
         json.dump(prompts_list, f, separators=(',', ':'))
     print(f"   ✅ prompts_list.json ({len(prompts_list)} unique prompts, {os.path.getsize('web/public/prompts_list.json')} bytes)")
+
+    # --- 9. overrefusal_stats.json (XSTest / OR-Bench) ---
+    _generate_overrefusal_json()
+
+
+def _generate_overrefusal_json():
+    """
+    Reads xstest_results.csv (written by --benchmark xstest audit step) and computes
+    per-model over-refusal rates: % of ground-truth-safe prompts that were refused.
+    Writes web/public/overrefusal_stats.json. Silently no-ops if the file doesn't exist.
+    """
+    XSTEST_CSV = 'web/public/xstest_results.csv'
+    OUT_PATH = 'web/public/overrefusal_stats.json'
+    REFUSAL_VERDICTS_SET = {'REFUSAL', 'REMOVED', 'Hard Refusal', 'BLOCKED', 'META_REFUSAL', 'POLICY_REFUSAL'}
+
+    if not os.path.exists(XSTEST_CSV):
+        print("   ℹ️  xstest_results.csv not found — skipping over-refusal stats")
+        return
+
+    try:
+        import pandas as pd
+        df = pd.read_csv(XSTEST_CSV, on_bad_lines='skip', engine='python')
+
+        if df.empty or 'expected_safe' not in df.columns:
+            print("   ⚠️  xstest_results.csv has no expected_safe column — skipping")
+            return
+
+        # Only consider prompts that are ground-truth safe
+        safe_df = df[df['expected_safe'] == True].copy()
+        if safe_df.empty:
+            print("   ⚠️  No expected_safe=True rows found in xstest_results.csv")
+            return
+
+        safe_df['is_refusal'] = safe_df['verdict'].isin(REFUSAL_VERDICTS_SET)
+        benchmark_name = safe_df['benchmark_source'].dropna().iloc[0] if 'benchmark_source' in safe_df.columns else 'XSTest'
+
+        models = sorted(safe_df['model'].dropna().unique())
+        model_stats = []
+        for model in models:
+            rows = safe_df[safe_df['model'] == model]
+            total = len(rows)
+            if total == 0:
+                continue
+            over_refused = int(rows['is_refusal'].sum())
+            rate = (over_refused / total) * 100
+            ci_lower, ci_upper = wilson_score_interval(over_refused, total)
+            model_stats.append({
+                'model': model,
+                'name': model.split('/')[-1] if '/' in model else model,
+                'overRefusalRate': round(rate, 2),
+                'overRefusalRateCILower': round(ci_lower * 100, 2),
+                'overRefusalRateCIUpper': round(ci_upper * 100, 2),
+                'overRefusals': over_refused,
+                'total': total,
+            })
+
+        model_stats.sort(key=lambda x: x['overRefusalRate'], reverse=True)
+
+        # Per-category breakdown
+        by_category = {}
+        if 'category' in safe_df.columns:
+            for cat, grp in safe_df.groupby('category'):
+                by_category[cat] = {
+                    'total': len(grp),
+                    'overRefusals': int(grp['is_refusal'].sum()),
+                    'overRefusalRate': round(grp['is_refusal'].mean() * 100, 2),
+                }
+
+        result = {
+            'benchmark': str(benchmark_name),
+            'promptCount': int(len(safe_df['prompt_id'].dropna().unique())) if 'prompt_id' in safe_df.columns else int(len(safe_df)),
+            'lastUpdated': str(safe_df['test_date'].max()) if 'test_date' in safe_df.columns else '',
+            'models': model_stats,
+            'byCategory': by_category,
+        }
+
+        with open(OUT_PATH, 'w') as f:
+            json.dump(result, f, separators=(',', ':'), indent=None)
+        print(f"   ✅ overrefusal_stats.json ({len(model_stats)} models, {os.path.getsize(OUT_PATH)} bytes)")
+
+    except Exception as e:
+        print(f"   ⚠️  overrefusal_stats generation failed: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def compress_csv():
