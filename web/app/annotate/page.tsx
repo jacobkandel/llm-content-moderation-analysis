@@ -114,7 +114,17 @@ export default function AnnotatePage() {
                 // longer than the 1.8s auto-advance, so users would never see the update.
                 setStats(prev => prev ? { ...prev, totalAnnotations: prev.totalAnnotations + 1 } : prev);
                 setFeedback({ type: 'success', message: `✓ Saved as ${verdict}` });
-                fetchStats(); // background sync to reconcile true count
+                // Background sync — only update if server count is higher than our optimistic value.
+                // This prevents the counter from jumping backwards when the slow GET returns stale data.
+                fetch('/api/annotate/submit').then(r => r.ok ? r.json() : null).then(data => {
+                    if (data) {
+                        setStats(prev => {
+                            if (!prev) return data;
+                            // Only take the server value if it's >= our optimistic count
+                            return data.totalAnnotations >= prev.totalAnnotations ? data : prev;
+                        });
+                    }
+                }).catch(() => {});
                 
                 // Save to local storage so we don't see it again
                 try {

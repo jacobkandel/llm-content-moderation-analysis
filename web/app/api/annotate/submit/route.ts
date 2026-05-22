@@ -117,40 +117,53 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
     try {
-        const blobs = await list({ prefix: BLOB_PREFIX });
-        
         let totalAnnotations = 0;
         const uniqueAnnotators = new Set<string>();
         const verdictCounts: Record<string, number> = { ALLOWED: 0, REMOVED: 0 };
+        let filesCount = 0;
 
-        for (const blob of blobs.blobs) {
-            try {
-                const response = await fetch(blob.url);
-                const content = await response.text();
-                const lines = content.split('\n').filter(l => l.trim());
-                
-                for (const line of lines) {
-                    try {
-                        const record = JSON.parse(line);
-                        totalAnnotations++;
-                        if (record.annotatorId) uniqueAnnotators.add(record.annotatorId);
-                        if (record.verdict) verdictCounts[record.verdict] = (verdictCounts[record.verdict] || 0) + 1;
-                    } catch {
-                        // Skip malformed lines
+        // Paginate through all annotation blobs (list() returns max 1000 per call)
+        let cursor: string | undefined;
+        do {
+            const blobs = await list({ prefix: BLOB_PREFIX, cursor });
+            filesCount += blobs.blobs.length;
+
+            for (const blob of blobs.blobs) {
+                try {
+                    const response = await fetch(blob.url);
+                    if (!response.ok) {
+                        console.error(`Failed to fetch blob ${blob.pathname}: ${response.status}`);
+                        continue;
                     }
+                    const content = await response.text();
+                    const lines = content.split('\n').filter(l => l.trim());
+                    
+                    for (const line of lines) {
+                        try {
+                            const record = JSON.parse(line);
+                            totalAnnotations++;
+                            if (record.annotatorId) uniqueAnnotators.add(record.annotatorId);
+                            if (record.verdict) verdictCounts[record.verdict] = (verdictCounts[record.verdict] || 0) + 1;
+                        } catch {
+                            // Skip malformed lines
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Error reading blob ${blob.pathname}:`, e);
                 }
-            } catch {
-                // Skip unreadable blobs
             }
-        }
+
+            cursor = blobs.hasMore ? blobs.cursor : undefined;
+        } while (cursor);
 
         return NextResponse.json({
             totalAnnotations,
             uniqueAnnotators: uniqueAnnotators.size,
             verdictCounts,
-            filesCount: blobs.blobs.length,
+            filesCount,
         });
-    } catch {
+    } catch (e) {
+        console.error('GET /api/annotate/submit error:', e);
         return NextResponse.json({
             totalAnnotations: 0,
             uniqueAnnotators: 0,
