@@ -37,6 +37,7 @@ const analysisCategories = [
             { name: 'Reliability', href: '/analysis/reliability', icon: Shield },
             { name: 'Model Stability', href: '/analysis/drift', icon: TrendingUp },
             { name: 'Significance', href: '/analysis/significance', icon: Scale },
+            { name: 'Annotator Agreement', href: '/analysis/iaa', icon: Users },
         ]
     },
     {

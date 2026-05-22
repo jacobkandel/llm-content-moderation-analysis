@@ -6,6 +6,15 @@ import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as 
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
+import {
+    brandGradientHorizontalDef,
+    TOOLTIP_STYLE,
+    TOOLTIP_CURSOR,
+    AXIS_TICK_STYLE,
+    GRID_STYLE,
+    ANIMATION_DURATION,
+    ANIMATION_EASING,
+} from '@/lib/chart-theme';
 
 
 
@@ -33,11 +42,24 @@ export default function TriggersPage() {
                     {triggerData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={triggerData.slice(0, 20)} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-                                <XAxis type="number" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                                <YAxis dataKey="word" type="category" width={110} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                                <RechartsTooltip cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }} contentStyle={{ backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }} />
-                                <Bar dataKey="count" fill="#800000" name="Occurrences" radius={[0, 4, 4, 0]} />
+                                <defs>
+                                    {brandGradientHorizontalDef()}
+                                </defs>
+                                <CartesianGrid strokeDasharray={GRID_STYLE.strokeDasharray} horizontal={false} stroke={GRID_STYLE.stroke} opacity={GRID_STYLE.opacity} />
+                                <XAxis type="number" tick={AXIS_TICK_STYLE} />
+                                <YAxis dataKey="word" type="category" width={110} tick={{ ...AXIS_TICK_STYLE, fontSize: 11 }} />
+                                <RechartsTooltip
+                                    cursor={TOOLTIP_CURSOR}
+                                    contentStyle={TOOLTIP_STYLE}
+                                />
+                                <Bar
+                                    dataKey="count"
+                                    fill="url(#brandGradientH)"
+                                    name="Occurrences"
+                                    radius={[0, 6, 6, 0]}
+                                    animationDuration={ANIMATION_DURATION}
+                                    animationEasing={ANIMATION_EASING}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (

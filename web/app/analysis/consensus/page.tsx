@@ -12,8 +12,13 @@ import {
     ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, Legend
 } from 'recharts';
+import {
+    TOOLTIP_STYLE,
+    ANIMATION_DURATION,
+    ANIMATION_EASING,
+} from '@/lib/chart-theme';
 
-const PIE_COLORS = ['#800000', '#767676', '#D6D6CE']; // Maroon, Dark Gray, Light Gray
+const PIE_COLORS = ['#800000', '#4b5563', '#d1d5db'];
 
 export default function ConsensusPage() {
     const router = useRouter();
@@ -203,7 +208,7 @@ export default function ConsensusPage() {
                                     className="h-full rounded-full transition-all duration-500"
                                     style={{
                                         width: `${m.agreementRate}%`,
-                                        backgroundColor: '#800000'
+                                        background: 'linear-gradient(90deg, #800000, #b91c1c)',
                                     }}
                                 />
                             </div>
@@ -234,15 +239,17 @@ export default function ConsensusPage() {
                                 cy="50%"
                                 innerRadius={80}
                                 outerRadius={130}
-                                paddingAngle={3}
+                                paddingAngle={4}
                                 dataKey="value"
                                 label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
+                                animationDuration={ANIMATION_DURATION}
+                                animationEasing={ANIMATION_EASING}
                             >
                                 {consensusStats.distribution.map((_: any, index: number) => (
-                                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index]} />
+                                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index]} stroke="hsl(var(--background))" strokeWidth={2} />
                                 ))}
                             </Pie>
-                            <Tooltip />
+                            <Tooltip contentStyle={TOOLTIP_STYLE} />
                             <Legend />
                         </PieChart>
                     </ResponsiveContainer>

@@ -27,6 +27,7 @@ const navItems = [
             { title: 'Longitudinal Analysis', href: '/analysis/longitudinal', icon: TrendingUp },
             { title: 'Model Stability', href: '/analysis/drift', icon: TrendingUp },
             { title: 'Significance', href: '/analysis/significance', icon: Scale },
+            { title: 'Annotator Agreement', href: '/analysis/iaa', icon: Users },
             { title: 'Family Analysis', href: '/analysis/family', icon: Layers },
             { title: 'Political Compass', href: '/analysis/political', icon: Compass },
             { title: 'Paternalism', href: '/analysis/paternalism', icon: Shield },

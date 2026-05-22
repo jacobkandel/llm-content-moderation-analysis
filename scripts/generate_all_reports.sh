@@ -51,6 +51,10 @@ else
     echo "⏭️ Skipping AI Analyst (LLM) to save costs..."
 fi
 
+# 10. Inter-Annotator Agreement Stats
+echo "🤝 Generating IAA Statistics..."
+$PYTHON_CMD scripts/generate_iaa_stats.py
+
 $PYTHON_CMD src/cluster_analysis_simple.py
 
 echo "✅ All reports generated successfully!"
