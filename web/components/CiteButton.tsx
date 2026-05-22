@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Copy, Check, BookOpen } from 'lucide-react';
 
 const BIBTEX = `@misc{kandel2026moderationbias,
@@ -15,7 +15,7 @@ const APA = `Kandel, J. (2026). Moderation Bias: A Systematic Benchmark of Conte
 
 export function CiteButton() {
     const [copied, setCopied] = useState<string | null>(null);
-    const [open, setOpen] = useState(false);
+    const popoverRef = useRef<HTMLDivElement>(null);
 
     const copyText = (text: string, format: string) => {
         navigator.clipboard.writeText(text);
@@ -23,10 +23,32 @@ export function CiteButton() {
         setTimeout(() => setCopied(null), 2000);
     };
 
+    // Use native popover API if available, otherwise JS fallback
+    const [open, setOpen] = useState(false);
+    const supportsPopover = typeof HTMLElement !== 'undefined' && 'popover' in HTMLElement.prototype;
+
+    useEffect(() => {
+        if (!supportsPopover && open) {
+            const handleClickOutside = (e: MouseEvent) => {
+                if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+                    setOpen(false);
+                }
+            };
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [open, supportsPopover]);
+
+    const popoverId = 'cite-popover';
+
     return (
-        <div className="relative">
+        <div className="relative" ref={popoverRef}>
+            {/* Use commandfor/command for native popover when supported */}
             <button
-                onClick={() => setOpen(!open)}
+                {...(supportsPopover
+                    ? { popoverTarget: popoverId, popoverTargetAction: 'toggle' as any }
+                    : { onClick: () => setOpen(!open) }
+                )}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
                 aria-label="Cite this research"
             >
@@ -34,40 +56,50 @@ export function CiteButton() {
                 Cite This
             </button>
 
-            {open && (
-                <>
-                    <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2 z-50 w-[420px] bg-popover border border-border rounded-xl shadow-xl p-4 space-y-3">
-                        <h4 className="text-sm font-bold text-foreground">Cite This Research</h4>
+            {/* Popover content — uses native popover when available */}
+            <div
+                id={popoverId}
+                {...(supportsPopover
+                    ? { popover: 'auto' as any }
+                    : {}
+                )}
+                className={`
+                    ${supportsPopover
+                        ? 'popover-cite-panel'
+                        : open ? 'block' : 'hidden'
+                    }
+                    absolute right-0 top-full mt-2 z-50 w-[420px]
+                    bg-popover border border-border rounded-xl shadow-xl p-4 space-y-3
+                `}
+            >
+                <h4 className="text-sm font-bold text-foreground">Cite This Research</h4>
 
-                        <div>
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs font-medium text-muted-foreground">BibTeX</span>
-                                <button
-                                    onClick={() => copyText(BIBTEX, 'bibtex')}
-                                    className="flex items-center gap-1 text-xs text-brand hover:underline"
-                                >
-                                    {copied === 'bibtex' ? <><Check className="h-3 w-3" /> Copied!</> : <><Copy className="h-3 w-3" /> Copy</>}
-                                </button>
-                            </div>
-                            <pre className="text-[11px] bg-muted/30 border border-border rounded-lg p-3 overflow-x-auto font-mono text-foreground leading-relaxed">{BIBTEX}</pre>
-                        </div>
-
-                        <div>
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs font-medium text-muted-foreground">APA</span>
-                                <button
-                                    onClick={() => copyText(APA, 'apa')}
-                                    className="flex items-center gap-1 text-xs text-brand hover:underline"
-                                >
-                                    {copied === 'apa' ? <><Check className="h-3 w-3" /> Copied!</> : <><Copy className="h-3 w-3" /> Copy</>}
-                                </button>
-                            </div>
-                            <p className="text-xs bg-muted/30 border border-border rounded-lg p-3 text-foreground">{APA}</p>
-                        </div>
+                <div>
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-muted-foreground">BibTeX</span>
+                        <button
+                            onClick={() => copyText(BIBTEX, 'bibtex')}
+                            className="flex items-center gap-1 text-xs text-brand hover:underline"
+                        >
+                            {copied === 'bibtex' ? <><Check className="h-3 w-3" /> Copied!</> : <><Copy className="h-3 w-3" /> Copy</>}
+                        </button>
                     </div>
-                </>
-            )}
+                    <pre className="text-[11px] bg-muted/30 border border-border rounded-lg p-3 overflow-x-auto font-mono text-foreground leading-relaxed">{BIBTEX}</pre>
+                </div>
+
+                <div>
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-muted-foreground">APA</span>
+                        <button
+                            onClick={() => copyText(APA, 'apa')}
+                            className="flex items-center gap-1 text-xs text-brand hover:underline"
+                        >
+                            {copied === 'apa' ? <><Check className="h-3 w-3" /> Copied!</> : <><Copy className="h-3 w-3" /> Copy</>}
+                        </button>
+                    </div>
+                    <p className="text-xs bg-muted/30 border border-border rounded-lg p-3 text-foreground">{APA}</p>
+                </div>
+            </div>
         </div>
     );
 }

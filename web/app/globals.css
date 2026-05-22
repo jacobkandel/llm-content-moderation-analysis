@@ -290,3 +290,38 @@ body {
     border: 1px solid #ddd !important;
   }
 }
+
+/* ─── Scroll-Driven Entry Animations (Progressive Enhancement) ─────────────── */
+/* Uses native CSS scroll-driven animations when supported (Chrome 115+, Safari 26+).
+   Only animates compositor-friendly properties (opacity, transform) for 60fps.
+   Falls back to no animation in unsupported browsers — purely decorative. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @keyframes card-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+    }
+
+    .bg-card {
+      animation: card-reveal auto ease-out backwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 30%;
+    }
+  }
+}
+
+/* ─── Native Popover Styling ───────────────────────────────────────────────── */
+/* Style the CiteButton popover to match our design system */
+[popover] {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+
+[popover]:popover-open {
+  display: block;
+}
