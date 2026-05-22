@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { CheckCircle, XCircle, SkipForward, ClipboardCheck, ArrowRight, Loader2, Shield } from 'lucide-react';
+import { CheckCircle, XCircle, SkipForward, ClipboardCheck, ArrowRight, Loader2, Shield, ChevronUp, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 
 interface AnnotationItem {

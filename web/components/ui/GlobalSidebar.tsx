@@ -46,6 +46,7 @@ const analysisCategories = [
             { name: 'Political Compass', href: '/analysis/political', icon: Compass },
             { name: 'Paternalism', href: '/analysis/paternalism', icon: Shield },
             { name: 'Alignment Tax', href: '/analysis/alignment', icon: DollarSign },
+            { name: 'Over-Refusal', href: '/analysis/overrefusal', icon: Shield },
         ]
     },
     {

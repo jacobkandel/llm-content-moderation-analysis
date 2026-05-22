@@ -5,11 +5,12 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard, FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles, ClipboardCheck, Layers, Trophy
+    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles, ClipboardCheck, Layers, Trophy, BookOpen
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { InstallButton } from '@/components/ui/InstallButton';
+import { CiteButton } from '@/components/CiteButton';
 
 const navItems = [
     { name: 'AI Overview', href: '/analysis/overview', icon: Sparkles },
@@ -18,6 +19,7 @@ const navItems = [
     { name: 'Models', href: '/models', icon: Box },
     { name: 'Categories', href: '/categories', icon: Filter },
     { name: 'Annotate', href: '/annotate', icon: ClipboardCheck },
+    { name: 'Prompts', href: '/prompts', icon: ListChecks },
     {
         name: 'Analysis',
         icon: FileText,
@@ -32,6 +34,7 @@ const navItems = [
             { title: 'Political Compass', href: '/analysis/political', icon: Compass },
             { title: 'Paternalism', href: '/analysis/paternalism', icon: Shield },
             { title: 'Alignment Tax', href: '/analysis/alignment', icon: DollarSign },
+            { title: 'Over-Refusal', href: '/analysis/overrefusal', icon: Shield },
         ]
     },
     {
@@ -43,7 +46,15 @@ const navItems = [
             { title: 'Council Consensus', href: '/analysis/consensus', icon: Users },
         ]
     },
-    { name: 'About', href: '/about', icon: Info },
+    {
+        name: 'About',
+        icon: Info,
+        dropdown: [
+            { title: 'About', href: '/about', icon: Info },
+            { title: 'Methodology', href: '/methodology', icon: FileText },
+            { title: 'Glossary', href: '/glossary', icon: BookOpen },
+        ]
+    },
 ];
 
 const mobileOnlyItems = [
@@ -139,6 +150,7 @@ export function NavBar() {
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2">
+                        <CiteButton />
                         <InstallButton />
                         <ThemeToggle />
                     </div>
