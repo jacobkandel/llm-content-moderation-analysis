@@ -1,5 +1,9 @@
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
+/** Safely call .toFixed() — returns '0' if the value is not a finite number. */
+const safeFixed = (n: number | null | undefined, d = 1): string =>
+    (typeof n === 'number' && isFinite(n) ? n : 0).toFixed(d);
+
 interface RadarSectionProps {
     modelA: string;
     modelB: string;
@@ -34,7 +38,7 @@ export function RadarSection({
             <div
                 className="h-[300px] sm:h-[400px] w-full"
                 role="img"
-                aria-label={`Radar chart comparing ${modelA} and ${modelB} across ${displayRadarData.length} content categories. ${displayRadarData.map(d => `${d.subject}: ${modelA.split('/').pop()} ${d.A.toFixed(0)}% vs ${modelB.split('/').pop()} ${d.B.toFixed(0)}%`).join('. ')}`}
+                aria-label={`Radar chart comparing ${modelA} and ${modelB} across ${displayRadarData.length} content categories. ${displayRadarData.map(d => `${d.subject}: ${modelA.split('/').pop()} ${safeFixed(d.A, 0)}% vs ${modelB.split('/').pop()} ${safeFixed(d.B, 0)}%`).join('. ')}`}
             >
                 {displayRadarData.length === 0 ? (
                     <div className="h-full w-full flex items-center justify-center border border-dashed border-border rounded-xl bg-muted/10 text-muted-foreground text-sm">
