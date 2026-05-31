@@ -1,7 +1,19 @@
+import type { Metadata } from 'next';
 import { getProviderName, getLogoUrl } from '@/lib/provider-logos';
 import Link from 'next/link';
 import Image from 'next/image';
 import modelsData from '@/public/models.json';
+
+export async function generateMetadata({ params }: { params: Promise<{ provider: string }> }): Promise<Metadata> {
+  const { provider } = await params;
+  const name = getProviderName(provider);
+  return {
+    title: `${name} Models — ModerationBias`,
+    description: `All ${name} models benchmarked in Moderation Bias. Compare refusal rates, verbosity, and category-level censorship data.`,
+    alternates: { canonical: `/models/${provider}` },
+    openGraph: { title: `${name} Models — ModerationBias`, url: `/models/${provider}` },
+  };
+}
 
 type ModelInfo = {
   id: string;

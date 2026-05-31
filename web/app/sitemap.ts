@@ -18,10 +18,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
-            url: `${BASE_URL}/analysis/longitudinal`,
+            url: `${BASE_URL}/leaderboard`,
             lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.8,
+            changeFrequency: 'daily',
+            priority: 0.9,
         },
         {
             url: `${BASE_URL}/models`,
@@ -30,31 +30,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         {
-            url: `${BASE_URL}/about`,
+            url: `${BASE_URL}/categories`,
             lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.5,
+            changeFrequency: 'weekly',
+            priority: 0.8,
         },
-        // Analysis Deep Dives
+        // Analysis Deep Dives (all 14)
         ...[
             'consensus', 'political', 'drift', 'paternalism', 'significance',
-            'summary', 'overview', 'triggers', 'clusters', 'alignment', 'reliability', 'family'
+            'summary', 'overview', 'triggers', 'clusters', 'alignment',
+            'reliability', 'iaa', 'overrefusal', 'longitudinal'
         ].map(slug => ({
             url: `${BASE_URL}/analysis/${slug}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.7,
         })),
-        // Top-level pages
-        ...[
-            '/leaderboard', '/data', '/annotate',
-        ].map(path => ({
+        // Top-level pages (all included now)
+        ...['/data', '/annotate', '/prompts', '/glossary', '/methodology', '/about'].map(path => ({
             url: `${BASE_URL}${path}`,
             lastModified: new Date(),
-            changeFrequency: 'weekly' as const,
-            priority: 0.8,
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
         })),
-        // Categories
+        // Category detail pages
         ...[
             'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
             'false-positive-control', 'harassment', 'hate-speech', 'health-misinformation',
@@ -68,7 +67,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ];
 
     try {
-        for (const model of models as any) {
+        // Provider index pages (e.g. /models/openai) — were missing before
+        const providers = [...new Set((models as any[]).map((m: any) => m.id?.split('/')[0]).filter(Boolean))];
+        for (const provider of providers) {
+            sitemapData.push({
+                url: `${BASE_URL}/models/${provider}`,
+                lastModified: new Date(),
+                changeFrequency: 'weekly',
+                priority: 0.7,
+            });
+        }
+        // Individual model detail pages
+        for (const model of models as any[]) {
             if (model.id) {
                 sitemapData.push({
                     url: `${BASE_URL}/models/${model.id}`,

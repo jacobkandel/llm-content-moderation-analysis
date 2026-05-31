@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from 'next/headers';
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -70,6 +71,9 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     creator: '@jmk9494',
+    title: 'LLM Censorship Benchmark — ModerationBias.com',
+    description: 'Open-source benchmark tracking censorship bias across 26+ LLMs. Live biweekly audits with statistical significance testing.',
+    images: [{ url: '/assets/heatmap.png', alt: 'ModerationBias Heatmap' }],
   },
   robots: {
     index: true,
@@ -87,11 +91,13 @@ export const metadata: Metadata = {
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') ?? '/';
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -110,7 +116,7 @@ export default function RootLayout({
           <FocusManager />
           <ToastProvider>
             <SidebarProvider>
-              <JsonLd />
+              <JsonLd pathname={pathname} />
               <ServiceWorkerRegister />
               <SkipLink />
               <MainContentWrapper className="flex flex-col min-h-screen">

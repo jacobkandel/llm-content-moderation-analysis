@@ -30,6 +30,10 @@ export function middleware(request: NextRequest) {
 
     const response = NextResponse.next();
 
+    // Forward the pathname as a header so server components (e.g. layout.tsx → JsonLd)
+    // can read the current route without needing a client-side usePathname() hook.
+    response.headers.set('x-pathname', request.nextUrl.pathname);
+
     response.headers.set('Content-Security-Policy', csp);
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     response.headers.set('X-Content-Type-Options', 'nosniff');

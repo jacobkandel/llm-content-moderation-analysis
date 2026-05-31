@@ -1,5 +1,18 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Filter } from 'lucide-react';
+
+export const metadata: Metadata = {
+    title: 'Content Categories — ModerationBias',
+    description: 'Browse the Moderation Bias benchmark by topic: hate speech, political content, weapons, self-harm, explicit content, and more. See how AI models handle each category.',
+    alternates: { canonical: '/categories' },
+    openGraph: {
+        title: 'Content Categories — ModerationBias',
+        description: 'Explore AI moderation rates by category: political, hate speech, self-harm, weapons, and more.',
+        url: '/categories',
+    },
+    twitter: { card: 'summary_large_image', title: 'Content Categories — ModerationBias' },
+};
 
 const CATEGORIES: Record<string, string> = {
     'explicit-sexual': 'Explicit/Sexual',

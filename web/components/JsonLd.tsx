@@ -1,20 +1,30 @@
-'use client';
+/**
+ * JsonLd — Server Component (no 'use client')
+ * Renders structured data as JSON-LD in a <script> tag server-side so
+ * Googlebot sees it in the initial HTML without needing JS execution.
+ *
+ * FAQPage is ONLY rendered on the homepage (pathname = '/').
+ * BreadcrumbList is generated from the path prop.
+ * WebSite and Dataset schemas are rendered on every page.
+ */
 
-import { usePathname } from 'next/navigation';
+const BASE = 'https://moderationbias.com';
 
-export default function JsonLd() {
-    const pathname = usePathname();
+interface JsonLdProps {
+    pathname: string; // passed from layout/page, no usePathname() needed
+}
 
-    const jsonLd: any[] = [
+export default function JsonLd({ pathname }: JsonLdProps) {
+    const jsonLd: object[] = [
         {
             '@context': 'https://schema.org',
             '@type': 'WebSite',
-            name: 'Moderation Bias - Into the Black Box',
-            url: 'https://moderationbias.com',
-            description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude.',
+            name: 'Moderation Bias',
+            url: BASE,
+            description: 'Benchmarking content-moderation bias in large language models across 25+ AI systems and 2,000+ prompts.',
             potentialAction: {
                 '@type': 'SearchAction',
-                target: 'https://moderationbias.com/?q={search_term_string}',
+                target: `${BASE}/prompts?q={search_term_string}`,
                 'query-input': 'required name=search_term_string',
             },
         },
@@ -22,8 +32,8 @@ export default function JsonLd() {
             '@context': 'https://schema.org',
             '@type': 'Dataset',
             name: 'LLM Content Moderation Audit Log',
-            description: 'A comprehensive benchmark of content moderation biases in LLMs like Llama-3, GPT-4, and Claude.',
-            url: 'https://moderationbias.com/data/audit_log.csv',
+            description: 'A comprehensive benchmark of content-moderation biases in large language models including GPT-4o, Claude 3.5 Sonnet, Gemini, and Llama 3.',
+            url: `${BASE}/data`,
             sameAs: 'https://github.com/jacobkandel/llm-content-moderation-analysis',
             license: 'https://creativecommons.org/licenses/by/4.0/',
             creator: {
@@ -35,11 +45,16 @@ export default function JsonLd() {
                 {
                     '@type': 'DataDownload',
                     encodingFormat: 'text/csv',
-                    contentUrl: 'https://moderationbias.com/data/audit_log.csv',
+                    // Actual file is gzip-compressed CSV on Vercel Blob
+                    contentUrl: 'https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz',
                 },
             ],
         },
-        {
+    ];
+
+    // FAQPage schema — only on the homepage where the FAQ content is visible
+    if (pathname === '/') {
+        jsonLd.push({
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
             mainEntity: [
@@ -76,36 +91,32 @@ export default function JsonLd() {
                     },
                 },
             ],
-        },
-    ];
+        });
+    }
 
+    // BreadcrumbList — generated from pathname for all non-root pages
     if (pathname && pathname !== '/') {
         const segments = pathname.split('/').filter(Boolean);
-        const itemListElement = [
+        const itemListElement: object[] = [
             {
                 '@type': 'ListItem',
                 position: 1,
                 name: 'Home',
-                item: 'https://moderationbias.com',
+                item: BASE,
             },
         ];
 
         let currentPath = '';
         segments.forEach((segment, index) => {
             currentPath += `/${segment}`;
-            // Format nicely: "analysis" -> "Analysis", "gpt-4" -> "Gpt 4"
-            const name = segment
-                .split('-')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-
-            // If it's a model ID segment, it might be URL-encoded, so decode it
-            // but the UI typically uses human-readable names there if possible. The pathname provides URL segments.
+            const name = decodeURIComponent(
+                segment.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+            );
             itemListElement.push({
                 '@type': 'ListItem',
                 position: index + 2,
-                name: decodeURIComponent(name),
-                item: `https://moderationbias.com${currentPath}`,
+                name,
+                item: `${BASE}${currentPath}`,
             });
         });
 
@@ -117,7 +128,7 @@ export default function JsonLd() {
     }
 
     return (
-        <section>
+        <>
             {jsonLd.map((data, index) => (
                 <script
                     key={index}
@@ -125,6 +136,6 @@ export default function JsonLd() {
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
                 />
             ))}
-        </section>
+        </>
     );
 }

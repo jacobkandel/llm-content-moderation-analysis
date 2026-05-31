@@ -1,7 +1,20 @@
+import type { Metadata } from 'next';
 import { getProviderName, getLogoUrl } from '@/lib/provider-logos';
 import Link from 'next/link';
 import Image from 'next/image';
 import modelsData from '@/public/models.json';
+
+export const metadata: Metadata = {
+    title: 'AI Models Directory — ModerationBias',
+    description: 'Browse all 25+ LLMs tested in the Moderation Bias benchmark. Compare GPT-4o, Claude 3.5 Sonnet, Gemini, Llama 4, DeepSeek, Mistral and more by provider.',
+    alternates: { canonical: '/models' },
+    openGraph: {
+        title: 'AI Models Directory — ModerationBias',
+        description: 'All 25+ LLMs tested: GPT-4o, Claude, Gemini, Llama 4, DeepSeek, Mistral and more.',
+        url: '/models',
+    },
+    twitter: { card: 'summary_large_image', title: 'AI Models Directory — ModerationBias' },
+};
 
 interface ModelInfo {
     id: string;

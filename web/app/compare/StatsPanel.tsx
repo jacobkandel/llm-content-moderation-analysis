@@ -59,7 +59,7 @@ export function StatsPanel({
                                 <div>
                                     <span className="text-xs text-muted-foreground uppercase tracking-wider">P-Value (McNemar's)</span>
                                     <div className="text-2xl font-black font-mono text-foreground mt-1">
-                                        {parseFloat(String(pairResult['P-Value'])).toExponential(2)}
+                                        {(() => { const pv = parseFloat(String(pairResult['P-Value'])); return isFinite(pv) ? pv.toExponential(2) : 'N/A'; })()}
                                     </div>
                                 </div>
                                 <div>
