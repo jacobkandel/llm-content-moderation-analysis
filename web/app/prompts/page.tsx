@@ -1,103 +1,92 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Filter, ChevronDown, ChevronRight, ShieldCheck, ShieldX, Eye } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, ShieldCheck, ShieldX } from 'lucide-react';
 import SkeletonLoader from '@/components/SkeletonLoader';
-import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
-import { getLogoUrl } from '@/lib/provider-logos';
 import { sanitizeSearchInput } from '@/lib/utils';
 
-function VerdictDot({ verdict }: { verdict: string }) {
-    const v = verdict?.toUpperCase();
-    const isAllowed = v === 'ALLOWED' || v === 'SAFE';
+interface PromptEntry {
+    id: string;
+    text: string;
+    category: string;
+    source: string;
+}
+
+function SourceBadge({ source }: { source: string }) {
+    const colors: Record<string, string> = {
+        'Hand-Written': 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+        'Template-Generated': 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+        'Style Variant': 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+        'Boundary Test': 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+        'False Positive Control': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    };
     return (
-        <span
-            className={`inline-block w-2.5 h-2.5 rounded-full ${isAllowed ? 'bg-emerald-500' : 'bg-red-500'}`}
-            title={isAllowed ? 'ALLOWED' : 'REMOVED'}
-        />
+        <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-medium ${colors[source] || 'bg-muted/30 text-muted-foreground'}`}>
+            {source}
+        </span>
     );
 }
 
 export default function PromptsPage() {
-    const [data, setData] = useState<AuditRow[] | null>(null);
+    const [prompts, setPrompts] = useState<PromptEntry[] | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
-    const [verdictFilter, setVerdictFilter] = useState<'all' | 'allowed' | 'removed'>('all');
-    const [expandedPrompt, setExpandedPrompt] = useState<string | null>(null);
+    const [sourceFilter, setSourceFilter] = useState('all');
+    const [expandedId, setExpandedId] = useState<string | null>(null);
     const [page, setPage] = useState(0);
-    const PAGE_SIZE = 25;
+    const PAGE_SIZE = 50;
 
     useEffect(() => {
-        fetchAuditData(false, false).then(rows => {
-            setData((rows || []).filter(r => r.verdict !== 'ERROR'));
-            setLoading(false);
-        }).catch(() => setLoading(false));
+        // Load from pre-built prompts_list.json (fast, always available)
+        fetch('/prompts_list.json')
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                return r.json();
+            })
+            .then((data: PromptEntry[]) => {
+                setPrompts(data.filter(p => p.text && p.text.trim()));
+                setLoading(false);
+            })
+            .catch(e => {
+                setError('Could not load prompt data. The data may still be generating.');
+                setLoading(false);
+            });
     }, []);
 
     const categories = useMemo(() => {
-        if (!data) return [];
-        return [...new Set(data.map(r => r.category))].filter(Boolean).sort();
-    }, [data]);
+        if (!prompts) return [];
+        return [...new Set(prompts.map(p => p.category))].filter(Boolean).sort();
+    }, [prompts]);
 
-    const models = useMemo(() => {
-        if (!data) return [];
-        return [...new Set(data.map(r => r.model))].filter(Boolean).sort();
-    }, [data]);
+    const sources = useMemo(() => {
+        if (!prompts) return [];
+        return [...new Set(prompts.map(p => p.source))].filter(Boolean).sort();
+    }, [prompts]);
 
-    // Group by prompt text, compute per-model verdicts
-    const promptGroups = useMemo(() => {
-        if (!data) return [];
+    const filtered = useMemo(() => {
+        if (!prompts) return [];
+        let results = prompts;
 
-        const groups = new Map<string, {
-            prompt: string;
-            category: string;
-            verdicts: Map<string, { verdict: string; response: string }>;
-        }>();
-
-        for (const row of data) {
-            if (!row.prompt) continue;
-            if (!groups.has(row.prompt)) {
-                groups.set(row.prompt, {
-                    prompt: row.prompt,
-                    category: row.category,
-                    verdicts: new Map(),
-                });
-            }
-            const group = groups.get(row.prompt)!;
-            group.verdicts.set(row.model, {
-                verdict: row.verdict,
-                response: row.response || '',
-            });
-        }
-
-        let results = [...groups.values()];
-
-        // Filters
         if (categoryFilter !== 'all') {
-            results = results.filter(g => g.category === categoryFilter);
+            results = results.filter(p => p.category === categoryFilter);
+        }
+        if (sourceFilter !== 'all') {
+            results = results.filter(p => p.source === sourceFilter);
         }
         if (search) {
             const s = sanitizeSearchInput(search).toLowerCase();
-            results = results.filter(g => g.prompt.toLowerCase().includes(s));
+            results = results.filter(p =>
+                p.text.toLowerCase().includes(s) ||
+                p.id.toLowerCase().includes(s)
+            );
         }
-        if (verdictFilter !== 'all') {
-            results = results.filter(g => {
-                const verdicts = [...g.verdicts.values()].map(v => v.verdict.toUpperCase());
-                if (verdictFilter === 'removed') {
-                    return verdicts.some(v => v === 'REMOVED' || v === 'REFUSAL' || v === 'UNSAFE');
-                }
-                return verdicts.every(v => v === 'ALLOWED' || v === 'SAFE');
-            });
-        }
-
-        // Sort by category then prompt
-        results.sort((a, b) => a.category.localeCompare(b.category) || a.prompt.localeCompare(b.prompt));
         return results;
-    }, [data, categoryFilter, search, verdictFilter]);
+    }, [prompts, categoryFilter, sourceFilter, search]);
 
-    const paged = promptGroups.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-    const totalPages = Math.ceil(promptGroups.length / PAGE_SIZE);
+    const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
 
     if (loading) return <SkeletonLoader />;
 
@@ -109,10 +98,16 @@ export default function PromptsPage() {
                     Prompt Explorer
                 </h1>
                 <p className="text-muted-foreground max-w-2xl">
-                    Browse every prompt in the benchmark and see how each model responded.
-                    Click a row to expand the full per-model verdicts.
+                    Browse every prompt in the benchmark. Filter by category or source type
+                    and click a row to see the full prompt text.
                 </p>
             </div>
+
+            {error && (
+                <div className="rounded-xl border border-amber-400/30 bg-amber-500/5 p-4 text-sm text-amber-700 dark:text-amber-400">
+                    {error}
+                </div>
+            )}
 
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
@@ -122,7 +117,7 @@ export default function PromptsPage() {
                         type="text"
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-                        placeholder="Search prompts..."
+                        placeholder="Search prompts or IDs..."
                         className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand/40"
                     />
                 </div>
@@ -137,20 +132,25 @@ export default function PromptsPage() {
                     ))}
                 </select>
                 <select
-                    value={verdictFilter}
-                    onChange={(e) => { setVerdictFilter(e.target.value as any); setPage(0); }}
+                    value={sourceFilter}
+                    onChange={(e) => { setSourceFilter(e.target.value); setPage(0); }}
                     className="px-3 py-2.5 text-sm rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-brand/40"
                 >
-                    <option value="all">All Verdicts</option>
-                    <option value="removed">Has Refusals</option>
-                    <option value="allowed">All Allowed</option>
+                    <option value="all">All Sources</option>
+                    {sources.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                    ))}
                 </select>
             </div>
 
-            {/* Results count */}
-            <p className="text-xs text-muted-foreground">
-                {promptGroups.length} prompts found · Page {page + 1} of {totalPages || 1}
-            </p>
+            {/* Stats row */}
+            <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">{filtered.length.toLocaleString()}</span> prompts
+                    {prompts && filtered.length !== prompts.length && ` (filtered from ${prompts.length.toLocaleString()} total)`}
+                    {totalPages > 1 && ` · Page ${page + 1} of ${totalPages}`}
+                </p>
+            </div>
 
             {/* Prompt List */}
             <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
@@ -158,78 +158,39 @@ export default function PromptsPage() {
                     <div className="p-12 text-center text-muted-foreground">
                         No prompts match your filters.
                     </div>
-                ) : paged.map((group) => {
-                    const isExpanded = expandedPrompt === group.prompt;
-                    const refusalCount = [...group.verdicts.values()].filter(
-                        v => ['REMOVED', 'REFUSAL', 'UNSAFE'].includes(v.verdict.toUpperCase())
-                    ).length;
-                    const totalModels = group.verdicts.size;
-
+                ) : paged.map((prompt) => {
+                    const isExpanded = expandedId === prompt.id;
                     return (
-                        <div key={group.prompt}>
+                        <div key={prompt.id}>
                             <button
-                                onClick={() => setExpandedPrompt(isExpanded ? null : group.prompt)}
-                                className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/20 transition-colors"
+                                onClick={() => setExpandedId(isExpanded ? null : prompt.id)}
+                                className="w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-muted/20 transition-colors"
                             >
                                 {isExpanded
                                     ? <ChevronDown className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                                     : <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                                 }
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-foreground line-clamp-2">{group.prompt}</p>
-                                    <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-sm text-foreground line-clamp-2 mb-1.5">{prompt.text}</p>
+                                    <div className="flex items-center gap-2 flex-wrap">
                                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted/30 px-2 py-0.5 rounded">
-                                            {group.category}
+                                            {prompt.category}
                                         </span>
-                                        {refusalCount > 0 ? (
-                                            <span className="text-[10px] text-red-400 flex items-center gap-1">
-                                                <ShieldX className="h-3 w-3" />
-                                                {refusalCount}/{totalModels} refused
-                                            </span>
-                                        ) : (
-                                            <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                                                <ShieldCheck className="h-3 w-3" />
-                                                All {totalModels} allowed
-                                            </span>
-                                        )}
+                                        <SourceBadge source={prompt.source} />
+                                        <span className="text-[10px] font-mono text-muted-foreground/60">{prompt.id}</span>
                                     </div>
-                                </div>
-                                <div className="flex gap-0.5 shrink-0 mt-1">
-                                    {models.slice(0, 12).map(m => {
-                                        const v = group.verdicts.get(m);
-                                        if (!v) return <span key={m} className="w-2.5 h-2.5 rounded-full bg-muted/30" />;
-                                        return <VerdictDot key={m} verdict={v.verdict} />;
-                                    })}
-                                    {models.length > 12 && (
-                                        <span className="text-[9px] text-muted-foreground ml-1">+{models.length - 12}</span>
-                                    )}
                                 </div>
                             </button>
 
                             {isExpanded && (
-                                <div className="bg-muted/10 border-t border-border px-4 py-3">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        {models.map(m => {
-                                            const v = group.verdicts.get(m);
-                                            if (!v) return null;
-                                            const isAllowed = ['ALLOWED', 'SAFE'].includes(v.verdict.toUpperCase());
-                                            return (
-                                                <div key={m} className={`flex items-start gap-2 p-2 rounded-lg text-xs ${isAllowed ? 'bg-emerald-500/5' : 'bg-red-500/5'}`}>
-                                                    <img
-                                                        src={getLogoUrl(m)}
-                                                        alt=""
-                                                        className="w-4 h-4 rounded mt-0.5"
-                                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                                    />
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className="font-medium text-foreground">{m.split('/').pop()}</span>
-                                                            <VerdictDot verdict={v.verdict} />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                <div className="bg-muted/10 border-t border-border px-6 py-4">
+                                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{prompt.text}</p>
+                                    <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                                        <span>ID: <span className="font-mono">{prompt.id}</span></span>
+                                        <span>·</span>
+                                        <span>Category: {prompt.category}</span>
+                                        <span>·</span>
+                                        <span>Source: {prompt.source}</span>
                                     </div>
                                 </div>
                             )}
