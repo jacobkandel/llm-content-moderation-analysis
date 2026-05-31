@@ -10,7 +10,7 @@ import type { NextRequest } from 'next/server';
  * we use 'unsafe-inline' for scripts — which is what the Next.js default ships with —
  * while still hardening all other directives (HSTS, X-Frame-Options, nosniff, etc.).
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     const isProd = process.env.NODE_ENV === 'production';
 
     const csp = [
@@ -44,6 +44,9 @@ export function middleware(request: NextRequest) {
     return response;
 }
 
+// Next.js 16: export named 'proxy'; also keep the middleware alias for compatibility
+export { proxy as middleware };
+
 export const config = {
     matcher: [
         /*
@@ -53,6 +56,6 @@ export const config = {
          * - favicon.ico
          * - Public files (images, fonts, etc.)
          */
-        '/((?!_next/static|_next/image|favicon.ico|public/|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|csv|json|gz)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|public/|.*\.(?:png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|csv|json|gz)$).*)',
     ],
 };
