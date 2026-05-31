@@ -23,12 +23,10 @@ export function CiteButton() {
         setTimeout(() => setCopied(null), 2000);
     };
 
-    // Use native popover API if available, otherwise JS fallback
     const [open, setOpen] = useState(false);
-    const supportsPopover = typeof HTMLElement !== 'undefined' && 'popover' in HTMLElement.prototype;
 
     useEffect(() => {
-        if (!supportsPopover && open) {
+        if (open) {
             const handleClickOutside = (e: MouseEvent) => {
                 if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
                     setOpen(false);
@@ -37,18 +35,12 @@ export function CiteButton() {
             document.addEventListener('mousedown', handleClickOutside);
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }
-    }, [open, supportsPopover]);
-
-    const popoverId = 'cite-popover';
+    }, [open]);
 
     return (
         <div className="relative" ref={popoverRef}>
-            {/* Use commandfor/command for native popover when supported */}
             <button
-                {...(supportsPopover
-                    ? { popoverTarget: popoverId, popoverTargetAction: 'toggle' as any }
-                    : { onClick: () => setOpen(!open) }
-                )}
+                onClick={() => setOpen(!open)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
                 aria-label="Cite this research"
             >
@@ -56,18 +48,10 @@ export function CiteButton() {
                 Cite This
             </button>
 
-            {/* Popover content — uses native popover when available */}
+            {/* Popover content */}
             <div
-                id={popoverId}
-                {...(supportsPopover
-                    ? { popover: 'auto' as any }
-                    : {}
-                )}
                 className={`
-                    ${supportsPopover
-                        ? 'popover-cite-panel'
-                        : open ? 'block' : 'hidden'
-                    }
+                    ${open ? 'block' : 'hidden'}
                     absolute right-0 top-full mt-2 z-50 w-[420px]
                     bg-popover border border-border rounded-xl shadow-xl p-4 space-y-3
                 `}

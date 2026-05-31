@@ -156,7 +156,11 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
 
     // Sort categories by this model's rate descending
     const categoryEntries = categories
-        .map(cat => ({ cat, rate: stats?.categoryRates?.[cat] ?? null }))
+        .map(cat => {
+            const val = stats?.categoryRates?.[cat];
+            const rate = typeof val === 'object' && val !== null ? val.rate : val;
+            return { cat, rate: typeof rate === 'number' ? rate : null };
+        })
         .filter(e => e.rate !== null)
         .sort((a, b) => (b.rate ?? 0) - (a.rate ?? 0));
 
