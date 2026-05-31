@@ -3,6 +3,10 @@ import Image from 'next/image';
 import { ChevronDown, Info, ExternalLink } from 'lucide-react';
 import { TooltipHover } from '@/components/ui/TooltipHover';
 
+/** Safely call .toFixed() — returns '0' if the value is not a finite number. */
+const safeFixed = (n: number | null | undefined, d = 1): string =>
+    (typeof n === 'number' && isFinite(n) ? n : 0).toFixed(d);
+
 interface StatsPanelProps {
     modelA: string;
     modelB: string;
@@ -109,8 +113,8 @@ export function StatsPanel({
                                     label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>}
                                     tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
                                 />
-                                <div className={`text-2xl font-bold ${statsA.refusalRate > 50 ? 'text-refusal' : 'text-safe'}`}>
-                                    {statsA.refusalRate.toFixed(1)}%
+                                <div className={`text-2xl font-bold ${(statsA.refusalRate ?? 0) > 50 ? 'text-refusal' : 'text-safe'}`}>
+                                    {safeFixed(statsA.refusalRate)}%
                                 </div>
                             </div>
                             <div className="bg-muted/50 p-4 rounded-lg">
@@ -155,8 +159,8 @@ export function StatsPanel({
                                     label={<div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Refusal Rate</div>}
                                     tooltipText="Percentage of prompts in our dataset that this model refused to answer. Higher = more restrictive."
                                 />
-                                <div className={`text-2xl font-bold ${statsB.refusalRate > 50 ? 'text-refusal' : 'text-safe'}`}>
-                                    {statsB.refusalRate.toFixed(1)}%
+                                <div className={`text-2xl font-bold ${(statsB.refusalRate ?? 0) > 50 ? 'text-refusal' : 'text-safe'}`}>
+                                    {safeFixed(statsB.refusalRate)}%
                                 </div>
                             </div>
                             <div className="bg-muted/50 p-4 rounded-lg">
