@@ -77,9 +77,9 @@ export function CouncilConsensus({ data = [] }: CouncilConsensusProps) {
                 <CardContent className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={leaningData}>
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                            <XAxis dataKey="leaning" fontSize={11} angle={-15} textAnchor="end" height={70} />
-                            <YAxis allowDecimals={false} />
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} stroke="hsl(var(--border))" />
+                            <XAxis dataKey="leaning" fontSize={11} angle={-15} textAnchor="end" height={70} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                            <YAxis allowDecimals={false} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                             <Tooltip
                                 contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                                 formatter={(value: any, name: string | undefined) => {

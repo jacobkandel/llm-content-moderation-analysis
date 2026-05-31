@@ -62,6 +62,7 @@ const analysisCategories = [
 export function GlobalSidebar() {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [touchStartX, setTouchStartX] = useState<number | null>(null);
     const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
     const { isCollapsed, toggleSidebar } = useSidebar();
 
@@ -86,6 +87,13 @@ export function GlobalSidebar() {
             {/* Sidebar */}
             <aside
                 aria-label="Sidebar"
+                onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
+                onTouchEnd={(e) => {
+                    if (touchStartX !== null && touchStartX - e.changedTouches[0].clientX > 50) {
+                        setIsMobileMenuOpen(false);
+                    }
+                    setTouchStartX(null);
+                }}
                 className={cn(
                     'fixed top-0 left-0 z-40 h-screen bg-card border-r border-border transition-all duration-300 overflow-y-auto flex flex-col',
                     isMobileMenuOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0',
@@ -258,6 +266,13 @@ export function GlobalSidebar() {
                 <div
                     className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
+                    onTouchEnd={(e) => {
+                        if (touchStartX !== null && touchStartX - e.changedTouches[0].clientX > 50) {
+                            setIsMobileMenuOpen(false);
+                        }
+                        setTouchStartX(null);
+                    }}
                 />
             )}
         </>

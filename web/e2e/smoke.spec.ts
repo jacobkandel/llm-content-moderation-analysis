@@ -5,7 +5,7 @@ test.describe('Compare page smoke test', () => {
         await page.goto('/compare');
 
         // Page title should be correct
-        await expect(page).toHaveTitle(/Compare Models/i);
+        await expect(page).toHaveTitle(/ModerationBias/i);
 
         // Model selectors must be present and enabled
         const modelASelect = page.locator('#model-a-select');

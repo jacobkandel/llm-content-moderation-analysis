@@ -116,9 +116,14 @@ export default function DataPage() {
 
             {/* ── HuggingFace ── */}
             <section className="space-y-4">
-                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <Database className="h-5 w-5 text-brand" />
-                    HuggingFace Dataset
+                <h2 className="text-lg font-bold text-foreground flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                        <Database className="h-5 w-5 text-brand" />
+                        HuggingFace Dataset
+                    </div>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border border-yellow-500/20">
+                        Auto-Synced
+                    </span>
                 </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                     The dataset is mirrored to HuggingFace Datasets for easy loading in Python.

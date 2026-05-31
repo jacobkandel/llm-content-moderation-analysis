@@ -39,9 +39,9 @@ export default function PaternalismPage() {
                         {paternalismData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={paternalismData} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis type="number" domain={[0, 100]} unit="%" />
-                                    <YAxis type="category" dataKey="model" width={120} tick={{ fontSize: 10 }} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                    <XAxis type="number" domain={[0, 100]} unit="%" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                                    <YAxis dataKey="model" type="category" width={150} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
                                     <RechartsTooltip />
                                     <Bar dataKey="refusal_rate" name="Refusal Rate" onClick={(e: any) => { if (e?.id) router.push(`/models/${e.id}`) }} style={{ cursor: 'pointer' }}>
                                         {paternalismData.map((entry: any, index: number) => (

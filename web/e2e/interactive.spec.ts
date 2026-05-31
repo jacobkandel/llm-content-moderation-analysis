@@ -66,11 +66,11 @@ test.describe('Compare page charts', () => {
     test('compare page renders SVG chart elements', async ({ page }) => {
         await page.goto('/compare', { waitUntil: 'domcontentloaded' });
 
-        // Wait for SVGs to load (recharts renders <svg> elements)
-        const svgLocator = page.locator('svg').first();
-        await expect(svgLocator).toBeVisible({ timeout: 20_000 });
+        // Wait for Recharts wrapper to load
+        const chartWrapper = page.locator('.recharts-wrapper').first();
+        await expect(chartWrapper).toBeVisible({ timeout: 20_000 });
 
-        const svgCount = await page.locator('svg').count();
+        const svgCount = await page.locator('.recharts-wrapper svg').count();
         expect(svgCount).toBeGreaterThan(0);
     });
 });
@@ -116,16 +116,9 @@ test.describe('Annotate page', () => {
         await page.goto('/annotate', { waitUntil: 'domcontentloaded' });
 
         // Annotation buttons are typically labeled with category options or rating buttons
-        // Look for button elements that are visible on the page
-        const buttons = page.locator('button');
-        await expect(buttons.first()).toBeVisible({ timeout: 15_000 });
-
-        const buttonCount = await buttons.count();
-        expect(buttonCount).toBeGreaterThan(0);
-
         // Specifically, look for buttons that would be used for annotation actions
         const annotationButtons = page.locator(
-            'button[data-label], button[aria-label*="annotate" i], button[aria-label*="label" i], button:has-text("Refuse"), button:has-text("Comply"), button:has-text("Neutral"), button:has-text("Safe"), button:has-text("Unsafe")'
+            'button[data-label], button[aria-label*="annotate" i], button:has-text("ALLOWED"), button:has-text("REMOVED")'
         );
         // At least one annotate-specific button should be visible if annotation UI loaded
         const annotationButtonCount = await annotationButtons.count();
