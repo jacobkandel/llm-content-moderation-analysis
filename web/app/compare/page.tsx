@@ -3,6 +3,53 @@ import CompareContent from './CompareContent';
 import { RefreshCw } from 'lucide-react';
 import fs from 'fs';
 import path from 'path';
+import type { Metadata } from 'next';
+
+// Helper: extract a short display name from a model id like "openai/gpt-4o"
+function modelDisplayName(id: string | null): string | null {
+    if (!id) return null;
+    const part = id.split('/').pop() ?? id;
+    // Capitalise and clean up dashes/dots
+    return part
+        .replace(/[-_.]/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Dynamic metadata driven by ?modelA=…&modelB=… query params
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<{ modelA?: string; modelB?: string }>;
+}): Promise<Metadata> {
+    const params = await searchParams;
+    const nameA = modelDisplayName(params.modelA ?? null);
+    const nameB = modelDisplayName(params.modelB ?? null);
+
+    const title =
+        nameA && nameB
+            ? `Compare ${nameA} vs ${nameB} | ModerationBias`
+            : 'Model Comparison | ModerationBias';
+
+    const description =
+        nameA && nameB
+            ? `Side-by-side analysis of ${nameA} vs ${nameB}: refusal rates, verbosity, category breakdowns, and statistical significance.`
+            : 'Compare LLM content-moderation behaviour side-by-side: refusal rates, verbosity, category breakdowns, and statistical significance.';
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary',
+            title,
+            description,
+        },
+    };
+}
 
 export default async function ComparePage() {
     // Read data server-side
