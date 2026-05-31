@@ -255,27 +255,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add \
-            web/public/models.json \
-            web/public/summary_stats.json \
-            web/public/spectrum_data.json \
-            web/public/heatmap_matrix.json \
-            web/public/longitudinal_data.json \
-            web/public/reliability_scores.json \
-            web/public/consensus_stats.json \
-            web/public/clusters.json \
-            web/public/drift_report.json \
-            web/public/political_compass.json \
-            web/public/paternalism.json \
-            web/public/significance_pairwise.json \
-            web/public/overrefusal_stats.json \
-            web/public/compare_data.json \
-            web/public/soft_censorship_stats.json \
-            web/public/family_stats.json \
-            web/public/prompts_list.json \
-            web/public/latest_report.md \
-            web/public/assets/ \
-            data/trends.csv || true
+          for file in web/public/*.json web/public/assets/ data/trends.csv web/public/latest_report.md; do
+            if [ -e "$file" ]; then
+              git add "$file"
+            fi
+          done
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
           git pull --rebase origin main
           git push origin main
