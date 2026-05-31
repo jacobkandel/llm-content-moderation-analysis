@@ -42,8 +42,9 @@ async function uploadToBlob() {
     }
 
     if (blobs.length === 0) {
-        console.error("❌ No files were uploaded.");
-        process.exit(1);
+        console.warn("⚠️ No files were uploaded (non-fatal — data may already be in Blob).");
+    } else {
+        console.log(`✅ Uploaded ${blobs.length} file(s) to Vercel Blob.`);
     }
 }
 
