@@ -21,7 +21,7 @@ interface ModelStats {
     refusalRate: number;
     avgVerbosity: number;
     total: number;
-    categoryRates: Record<string, number>;
+    categoryRates: Record<string, number | { rate: number; ciLower: number; ciUpper: number }>;
 }
 
 async function getModelData() {
