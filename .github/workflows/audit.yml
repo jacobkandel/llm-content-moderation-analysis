@@ -261,10 +261,14 @@ jobs:
             fi
           done
           git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
+          # Stash any unstaged changes (build artifacts, cleaned-up files) so rebase can run
+          git stash --include-untracked || true
           # Safely merge any commits that landed on main while this job was running
           git fetch origin main
           git rebase origin/main || (git rebase --abort && git merge --no-edit origin/main)
           git push origin HEAD:main
+          # Drop the stash (we don't need build artifacts)
+          git stash drop 2>/dev/null || true
 
       - name: Upload Audit Data Backup
         uses: actions/upload-artifact@v4
