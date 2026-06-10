@@ -78,9 +78,10 @@ jobs:
           mkdir -p web/public
           echo "📥 Downloading existing audit log from Vercel Blob..."
           if curl -f -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz; then
-            echo "✅ Download successful."
             gzip -df web/public/audit_log.csv.gz
-            echo "✅ Decompressed to web/public/audit_log.csv"
+            python scripts/migrate_csv.py
+            mv web/public/audit_log_migrated.csv web/public/audit_log.csv
+            echo "✅ audit_log.csv ready for append"
           else
             echo "⚠️ No existing data found. Starting fresh."
           fi
@@ -191,6 +192,8 @@ jobs:
           echo "📥 Downloading latest audit log from Vercel Blob..."
           if curl -f -o web/public/audit_log.csv.gz https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz; then
             gzip -df web/public/audit_log.csv.gz
+            python scripts/migrate_csv.py
+            mv web/public/audit_log_migrated.csv web/public/audit_log.csv
             echo "✅ audit_log.csv ready ($(wc -l < web/public/audit_log.csv) rows)"
           else
             echo "❌ Could not download audit log from Blob — nothing to sync."
