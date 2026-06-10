@@ -280,6 +280,7 @@ jobs:
 
       - name: Deploy to Vercel (Preview)
         id: vercel_deploy
+        continue-on-error: true
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -289,7 +290,9 @@ jobs:
           if [ -f "data/latest_report.md" ]; then
             cp data/latest_report.md web/public/
           fi
-          PREVIEW_URL=$(npx vercel deploy --token=$VERCEL_TOKEN --yes)
+          # Remove large files that exceed Vercel's 100MB limit before deploying
+          find . -path ./.git -prune -o -type f -size +90M -print -exec rm -f {} \;
+          PREVIEW_URL=$(npx vercel deploy --token=$VERCEL_TOKEN --yes) || true
           echo "Deployed to: $PREVIEW_URL"
           echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
 

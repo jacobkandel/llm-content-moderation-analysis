@@ -236,3 +236,13 @@ check_db.py
 check_progress.py
 .env
 .env.local
+
+# Test / audit artifacts
+audit_pages.json
+audit_pages.py
+report.json
+test_a.txt
+web/audit_screenshots/
+web/full_audit_report.json
+web/playwright-report/
+full_audit.js

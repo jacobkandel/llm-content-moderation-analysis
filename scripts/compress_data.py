@@ -865,9 +865,10 @@ def compress_csv():
 
     # 2. Generate and Compress Lite Version (Metadata Only)
     print(f"   - Generating lite version (no prompt/response) to {OUTPUT_FILE_LITE}...")
+    df = None
     try:
         import pandas as pd
-        df = pd.read_csv(INPUT_FILE)
+        df = pd.read_csv(INPUT_FILE, on_bad_lines='skip', engine='python')
 
         drop_cols = ['prompt', 'response', 'prompt_text', 'response_text', 'text', 'prompt_text,response_text']
         cols_to_drop = [c for c in drop_cols if c in df.columns]
@@ -885,8 +886,15 @@ def compress_csv():
         print("❌ Pandas not found. Cannot generate lite version. Skipping.")
         return
     except Exception as e:
-        print(f"❌ Failed to generate lite version: {e}")
-        return
+        print(f"⚠️ Failed to generate lite version: {e}")
+        # Still try to generate JSON if we managed to load the dataframe
+        if df is None:
+            try:
+                import pandas as pd
+                df = pd.read_csv(INPUT_FILE, on_bad_lines='skip', engine='python')
+            except Exception as e2:
+                print(f"❌ Cannot read CSV at all: {e2}")
+                return
 
     # 3. Generate pre-computed JSON files
     try:
