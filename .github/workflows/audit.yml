@@ -327,6 +327,7 @@ jobs:
             }" && echo "✅ IndexNow ping sent" || echo "⚠️ IndexNow ping failed (non-critical)"
 
       - name: Sync to Hugging Face Hub
+        continue-on-error: true
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_REPO_ID: "jmk9494/moderation-bias-benchmark"
