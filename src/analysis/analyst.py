@@ -4,28 +4,56 @@ import pandas as pd
 import numpy as np
 from datetime import date
 from openai import OpenAI
-from src.database import get_session, AuditResult
 from src.config import settings
 from src.logger import logger
 from src.statistics import calculate_fleiss_kappa, interpret_kappa
-from sqlalchemy import select
 
-def generate_weekly_report(output_dir=".", report_file="web/public/latest_report.md"):
-    """
-    Analyst 3.0: Generates a rich, longitudinal research report using all available statistics.
-    """
-    logger.info("📊 Starting AI Analyst 3.0 Analysis...")
-    
-    session = get_session()
+CSV_PATHS = [
+    "web/public/audit_log.csv",
+    "web/public/audit_log.csv.gz",
+    "audit_log.csv",
+]
+
+def _load_data():
+    """Load audit data from CSV (preferred) or SQLite fallback."""
+    # Try CSV first (works in CI and locally)
+    for csv_path in CSV_PATHS:
+        if os.path.exists(csv_path):
+            logger.info(f"📂 Loading data from {csv_path}...")
+            df = pd.read_csv(csv_path, on_bad_lines='skip', engine='python')
+            # Normalize column names to match expected schema
+            col_map = {'model_id': 'model', 'run_cost': 'cost'}
+            df.rename(columns={k: v for k, v in col_map.items() if k in df.columns}, inplace=True)
+            logger.info(f"Loaded {len(df)} rows from CSV.")
+            return df
+
+    # Fallback to SQLite
+    logger.info("No CSV found, trying SQLite...")
     try:
-        # --- Fetch raw audit data ---
+        from src.database import get_session, AuditResult
+        from sqlalchemy import select
+        session = get_session()
         query = select(AuditResult.model_id.label("model"),
                        AuditResult.verdict,
                        AuditResult.prompt_id,
                        AuditResult.response_text,
                        AuditResult.cost)
         df = pd.read_sql(query, session.bind)
-        
+        session.close()
+        return df
+    except Exception as e:
+        logger.error(f"SQLite fallback also failed: {e}")
+        return pd.DataFrame()
+
+def generate_weekly_report(output_dir=".", report_file="web/public/latest_report.md"):
+    """
+    Analyst 3.0: Generates a rich, longitudinal research report using all available statistics.
+    """
+    logger.info("📊 Starting AI Analyst 3.0 Analysis...")
+
+    try:
+        df = _load_data()
+
         if df.empty: 
             logger.warning("⚠️ No audit log found to analyze.")
             return
@@ -209,8 +237,6 @@ CRITICAL FORMATTING RULES:
         logger.error(f"⚠️ Failed to generate analyst report: {e}")
         import traceback
         traceback.print_exc()
-    finally:
-        session.close()
 
 if __name__ == "__main__":
     generate_weekly_report()
