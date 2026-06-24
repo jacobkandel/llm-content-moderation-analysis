@@ -7,7 +7,8 @@ import { put, list } from '@vercel/blob';
  * 
  * Body: { itemId, model, verdict, annotatorId, category }
  * 
- * Annotations are appended to a JSONL file in Vercel Blob for easy analysis.
+ * Each annotation is stored as an individual blob file to avoid
+ * race conditions from concurrent read-modify-write on shared files.
  */
 
 interface AnnotationPayload {
@@ -69,32 +70,18 @@ export async function POST(request: NextRequest) {
             userAgent: request.headers.get('user-agent')?.slice(0, 100) || '',
         };
 
-        // Append to a daily JSONL file in Vercel Blob
+        // Write each annotation as its own blob file to prevent race conditions.
+        // Previously, concurrent writes to a shared daily JSONL file caused data loss
+        // because two requests would read the same content, both append, and the slower
+        // write would overwrite the faster one.
         const date = new Date().toISOString().split('T')[0];
-        const blobPath = `${BLOB_PREFIX}${date}.jsonl`;
+        const uniqueId = `${now}_${Math.random().toString(36).slice(2, 8)}`;
+        const blobPath = `${BLOB_PREFIX}${date}/${body.annotatorId}_${uniqueId}.json`;
 
-        // Read existing content if any
-        let existingContent = '';
-        try {
-            const blobs = await list({ prefix: blobPath });
-            if (blobs.blobs.length > 0) {
-                const existingBlob = blobs.blobs[0];
-                const response = await fetch(existingBlob.url);
-                existingContent = await response.text();
-            }
-        } catch {
-            // File doesn't exist yet — that's fine
-        }
-
-        // Append the new record
-        const newContent = existingContent + JSON.stringify(record) + '\n';
-
-        // Write back to blob (overwrite with appended content)
-        await put(blobPath, newContent, {
+        await put(blobPath, JSON.stringify(record), {
             access: 'public',
             addRandomSuffix: false,
-            contentType: 'application/x-ndjson',
-            allowOverwrite: true,
+            contentType: 'application/json',
         });
 
         return NextResponse.json({
@@ -131,13 +118,11 @@ export async function GET() {
             for (const blob of blobs.blobs) {
                 try {
                     const response = await fetch(blob.url);
-                    if (!response.ok) {
-                        console.error(`Failed to fetch blob ${blob.pathname}: ${response.status}`);
-                        continue;
-                    }
+                    if (!response.ok) continue;
                     const content = await response.text();
+
+                    // Handle both old JSONL files (multiple lines) and new individual JSON files
                     const lines = content.split('\n').filter(l => l.trim());
-                    
                     for (const line of lines) {
                         try {
                             const record = JSON.parse(line);
