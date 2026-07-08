@@ -24,7 +24,7 @@ tabulate          # For pandas to_markdown support
 # Phase 29-35: Advanced Improvements
 psycopg2-binary   # PostgreSQL adapter
 celery>=5.6.3     # Background job queue
-redis>=7.4.0      # Celery broker
+redis>=8.0.1      # Celery broker
 seaborn
 matplotlib
 sentence-transformers  # Semantic embeddings for refusal cluster analysis
