@@ -14,9 +14,12 @@ interface PromptItem {
 }
 
 let cachedPrompts: PromptItem[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 3600_000; // 1 hour
 
 async function loadPrompts(baseUrl: string): Promise<PromptItem[]> {
-    if (cachedPrompts && cachedPrompts.length > 0) return cachedPrompts;
+    const now = Date.now();
+    if (cachedPrompts && cachedPrompts.length > 0 && (now - cacheTimestamp) < CACHE_TTL_MS) return cachedPrompts;
 
     try {
         const url = `${baseUrl}/prompts_list.json`;
@@ -25,6 +28,7 @@ async function loadPrompts(baseUrl: string): Promise<PromptItem[]> {
         const data: PromptItem[] = await res.json();
         // Only include hand-written prompts for human annotation (higher quality)
         cachedPrompts = data.filter(p => p.source === 'Hand-Written' && p.text.length > 20);
+        cacheTimestamp = Date.now();
         return cachedPrompts;
     } catch (e) {
         console.error('Failed to load prompts:', e);

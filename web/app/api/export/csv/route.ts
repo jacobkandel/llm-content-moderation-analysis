@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 
 /**
- * Server-side CSV export — originally backed by better-sqlite3.
- * The DataTable component already handles client-side CSV export.
- * Returning 501 until a proper persistence layer is wired in.
+ * GET /api/export/csv
+ *
+ * Redirects to the publicly hosted audit log CSV on Vercel Blob storage.
+ * Previously returned 501 because the original SQLite-backed implementation
+ * doesn't work on Vercel serverless.
  */
+const BLOB_CSV_URL = 'https://oeqbf51ent3zxva1.public.blob.vercel-storage.com/data/audit_log.csv.gz';
+
 export async function GET() {
-    return NextResponse.json(
-        { error: 'Server-side CSV export not yet implemented. Use the Export button in the Database view instead.' },
-        { status: 501 }
-    );
+    return NextResponse.redirect(BLOB_CSV_URL);
 }
