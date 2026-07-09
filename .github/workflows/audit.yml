@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -144,7 +144,7 @@ jobs:
           cd ..
 
       - name: Upload Benchmark Results Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-results
           path: web/public/xstest_results.csv
@@ -166,7 +166,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -201,7 +201,7 @@ jobs:
           fi
 
       - name: Download Benchmark Results Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: benchmark-results
           path: web/public/
@@ -274,7 +274,7 @@ jobs:
           git stash drop 2>/dev/null || true
 
       - name: Upload Audit Data Backup
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: audit-data-backup
           path: |
