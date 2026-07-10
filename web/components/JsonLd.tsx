@@ -21,7 +21,7 @@ export default function JsonLd({ pathname }: JsonLdProps) {
             '@type': 'WebSite',
             name: 'Moderation Bias',
             url: BASE,
-            description: 'Benchmarking content-moderation bias in large language models across 25+ AI systems and 2,000+ prompts.',
+            description: 'Benchmarking content-moderation bias in large language models across 30+ AI systems and 2,300+ prompts.',
             potentialAction: {
                 '@type': 'SearchAction',
                 target: `${BASE}/prompts?q={search_term_string}`,

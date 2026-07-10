@@ -7,6 +7,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Activity } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { JsonData } from '@/lib/data-loading';
+import { TOOLTIP_STYLE, TOOLTIP_CURSOR, AXIS_TICK_STYLE, GRID_STYLE } from '@/lib/chart-theme';
 
 interface ModelDriftProps {
     data?: JsonData[];
@@ -30,10 +31,10 @@ export function ModelDrift({ data = [] }: ModelDriftProps) {
                 {data.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} stroke="hsl(var(--border))" />
-                            <XAxis type="number" domain={[-20, 20]} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                            <YAxis dataKey="model" type="category" width={100} fontSize={11} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                            <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }} />
+                            <CartesianGrid {...GRID_STYLE} />
+                            <XAxis type="number" domain={[-20, 20]} tick={AXIS_TICK_STYLE} />
+                            <YAxis dataKey="model" type="category" width={100} tick={AXIS_TICK_STYLE} />
+                            <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} />
                             <Bar dataKey="rate_change" fill="#A4343A" name="Rate Change (%)" onClick={(e: JsonData) => { if (e?.model) router.push(`/models/${e.model}`) }} style={{ cursor: 'pointer' }}>
                                 {data.map((entry, index) => (
                                     // recharts' Cell radius type is number|string, but the underlying

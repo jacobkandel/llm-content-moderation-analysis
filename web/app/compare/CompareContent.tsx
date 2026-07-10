@@ -148,6 +148,8 @@ export default function CompareContent({
     // --- Phase 1: Initialize model pair from URL/localStorage (once, when data is ready) ---
     const didInitModels = useRef(false);
     useEffect(() => {
+        // Mount guard + one-time init from URL/localStorage; running once on mount is intended.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsClient(true);
         if (!compareData || didInitModels.current) return;
         didInitModels.current = true;
@@ -201,7 +203,7 @@ export default function CompareContent({
         fullDataTriggered.current = true;
         setFullDataLoading(true);
 
-        fetchAuditData(false, false).then(rows => {
+        fetchAuditData(false).then(rows => {
             const cleanRows = (rows || []).filter(r => r.verdict !== 'ERROR');
             setFullData(cleanRows);
             setFullDataLoading(false);
@@ -409,6 +411,8 @@ export default function CompareContent({
 
     // Reset visible count when model pair or filters change
     useEffect(() => {
+        // Derived reset driven by several filter inputs; setState in the effect is intended here.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setVisibleCount(batchSize);
     }, [modelA, modelB, selectedCategory, selectedDate, deferredSearch, batchSize]);
 

@@ -1,42 +1,47 @@
 from unittest.mock import MagicMock, patch
+import pandas as pd
 from src.analysis.analyst import generate_weekly_report
-from src.database import AuditResult
 
-def test_generate_report_no_data(db_session, caplog):
-    """Verify that empty DB results in a warning log."""
-    with patch("src.analysis.analyst.get_session", return_value=db_session):
+
+def test_generate_report_no_data(caplog):
+    """Verify that empty data results in a warning log."""
+    # analyst loads data via _load_data() (CSV-preferred, SQLite fallback).
+    # Patch that seam directly so the test is independent of the data source.
+    with patch("src.analysis.analyst._load_data", return_value=pd.DataFrame()):
         generate_weekly_report(output_dir="/tmp")
     assert "No audit log found" in caplog.text
 
+
 @patch("src.analysis.analyst.OpenAI")
-def test_generate_report_success(mock_openai_class, db_session):
-    """Verify report generation with mocked OpenAI."""
-    # 1. Setup Mock
+def test_generate_report_success(mock_openai_class):
+    """Verify report generation with mocked data source and OpenAI."""
+    # 1. Mock the OpenAI client + completion
     mock_client = MagicMock()
     mock_openai_class.return_value = mock_client
-    
-    # Mock the chat completion response
     mock_completion = MagicMock()
     mock_completion.choices[0].message.content = "Mocked Report Content"
     mock_client.chat.completions.create.return_value = mock_completion
 
-    # 2. Setup Data
-    results = [
-        AuditResult(model_id="gpt-4", verdict="ALLOWED", prompt_id="p1", response_text="ok"),
-        AuditResult(model_id="gpt-4", verdict="REMOVED", prompt_id="p2", response_text="bad"),
-    ]
-    db_session.add_all(results)
-    db_session.commit()
+    # 2. Provide a minimal-but-valid audit frame (model / verdict / prompt_id are
+    #    the only columns the stats pipeline requires; two models with a
+    #    disagreement exercise the kappa + pivot paths).
+    df = pd.DataFrame(
+        [
+            {"model": "gpt-4", "verdict": "ALLOWED", "prompt_id": "p1"},
+            {"model": "gpt-4", "verdict": "REMOVED", "prompt_id": "p2"},
+            {"model": "claude-3", "verdict": "ALLOWED", "prompt_id": "p1"},
+            {"model": "claude-3", "verdict": "ALLOWED", "prompt_id": "p2"},
+        ]
+    )
 
     # 3. Run
-    # We patch get_session to return our test db_session
-    with patch("src.analysis.analyst.get_session", return_value=db_session):
+    with patch("src.analysis.analyst._load_data", return_value=df):
         generate_weekly_report(output_dir="/tmp", report_file="test_report.md")
-    
+
     # 4. Verify — analyst prepends a metadata comment; check content is present
     with open("/tmp/test_report.md", "r") as f:
-         content = f.read()
-         assert "Mocked Report Content" in content
-    
+        content = f.read()
+        assert "Mocked Report Content" in content
+
     # Verify OpenAI was called
     mock_client.chat.completions.create.assert_called_once()

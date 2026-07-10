@@ -43,22 +43,18 @@ const LITE_COLUMNS = new Set([
 /**
  * Fetch and parse the audit log CSV.
  *
- * @param useTraces - If true, loads from /assets/traces.json (pre-parsed).
- * @param lite - If true, strips text-heavy columns for faster initial load.
+ * @param lite - If true, loads the pre-stripped lite CSV (no prompt/response
+ *   text = much smaller) instead of the full file.
  */
 export async function fetchAuditData(
-  useTraces = false,
   lite = true,
 ): Promise<AuditRow[]> {
-  if (useTraces) {
-    const res = await fetch('/assets/traces.json');
-    if (!res.ok) throw new Error(`Failed to load traces: ${res.status}`);
-    return res.json();
-  }
-
-  // Fetch gzipped CSV
-  const res = await fetch('/audit_log.csv.gz');
-  if (!res.ok) throw new Error(`Failed to load audit log: ${res.status}`);
+  // Fetch gzipped CSV. In lite mode fetch the pre-stripped lite file (much smaller —
+  // no prompt/response text) instead of downloading the full CSV only to discard
+  // the text columns client-side.
+  const csvUrl = lite ? '/audit_log_lite.csv.gz' : '/audit_log.csv.gz';
+  const res = await fetch(csvUrl);
+  if (!res.ok) throw new Error(`Failed to load audit log (${csvUrl}): ${res.status}`);
 
   const buffer = await res.arrayBuffer();
   let csvText = '';

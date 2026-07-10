@@ -39,7 +39,9 @@ export function proxy(request: NextRequest) {
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    // Keep identical to the baseline in vercel.json so HTML routes (where both apply)
+    // don't emit two conflicting Permissions-Policy values.
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
 
     return response;
 }

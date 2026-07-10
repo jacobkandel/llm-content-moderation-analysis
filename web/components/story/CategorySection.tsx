@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
+import { TOOLTIP_CURSOR } from '@/lib/chart-theme';
 
 interface CategoryData {
     name: string;
@@ -141,7 +142,7 @@ export function CategorySection({ topCategories }: CategorySectionProps) {
                                         tick={{ fontSize: 13, fontWeight: 600, fill: 'hsl(var(--muted-foreground))' }}
                                     />
                                     <Tooltip
-                                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                        cursor={TOOLTIP_CURSOR}
                                         content={({ active, payload }) => {
                                             if (active && payload && payload.length) {
                                                 const data = payload[0].payload;

@@ -4,18 +4,11 @@ import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getLogoUrl } from '@/lib/provider-logos';
+import { CATEGORIES } from '@/lib/categories';
 import { CategoryPromptsTable } from './CategoryPromptsTable';
-
-const CATEGORIES: Record<string, string> = {
-    'explicit-sexual': 'Explicit/Sexual',
-    'hate-speech': 'Hate Speech',
-    'health-misinformation': 'Health Misinformation',
-    'incitement-to-violence': 'Incitement to Violence',
-    'paternalism': 'Paternalism',
-    'political': 'Political',
-};
 
 export async function generateStaticParams() {
     return Object.keys(CATEGORIES).map(slug => ({ category: slug }));
@@ -28,6 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     return {
         title: `${label} — AI Censorship by Category — Moderation Bias`,
         description: `How do GPT-4, Claude, Llama, and Gemini handle "${label}" content? Compare refusal rates across all major LLMs for this category of prompts.`,
+        alternates: { canonical: `/categories/${category}` },
         openGraph: {
             title: `${label} AI Censorship Comparison`,
             description: `Refusal rates and model disagreements for "${label}" prompts across all major LLMs.`,
@@ -39,13 +33,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     const { category } = await params;
     const label = CATEGORIES[category];
 
+    // Unknown slug → real 404 (not a soft-404 200 body that pollutes the index).
     if (!label) {
-        return (
-            <main className="max-w-4xl mx-auto py-12 px-6">
-                <p className="text-muted-foreground">Category not found.</p>
-                <Link href="/analysis/summary" className="text-primary hover:underline mt-4 inline-block">← Back to Analysis</Link>
-            </main>
-        );
+        notFound();
     }
 
     // Load compare_data to get per-model category rates

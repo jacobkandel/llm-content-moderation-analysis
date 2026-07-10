@@ -9,6 +9,9 @@ export function ThemeToggle() {
     const [mounted, setMounted] = React.useState(false)
 
     React.useEffect(() => {
+        // Standard next-themes hydration guard: render a stable placeholder until
+        // mounted so server and client markup match. The one-time setState is intentional.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true)
     }, [])
 

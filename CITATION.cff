@@ -9,10 +9,10 @@ authors:
 repository-code: "https://github.com/jacobkandel/llm-content-moderation-analysis"
 url: "https://moderationbias.com"
 abstract: >
-  An open-source benchmark for auditing content moderation bias across 27 Large Language
-  Models spanning 16 harm categories and 2,012 evaluated prompts (2,293 in corpus).
+  An open-source benchmark for auditing content moderation bias across 30 Large Language
+  Models spanning 16 harm categories and 2,012 evaluated prompts (2,323 in corpus).
   Biweekly automated audits track policy drift over time. Statistical methods include
-  McNemar's test with Bonferroni correction, Fleiss' Kappa (inter-model agreement),
+  McNemar's test with Benjamini-Hochberg FDR correction, Fleiss' Kappa (inter-model agreement),
   Cramér's V (categorical effect size), Cohen's d (verbosity analysis), Wilson Score
   confidence intervals, and minimum detectable effect size (MDES) power analysis.
   Key finding: model identity (Cramér's V = 0.59) is a substantially stronger predictor

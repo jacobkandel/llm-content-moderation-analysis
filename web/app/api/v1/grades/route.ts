@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put, list } from '@vercel/blob';
+import { sanitizeSegment, clampString, rateLimit, fetchJsonBlobs } from '@/lib/api-utils';
 
 /**
  * Human Grading API — backed by Vercel Blob storage.
@@ -11,6 +12,9 @@ import { put, list } from '@vercel/blob';
  * race conditions from concurrent writes (same pattern as annotations).
  */
 
+// This route mutates/aggregates external state — never serve a cached copy.
+export const dynamic = 'force-dynamic';
+
 interface GradePayload {
     itemId: string;
     verdict: string;
@@ -21,9 +25,19 @@ interface GradePayload {
 }
 
 const BLOB_PREFIX = 'grades/';
+const ALLOWED_VERDICTS = ['ALLOWED', 'REMOVED'];
+
+// Baseline in-memory per-IP rate limiting (mirrors /api/annotate/submit).
+const rateLimitCache = new Map<string, { count: number, resetTime: number }>();
+const MAX_GRADES_PER_HOUR = 200;
 
 export async function POST(request: NextRequest) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || 'unknown';
+        if (!rateLimit(rateLimitCache, ip, MAX_GRADES_PER_HOUR)) {
+            return NextResponse.json({ error: 'Rate limit exceeded. Try again later.' }, { status: 429 });
+        }
+
         const body: GradePayload = await request.json();
 
         // Validate required fields
@@ -34,16 +48,34 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Build the grade record
+        // Validate the verdict against an allowed set — previously any string was
+        // accepted, which let callers poison the aggregated grade distribution.
+        if (!ALLOWED_VERDICTS.includes(body.verdict)) {
+            return NextResponse.json(
+                { error: `verdict must be one of: ${ALLOWED_VERDICTS.join(', ')}` },
+                { status: 400 }
+            );
+        }
+
+        // Build the record from a bounded whitelist — never spread the raw body.
         const record = {
-            ...body,
+            itemId: clampString(body.itemId, 128),
+            verdict: body.verdict,
+            annotatorId: clampString(body.annotatorId, 64),
+            notes: clampString(body.notes, 1000),
+            confidence: ['high', 'medium', 'low'].includes(body.confidence as string) ? body.confidence : undefined,
+            category: clampString(body.category, 64),
             timestamp: new Date().toISOString(),
         };
 
-        // Write each grade as its own blob file to prevent race conditions
+        // Write each grade as its own blob file to prevent race conditions.
+        // Sanitize the user-controlled ids before they reach the pathname so a
+        // value like '../annotations/x' cannot escape the grades/ prefix.
         const date = new Date().toISOString().split('T')[0];
+        const safeAnnotator = sanitizeSegment(body.annotatorId);
+        const safeItem = sanitizeSegment(body.itemId, 128);
         const uniqueId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        const blobPath = `${BLOB_PREFIX}${date}/${body.annotatorId}_${body.itemId}_${uniqueId}.json`;
+        const blobPath = `${BLOB_PREFIX}${date}/${safeAnnotator}_${safeItem}_${uniqueId}.json`;
 
         await put(blobPath, JSON.stringify(record), {
             access: 'public',
@@ -54,7 +86,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             message: 'Grade saved',
-            gradeId: `${body.annotatorId}_${body.itemId}`,
+            gradeId: `${safeAnnotator}_${safeItem}`,
         });
     } catch (error: unknown) {
         console.error('Grade submission error:', error);
@@ -65,44 +97,35 @@ export async function POST(request: NextRequest) {
     }
 }
 
+interface GradeRecord {
+    annotatorId?: string;
+    verdict?: string;
+}
+
 export async function GET() {
     try {
         let totalGrades = 0;
         const uniqueGraders = new Set<string>();
         const verdictCounts: Record<string, number> = {};
 
-        // Paginate through all grade blobs
+        // Collect every grade blob URL across all pages, then fetch with bounded
+        // concurrency instead of a serial per-blob waterfall.
+        const urls: string[] = [];
         let cursor: string | undefined;
         do {
             const blobs = await list({ prefix: BLOB_PREFIX, cursor });
-
-            for (const blob of blobs.blobs) {
-                try {
-                    const response = await fetch(blob.url);
-                    if (!response.ok) continue;
-                    const content = await response.text();
-
-                    // Handle both JSONL (legacy) and individual JSON files
-                    const lines = content.split('\n').filter(l => l.trim());
-                    for (const line of lines) {
-                        try {
-                            const record = JSON.parse(line);
-                            totalGrades++;
-                            if (record.annotatorId) uniqueGraders.add(record.annotatorId);
-                            if (record.verdict) {
-                                verdictCounts[record.verdict] = (verdictCounts[record.verdict] || 0) + 1;
-                            }
-                        } catch {
-                            // Skip malformed lines
-                        }
-                    }
-                } catch (e) {
-                    console.error(`Error reading blob ${blob.pathname}:`, e);
-                }
-            }
-
+            for (const blob of blobs.blobs) urls.push(blob.url);
             cursor = blobs.hasMore ? blobs.cursor : undefined;
         } while (cursor);
+
+        const records = await fetchJsonBlobs<GradeRecord>(urls);
+        for (const record of records) {
+            totalGrades++;
+            if (record.annotatorId) uniqueGraders.add(record.annotatorId);
+            if (record.verdict) {
+                verdictCounts[record.verdict] = (verdictCounts[record.verdict] || 0) + 1;
+            }
+        }
 
         return NextResponse.json({
             totalGrades,

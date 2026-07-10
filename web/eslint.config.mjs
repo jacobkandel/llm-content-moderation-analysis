@@ -5,14 +5,13 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Pin the React version so eslint-plugin-react does not try to auto-detect it.
-  // Auto-detection crashes under ESLint 10 (contextOrFilename.getFilename is not
-  // a function), taking the whole lint run down with it.
   {
+    // eslint-plugin-react 7.x auto-detects the React version by shelling out
+    // through context.getFilename(), which ESLint 10 removed — that detection
+    // path throws "contextOrFilename.getFilename is not a function" and crashes
+    // the whole lint run. Pinning the version here skips detection entirely.
     settings: {
-      react: {
-        version: "19.2",
-      },
+      react: { version: "19.2" },
     },
   },
   // Standalone Node build/utility scripts are CommonJS, so require() and the
@@ -46,10 +45,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Generated / abandoned files that should not be linted.
+    // Abandoned duplicate app — not part of the build (also gitignored).
     "web_broken/**",
-    "public/workbox-*.js",
+    // Generated service-worker / PWA runtime (produced by next-pwa/workbox).
     "public/sw.js",
+    "public/workbox-*.js",
+    "public/fallback-*.js",
   ]),
 ]);
 

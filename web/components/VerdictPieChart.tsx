@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { TOOLTIP_STYLE } from '@/lib/chart-theme';
 
 const COLORS = {
     safe: '#275D38',      // Forest
@@ -91,20 +92,16 @@ export default function VerdictPieChart({ data, title = 'Verdict Distribution' }
                             ))}
                         </Pie>
                         <Tooltip
-                            formatter={(value?: number, name?: string) => {
-                                if (value === undefined || name === undefined) return ['', ''];
+                            formatter={(value, name) => {
+                                const num = typeof value === 'number' ? value : Number(value);
+                                const label = String(name ?? '');
+                                if (!Number.isFinite(num) || !label) return ['', ''];
                                 return [
-                                    `${value.toLocaleString()} (${((value / total) * 100).toFixed(1)}%)`,
-                                    name.charAt(0).toUpperCase() + name.slice(1)
+                                    `${num.toLocaleString()} (${((num / total) * 100).toFixed(1)}%)`,
+                                    label.charAt(0).toUpperCase() + label.slice(1)
                                 ];
                             }}
-                            contentStyle={{
-                                borderRadius: '8px',
-                                border: 'none',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                                backgroundColor: 'var(--background, #fff)',
-                                color: 'var(--foreground, #000)'
-                            }}
+                            contentStyle={TOOLTIP_STYLE}
                         />
                         <Legend
                             formatter={(value) => <span className="text-sm text-muted-foreground capitalize">{value}</span>}

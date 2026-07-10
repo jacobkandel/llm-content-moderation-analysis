@@ -37,7 +37,7 @@ The corpus spans **16 categories**, each containing ≥ 30 prompts to ensure sta
 | International Controversy | 60 | Geopolitical disputes: Palestine/Israel, Russia/Ukraine, Taiwan, Myanmar, Venezuela, Afghanistan, North Korea |
 | False Positive Control | 30 | Benign queries that may trigger false flags |
 
-> **Note on category sample sizes:** Category sizes are intentionally unequal, reflecting the practical difficulty of sourcing naturalistic prompts for niche harm types versus high-volume categories. All cross-category comparisons use **within-category McNemar's tests** (paired by prompt) and **category-stratified effect sizes** (Cramér's V computed separately per stratum) to avoid sample-size confounding. The five large categories (n ≥ 391) provide sufficient power (MDES ≈ 2pp at 80% power) for fine-grained pairwise comparisons; the eleven smaller categories (n = 30) meet the CLT threshold for proportion-based inference but should be interpreted with wider confidence intervals.
+> **Note on category sample sizes:** Category sizes are intentionally unequal, reflecting the practical difficulty of sourcing naturalistic prompts for niche harm types versus high-volume categories. All cross-category comparisons use **within-category McNemar's tests** (paired by prompt) and **category-stratified effect sizes** (Cramér's V computed separately per stratum) to avoid sample-size confounding. The five large categories (n ≥ 391) provide sufficient power (MDES ≈ 2pp at 80% power) for fine-grained pairwise comparisons; the ten smaller categories (n = 30), plus International Controversy (n = 60), meet the CLT threshold for proportion-based inference but should be interpreted with wider confidence intervals.
 
 ### 1.3 Selection Bias Mitigation
 - Hate Speech prompts were filtered by search volume to prioritize real-world relevance over researcher-selected edge cases
@@ -80,7 +80,7 @@ Human annotations are collected via a public annotation interface at [moderation
 
 ### 3.2 Pairwise Significance Testing
 - **McNemar's Test** (with continuity correction) is used for paired model comparisons on the same prompt set, testing whether disagreement patterns are symmetric
-- **Benjamini-Hochberg False Discovery Rate (FDR)** correction is applied to adjust p-values across all pairwise comparisons. With *k* models producing *k(k−1)/2* pairs (e.g., 27 models = 351 pairs), Bonferroni correction is prohibitively conservative (threshold ≈ 0.00014). BH-FDR controls the expected proportion of false discoveries rather than the family-wise error rate, providing greater statistical power while maintaining rigor
+- **Benjamini-Hochberg False Discovery Rate (FDR)** correction is applied to adjust p-values across all pairwise comparisons. With *k* models producing *k(k−1)/2* pairs (e.g., 30 models = 435 pairs), Bonferroni correction is prohibitively conservative (threshold ≈ 0.00014). BH-FDR controls the expected proportion of false discoveries rather than the family-wise error rate, providing greater statistical power while maintaining rigor
 - Significance threshold: adjusted p < 0.05
 - **Sensitivity analysis:** Holm-Bonferroni step-down correction is reported alongside BH-FDR to verify that key findings are robust to the choice of correction method
 
@@ -94,7 +94,7 @@ Human annotations are collected via a public annotation interface at [moderation
 
 ### 3.5 Power Analysis
 - Minimum sample sizes for detecting a given effect size at α=0.05 and 80% power are reported per model pair
-- **Required N for 5% MDES at 80% power:** 314 prompts. Our corpus of 2,012 provides >6× that threshold
+- **Required N for 5% MDES at 80% power:** 314 prompts. Our evaluated set of 2,012 (corpus of 2,323) provides >6× that threshold
 
 ### 3.6 Political Compass Scoring
 The Political Compass analysis uses a curated set of 20 politically contentious statements spanning two axes:

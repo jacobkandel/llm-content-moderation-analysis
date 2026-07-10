@@ -145,15 +145,17 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         router.replace(qs ? `?${qs}` : '?', { scroll: false });
     }, [selectedModels, showSeedOnly, dateRange, router]);
 
-    // Action to load full data (text columns). Memoised so its identity is stable
-    // across renders (it feeds the contextValue useMemo below).
+    // Action to load full data (text columns).
+    // Memoised so it stays referentially stable — it is part of the context value's
+    // dependency array, and an unstable identity would invalidate the memo (and
+    // re-render every analysis page) on every render.
     const loadFullDetails = useCallback(async () => {
         if (!isLite || isLoadingFull) return; // Already full or loading
 
         console.log("🚀 Triggering FULL data load...");
         setIsLoadingFull(true);
         try {
-            const fullData = await fetchAuditData(false, false); // lite=false
+            const fullData = await fetchAuditData(false); // lite=false
             setAuditData(fullData);
             setIsLite(false);
             console.log("✅ FULL data loaded (replaced lite data)");
@@ -167,81 +169,77 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     // --- Lazy-load helpers: fetch supplementary data on-demand (once) ---
     const loaded = useRef<Record<string, boolean>>({});
 
+    // NOTE: each loader marks itself loaded only AFTER a successful fetch. If it set
+    // the flag up-front (the previous behaviour), a single transient network failure
+    // or a not-yet-deployed data file would blank that page permanently with no retry.
     const ensureClusters = useCallback(async () => {
         if (loaded.current.clusters) return;
-        loaded.current.clusters = true;
         try {
             const r = await fetch('/clusters.json');
-            if (r.ok) setClusters(await r.json());
+            if (r.ok) { setClusters(await r.json()); loaded.current.clusters = true; }
         } catch { }
     }, []);
     const ensureDrift = useCallback(async () => {
         if (loaded.current.drift) return;
-        loaded.current.drift = true;
         try {
             const r = await fetch('/drift_report.json');
-            if (r.ok) setDriftData(await r.json());
+            if (r.ok) { setDriftData(await r.json()); loaded.current.drift = true; }
         } catch { }
     }, []);
     const ensureConsensus = useCallback(async () => {
         if (loaded.current.consensus) return;
-        loaded.current.consensus = true;
         try {
             const r = await fetch('/consensus_stats.json');
             if (r.ok) {
                 const data = await r.json();
                 setConsensusData(data.perModel || []);
+                loaded.current.consensus = true;
             }
         } catch { }
     }, []);
     const ensurePolitical = useCallback(async () => {
         if (loaded.current.political) return;
-        loaded.current.political = true;
         try {
             const r = await fetch('/political_compass.json');
-            if (r.ok) setPoliticalData(await r.json());
+            if (r.ok) { setPoliticalData(await r.json()); loaded.current.political = true; }
         } catch { }
     }, []);
     const ensurePaternalism = useCallback(async () => {
         if (loaded.current.paternalism) return;
-        loaded.current.paternalism = true;
         try {
             const r = await fetch('/paternalism.json');
-            if (r.ok) setPaternalismData(await r.json());
+            if (r.ok) { setPaternalismData(await r.json()); loaded.current.paternalism = true; }
         } catch { }
     }, []);
     const ensureTriggers = useCallback(async () => {
         if (loaded.current.triggers) return;
-        loaded.current.triggers = true;
         try {
             const r = await fetch('/assets/trigger_words.json');
-            if (r.ok) setTriggerData(await r.json());
+            if (r.ok) { setTriggerData(await r.json()); loaded.current.triggers = true; }
         } catch { }
     }, []);
     const ensureReport = useCallback(async () => {
         if (loaded.current.report) return;
-        loaded.current.report = true;
         try {
             const r = await fetch('/latest_report.md');
             if (r.ok) {
                 const content = await r.text();
                 setReportContent(content);
+                loaded.current.report = true;
             }
         } catch { }
     }, []);
 
     const ensureSignificance = useCallback(async () => {
         if (loaded.current.significance) return;
-        loaded.current.significance = true;
         try {
             const r = await fetch('/significance_pairwise.json');
-            if (r.ok) setPrecomputedSignificance(await r.json());
+            if (r.ok) { setPrecomputedSignificance(await r.json()); loaded.current.significance = true; }
         } catch { }
     }, []);
 
     const ensurePrompts = useCallback(async () => {
         if (loaded.current.prompts) return;
-        loaded.current.prompts = true;
         try {
             const r = await fetch('/prompts_list.json.gz');
             if (r.ok) {
@@ -249,6 +247,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
                 // GOLD prompts are used backend-only for statistical calibration; exclude from public display
                 const publicPrompts = data.filter((p: { id: string }) => !p.id?.toUpperCase().startsWith('GOLD'));
                 if (publicPrompts?.length) setPrecomputedPrompts(publicPrompts);
+                loaded.current.prompts = true;
             }
         } catch { }
     }, []);
@@ -256,12 +255,12 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     // Load the lite CSV (for filtering & drill-downs)
     const ensureAuditData = useCallback(async () => {
         if (loaded.current.csv) return;
-        loaded.current.csv = true;
         console.log('📦 Loading lite CSV...');
         try {
-            const data = await fetchAuditData(false, true);
+            const data = await fetchAuditData(true); // lite
             setAuditData(data);
             setIsLite(true);
+            loaded.current.csv = true;
             console.log('✅ Lite CSV loaded');
         } catch (e) {
             console.error('Failed to load CSV', e);
@@ -316,6 +315,9 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const hasFiltersForCsv = selectedModels.length > 0 || dateRange.start !== '' || dateRange.end !== '' || showSeedOnly;
     useEffect(() => {
         if (hasFiltersForCsv) {
+            // ensureAuditData fetches asynchronously; its setState runs after an await,
+            // not synchronously in this effect body.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             ensureAuditData();
         }
     }, [hasFiltersForCsv, ensureAuditData]);
@@ -384,8 +386,11 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         }).filter(c => c.size > 0);
     }, [clusters, selectedModels]);
 
-    // Are filters active? If not, use pre-computed data
-    const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
+    // Are filters active? If not, use pre-computed data.
+    // NOTE: showSeedOnly must be included — otherwise toggling "seed only" alone
+    // leaves hasFilters false and stats/efficiency fall back to the unfiltered
+    // pre-computed summary, silently ignoring the filter.
+    const hasFilters = selectedModels.length > 0 || !!dateRange.start || !!dateRange.end || showSeedOnly;
 
     const stats = useMemo(() => {
         // Use pre-computed summary when no filters are active
