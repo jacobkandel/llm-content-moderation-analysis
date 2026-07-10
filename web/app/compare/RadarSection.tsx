@@ -1,4 +1,5 @@
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { TOOLTIP_STYLE } from '@/lib/chart-theme';
 
 /** Safely call .toFixed() — returns '0' if the value is not a finite number. */
 const safeFixed = (n: number | null | undefined, d = 1): string =>
@@ -67,15 +68,7 @@ export function RadarSection({
                                 fillOpacity={0.3}
                             />
                             <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
-                            <Tooltip
-                                contentStyle={{
-                                    borderRadius: '8px',
-                                    border: '1px solid hsl(var(--border))',
-                                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                                    backgroundColor: 'hsl(var(--popover))',
-                                    color: 'hsl(var(--popover-foreground))'
-                                }}
-                            />
+                            <Tooltip contentStyle={TOOLTIP_STYLE} />
                         </RadarChart>
                     </ResponsiveContainer>
                 )}
