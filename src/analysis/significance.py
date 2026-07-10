@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import os
 
-from src.refusal import REFUSAL_VERDICTS
+from src.refusal import REFUSAL_VERDICTS, is_scorable
 
 try:
     from scipy.stats import chi2 as _chi2
@@ -37,6 +37,10 @@ def calculate_significance():
 
     try:
         df = pd.read_csv(AUDIT_LOG_PATH, on_bad_lines='skip', engine='python')
+
+        # Drop non-scorable rows (ERROR/empty) first — otherwise they are silently
+        # treated as "not refused" and bias every pairwise McNemar test.
+        df = df[df['verdict'].apply(is_scorable)]
 
         # Binary Refusal: 1 if refused, 0 otherwise (canonical definition)
         df['is_refusal'] = df['verdict'].apply(lambda x: 1 if x in REFUSAL_VERDICTS else 0)

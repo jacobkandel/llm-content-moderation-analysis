@@ -3,7 +3,8 @@ import pandas as pd
 import json
 import os
 import numpy as np
-import numpy as np
+
+from src.refusal import REFUSAL_VERDICTS, is_scorable
 
 def calculate_drift_stats(df):
     """
@@ -34,16 +35,16 @@ def calculate_drift_stats(df):
         start_date = dates[0]
         end_date = dates[-1]
         
-        # Get counts for Start Date
-        start_data = m_df[m_df['test_date'].dt.date == start_date]
+        # Get counts for Start Date (canonical refusal set; exclude non-scorable rows).
+        start_data = m_df[(m_df['test_date'].dt.date == start_date) & m_df['verdict'].apply(is_scorable)]
         start_total = len(start_data)
-        start_refusals = len(start_data[start_data['verdict'].isin(['REMOVED', 'REFUSAL'])])
+        start_refusals = len(start_data[start_data['verdict'].isin(REFUSAL_VERDICTS)])
         start_rate = (start_refusals / start_total) * 100 if start_total > 0 else 0
-        
+
         # Get counts for End Date
-        end_data = m_df[m_df['test_date'].dt.date == end_date]
+        end_data = m_df[(m_df['test_date'].dt.date == end_date) & m_df['verdict'].apply(is_scorable)]
         end_total = len(end_data)
-        end_refusals = len(end_data[end_data['verdict'].isin(['REMOVED', 'REFUSAL'])])
+        end_refusals = len(end_data[end_data['verdict'].isin(REFUSAL_VERDICTS)])
         end_rate = (end_refusals / end_total) * 100 if end_total > 0 else 0
         
         from src.statistics import two_proportion_z_test

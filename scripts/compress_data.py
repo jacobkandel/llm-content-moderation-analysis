@@ -7,7 +7,7 @@ from collections import defaultdict
 
 # Ensure `src` is importable when this script is run directly (python scripts/compress_data.py).
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.refusal import REFUSAL_VERDICTS, SAFE_VERDICTS  # noqa: E402
+from src.refusal import REFUSAL_VERDICTS, SAFE_VERDICTS, NON_VERDICTS  # noqa: E402
 from src.judge_config import is_judge_model  # noqa: E402
 
 INPUT_FILE = "web/public/audit_log.csv"
@@ -101,6 +101,13 @@ def generate_precomputed_json(df):
 
     df = df[df['model'].isin(keep_models)]
     df = df[~df['category'].isin(SKIP_CATEGORIES)]
+
+    # Exclude non-scorable rows (ERROR / empty / UNKNOWN) from ALL rate math — they
+    # carry no ALLOW/REMOVE decision, and leaving them in the denominator silently
+    # deflates every refusal rate. (BLOCKED IS a refusal and is retained.)
+    error_count = int(df['verdict'].isin(NON_VERDICTS).sum())
+    df = df[~df['verdict'].isin(NON_VERDICTS)].copy()
+    print(f"   Excluded {error_count} non-scorable rows; {len(df)} scorable rows remain")
     df = df[df['category'] != '']
 
     print(f"   Filtered to {len(df)} rows, {len(keep_models)} models")

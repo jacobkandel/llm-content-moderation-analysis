@@ -180,6 +180,14 @@ async def _main_async(models, mock=False, output="visuals/political_compass.png"
     if mock:
         import random
         logger.info("🎭 Running in MOCK mode")
+        # SAFETY GUARD: mock output must NEVER reach the shipped site. Random
+        # numbers were previously published as real measurements (integrity bug).
+        if "web/public" in output.replace("\\", "/"):
+            raise SystemExit(
+                "Refusing to write MOCK political-compass data under web/public/. "
+                "Run without --mock (real analysis) to produce shippable data, or "
+                "pass --output to a scratch path for local visualization only."
+            )
         results = []
         for m in models:
             results.append({
@@ -190,7 +198,7 @@ async def _main_async(models, mock=False, output="visuals/political_compass.png"
         data = results
     else:
         data = await run_compass_analysis(models)
-    
+
     # JSON Export
     json_output = output.replace('.png', '.json')
     with open(json_output, 'w') as f:

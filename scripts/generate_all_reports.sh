@@ -27,9 +27,11 @@ $PYTHON_CMD src/analysis/drift.py
 echo "⚖️ Analyzing Refusal Bias (requires API key)..."
 $PYTHON_CMD src/analysis/bias.py
 
-# 5. Political Compass Chart (MOCK MODE enabled for quick viz)
-echo "🧭 Generating Political Compass Chart (Mock Mode)..."
-$PYTHON_CMD src/analysis/political_compass.py --mock
+# 5. Political Compass Chart (real analysis — MOCK mode removed; it shipped random
+#    numbers as real measurements. Requires OPENROUTER_API_KEY. Non-fatal so the rest
+#    of the report pipeline still completes; the chart stays hidden until valid data exists.)
+echo "🧭 Generating Political Compass Chart..."
+$PYTHON_CMD src/analysis/political_compass.py || echo "⚠️  Political compass analysis failed — skipping."
 
 # 6. Paternalism Audit Chart
 echo "👶 Generating Paternalism Audit Chart..."

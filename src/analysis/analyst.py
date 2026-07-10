@@ -7,7 +7,7 @@ from openai import OpenAI
 from src.config import settings
 from src.logger import logger
 from src.statistics import calculate_fleiss_kappa, interpret_kappa
-from src.refusal import REFUSAL_VERDICTS
+from src.refusal import REFUSAL_VERDICTS, is_scorable
 
 CSV_PATHS = [
     "web/public/audit_log.csv",
@@ -59,8 +59,9 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
             logger.warning("⚠️ No audit log found to analyze.")
             return
 
-        # Filter out hard errors (keep BLOCKED = API safety filter)
-        df = df[df['verdict'] != 'ERROR'].copy()
+        # Drop non-scorable rows (ERROR/empty/UNKNOWN) via the canonical predicate;
+        # BLOCKED is a real refusal and is retained.
+        df = df[df['verdict'].apply(is_scorable)].copy()
         if df.empty:
             logger.warning("⚠️ No valid data after filtering errors.")
             return
