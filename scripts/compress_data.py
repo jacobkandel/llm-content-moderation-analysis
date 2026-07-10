@@ -83,13 +83,22 @@ def generate_precomputed_json(df):
     # Count per model
     model_counts = df['model'].value_counts()
     model_refusals = df[df['verdict'].isin(REFUSAL_VERDICTS)].groupby('model').size()
+    model_errors = df[df['verdict'].isin(NON_VERDICTS)].groupby('model').size()
 
     # Filter: min 50 entries, blocklist with 0 refusals, skip categories.
     # Also exclude the judge/classifier model from the subject pool so it never
-    # appears in the leaderboard grading its own responses (see src/judge_config.py).
+    # appears in the leaderboard grading its own responses (see src/judge_config.py),
+    # and exclude non-functional endpoints (mostly ERROR — dead / rate-limited
+    # :free models) that would otherwise pollute the leaderboard with a handful of
+    # unrepresentative rows.
     keep_models = set()
     for model, count in model_counts.items():
         if count < 50:
+            continue
+        error_rate = model_errors.get(model, 0) / count if count else 0
+        scorable = count - model_errors.get(model, 0)
+        if error_rate > 0.8 or scorable < 50:
+            print(f"   🚫 Excluding non-functional model ({error_rate:.0%} errors, {scorable} usable): {model}")
             continue
         if is_judge_model(model):
             print(f"   ⚖️  Excluding judge model from subject pool: {model}")
