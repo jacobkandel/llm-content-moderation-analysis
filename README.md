@@ -37,7 +37,7 @@ Open-source benchmark tracking censorship and content moderation bias across 30+
 │   └── public/             # Precomputed JSON data assets
 ├── data/
 │   ├── prompts.csv         # 2,323 test prompts by category
-│   └── models.json         # Model registry (31 models)
+│   └── models.json         # Model registry (26 models)
 └── .github/workflows/      # CI and scheduled audits
 ```
 

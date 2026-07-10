@@ -7,8 +7,8 @@
         "provider": "OpenAI",
         "region": "US",
         "tier": "High",
-        "cost_per_m_in": 5.0,
-        "cost_per_m_out": 15.0
+        "cost_per_m_in": 5,
+        "cost_per_m_out": 15
     },
     {
         "id": "openai/gpt-4o-mini",
@@ -29,8 +29,8 @@
         "provider": "Anthropic",
         "region": "US",
         "tier": "High",
-        "cost_per_m_in": 3.0,
-        "cost_per_m_out": 15.0
+        "cost_per_m_in": 3,
+        "cost_per_m_out": 15
     },
     {
         "id": "anthropic/claude-3-haiku",
@@ -106,8 +106,8 @@
         "provider": "Mistral AI",
         "region": "Europe",
         "tier": "High",
-        "cost_per_m_in": 2.0,
-        "cost_per_m_out": 6.0
+        "cost_per_m_in": 2,
+        "cost_per_m_out": 6
     },
     {
         "id": "mistralai/mistral-small-3.1-24b-instruct",
@@ -151,7 +151,7 @@
         "region": "US",
         "tier": "Mid",
         "cost_per_m_in": 0.8,
-        "cost_per_m_out": 4.0
+        "cost_per_m_out": 4
     },
     {
         "id": "mistralai/mistral-small-24b-instruct-2501",
@@ -194,8 +194,8 @@
         "provider": "xAI",
         "region": "US",
         "tier": "High",
-        "cost_per_m_in": 3.0,
-        "cost_per_m_out": 15.0
+        "cost_per_m_in": 3,
+        "cost_per_m_out": 15
     },
     {
         "id": "x-ai/grok-3-mini",
@@ -227,63 +227,8 @@
         "provider": "DeepSeek",
         "region": "China",
         "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
-    },
-    {
-        "id": "meta-llama/llama-3.3-70b-instruct:free",
-        "strict_id": "meta-llama/llama-3.3-70b-instruct:free",
-        "name": "Llama 3.3 70B",
-        "display_name": "Llama 3.3 70B",
-        "provider": "Meta",
-        "region": "US",
-        "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
-    },
-    {
-        "id": "mistralai/mistral-small-3.1-24b-instruct:free",
-        "strict_id": "mistralai/mistral-small-3.1-24b-instruct:free",
-        "name": "Mistral Small 3.1 24B",
-        "display_name": "Mistral Small 3.1",
-        "provider": "Mistral AI",
-        "region": "Europe",
-        "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
-    },
-    {
-        "id": "google/gemma-3-27b-it:free",
-        "strict_id": "google/gemma-3-27b-it:free",
-        "name": "Gemma 3 27B",
-        "display_name": "Gemma 3 27B",
-        "provider": "Google",
-        "region": "US",
-        "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
-    },
-    {
-        "id": "nousresearch/hermes-3-llama-3.1-405b:free",
-        "strict_id": "nousresearch/hermes-3-llama-3.1-405b:free",
-        "name": "Hermes 3 405B",
-        "display_name": "Hermes 3 405B",
-        "provider": "NousResearch",
-        "region": "US",
-        "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
-    },
-    {
-        "id": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
-        "strict_id": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
-        "name": "Dolphin Mistral 24B",
-        "display_name": "Dolphin Mistral 24B",
-        "provider": "CognitiveComputations",
-        "region": "US",
-        "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
+        "cost_per_m_in": 0,
+        "cost_per_m_out": 0
     },
     {
         "id": "meta-llama/llama-4-scout:free",
@@ -293,8 +238,8 @@
         "provider": "Meta",
         "region": "US",
         "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
+        "cost_per_m_in": 0,
+        "cost_per_m_out": 0
     },
     {
         "id": "meta-llama/llama-4-maverick:free",
@@ -304,8 +249,8 @@
         "provider": "Meta",
         "region": "US",
         "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
+        "cost_per_m_in": 0,
+        "cost_per_m_out": 0
     },
     {
         "id": "google/gemini-3.1-flash",
@@ -337,7 +282,7 @@
         "provider": "Alibaba",
         "region": "China",
         "tier": "Low",
-        "cost_per_m_in": 0.0,
-        "cost_per_m_out": 0.0
+        "cost_per_m_in": 0,
+        "cost_per_m_out": 0
     }
 ]
