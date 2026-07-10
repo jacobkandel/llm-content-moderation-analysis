@@ -51,6 +51,86 @@
   /* 128px */
 }
 
+/* Enter/exit animation utilities — used by the toast system and the keyboard-
+   shortcuts overlay so those always-mounted components don't pull framer-motion
+   into the shared client bundle. Keyframes are defined below. */
+@theme {
+  --animate-toast-in: toast-in 0.2s ease-out both;
+  --animate-toast-out: toast-out 0.2s ease-in forwards;
+  --animate-overlay-in: overlay-in 0.15s ease-out both;
+  --animate-overlay-out: overlay-out 0.15s ease-in forwards;
+  --animate-modal-in: modal-in 0.15s ease-out both;
+  --animate-modal-out: modal-out 0.15s ease-in forwards;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+}
+
 :root {
   /* UChicago Brand Palette */
   /* Primary: Maroon #800000 -> HSL 0 100% 25% */

@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -12,6 +11,9 @@ interface Toast {
     title: string;
     message?: string;
     duration?: number;
+    // Set when the toast is dismissed to play the exit animation before it is
+    // removed from the DOM (in onAnimationEnd). Internal — callers never set it.
+    leaving?: boolean;
 }
 
 interface ToastContextType {
@@ -39,19 +41,31 @@ const bgColors: Record<ToastType, string> = {
 export function ToastProvider({ children }: { children: ReactNode }) {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
-        const id = Math.random().toString(36).substring(2, 9);
-        const newToast = { ...toast, id };
-        setToasts((prev) => [...prev, newToast]);
-
-        // Auto-remove after duration (default 5s)
-        setTimeout(() => {
-            setToasts((prev) => prev.filter((t) => t.id !== id));
-        }, toast.duration || 5000);
+    const removeToast = useCallback((id: string) => {
+        // Flag the toast as leaving so it plays the exit animation; the actual
+        // removal happens in handleAnimationEnd once that animation completes.
+        setToasts((prev) =>
+            prev.map((t) => (t.id === id ? { ...t, leaving: true } : t))
+        );
     }, []);
 
-    const removeToast = useCallback((id: string) => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
+    const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
+        const id = Math.random().toString(36).substring(2, 9);
+        setToasts((prev) => [...prev, { ...toast, id }]);
+
+        // Auto-dismiss after duration (default 5s)
+        setTimeout(() => {
+            removeToast(id);
+        }, toast.duration || 5000);
+    }, [removeToast]);
+
+    const handleAnimationEnd = useCallback((id: string) => {
+        // Both enter and exit animations fire this event; only unmount once the
+        // exit (leaving) animation has finished.
+        setToasts((prev) => {
+            const toast = prev.find((t) => t.id === id);
+            return toast?.leaving ? prev.filter((t) => t.id !== id) : prev;
+        });
     }, []);
 
     return (
@@ -59,32 +73,28 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             {children}
             {/* Toast Container */}
             <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2" aria-live="polite" aria-label="Notifications">
-                <AnimatePresence>
-                    {toasts.map((toast) => (
-                        <motion.div
-                            key={toast.id}
-                            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                            className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg max-w-sm ${bgColors[toast.type]}`}
+                {toasts.map((toast) => (
+                    <div
+                        key={toast.id}
+                        onAnimationEnd={() => handleAnimationEnd(toast.id)}
+                        className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg max-w-sm ${bgColors[toast.type]} ${toast.leaving ? 'animate-toast-out' : 'animate-toast-in'}`}
+                    >
+                        {icons[toast.type]}
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground dark:text-foreground">{toast.title}</p>
+                            {toast.message && (
+                                <p className="text-sm text-muted-foreground dark:text-muted-foreground/50 mt-1">{toast.message}</p>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => removeToast(toast.id)}
+                            className="text-muted-foreground/70 hover:text-muted-foreground dark:hover:text-foreground"
+                            aria-label="Dismiss notification"
                         >
-                            {icons[toast.type]}
-                            <div className="flex-1 min-w-0">
-                                <p className="font-medium text-foreground dark:text-foreground">{toast.title}</p>
-                                {toast.message && (
-                                    <p className="text-sm text-muted-foreground dark:text-muted-foreground/50 mt-1">{toast.message}</p>
-                                )}
-                            </div>
-                            <button
-                                onClick={() => removeToast(toast.id)}
-                                className="text-muted-foreground/70 hover:text-muted-foreground dark:hover:text-foreground"
-                                aria-label="Dismiss notification"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
+                ))}
             </div>
         </ToastContext.Provider>
     );

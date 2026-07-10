@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Keyboard, X } from 'lucide-react';
 
 export function KeyboardShortcuts() {
     const [isOpen, setIsOpen] = useState(false);
+    // Kept mounted while the exit animation plays; unmounted in handleAnimationEnd.
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -25,7 +26,13 @@ export function KeyboardShortcuts() {
             switch (e.key.toLowerCase()) {
                 case '?':
                     e.preventDefault();
-                    setIsOpen(prev => !prev);
+                    if (isOpen) {
+                        setIsOpen(false);
+                    } else {
+                        // Mount before opening so the enter animation plays.
+                        setMounted(true);
+                        setIsOpen(true);
+                    }
                     break;
                 case 'c':
                     e.preventDefault();
@@ -52,53 +59,53 @@ export function KeyboardShortcuts() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [router, isOpen]);
 
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsOpen(false)}
-                        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-                    >
-                        {/* Modal */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            transition={{ duration: 0.15, ease: "easeOut" }}
-                            onClick={e => e.stopPropagation()}
-                            className="bg-card w-full max-w-md rounded-2xl shadow-xl border border-border overflow-hidden"
-                        >
-                            <div className="flex items-center justify-between p-4 border-b border-border">
-                                <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
-                                    <Keyboard className="w-5 h-5 text-muted-foreground" />
-                                    Keyboard Shortcuts
-                                </h2>
-                                <button
-                                    onClick={() => setIsOpen(false)}
-                                    className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
+    const handleAnimationEnd = (e: React.AnimationEvent<HTMLDivElement>) => {
+        // Only the backdrop's own exit animation (not the modal's, which bubbles
+        // up) should unmount the overlay, and only when it's actually closing.
+        if (e.target === e.currentTarget && !isOpen) {
+            setMounted(false);
+        }
+    };
 
-                            <div className="p-4 space-y-3">
-                                <ShortcutRow kbd="?" label="Show this help menu" />
-                                <ShortcutRow kbd="⌘ + K" label="Open global search" />
-                                <div className="h-px bg-border my-2" />
-                                <ShortcutRow kbd="C" label="Go to Compare Models" />
-                                <ShortcutRow kbd="A" label="Go to Analysis Summary" />
-                                <ShortcutRow kbd="S" label="Go to Significance Analysis" />
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
+    if (!mounted) return null;
+
+    return (
+        // Backdrop
+        <div
+            onAnimationEnd={handleAnimationEnd}
+            onClick={() => setIsOpen(false)}
+            className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 ${isOpen ? 'animate-overlay-in' : 'animate-overlay-out'}`}
+        >
+            {/* Modal (animation on the wrapper so the inner .bg-card box keeps its own styling) */}
+            <div
+                onClick={e => e.stopPropagation()}
+                className={`w-full max-w-md ${isOpen ? 'animate-modal-in' : 'animate-modal-out'}`}
+            >
+                <div className="bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                        <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
+                            <Keyboard className="w-5 h-5 text-muted-foreground" />
+                            Keyboard Shortcuts
+                        </h2>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <div className="p-4 space-y-3">
+                        <ShortcutRow kbd="?" label="Show this help menu" />
+                        <ShortcutRow kbd="⌘ + K" label="Open global search" />
+                        <div className="h-px bg-border my-2" />
+                        <ShortcutRow kbd="C" label="Go to Compare Models" />
+                        <ShortcutRow kbd="A" label="Go to Analysis Summary" />
+                        <ShortcutRow kbd="S" label="Go to Significance Analysis" />
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 
