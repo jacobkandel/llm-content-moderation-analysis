@@ -8,7 +8,19 @@ import pandas as pd
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
+
+
+def _is_retryable_api_error(exc: BaseException) -> bool:
+    """Retry only transient failures. Do NOT retry non-retryable client errors like
+    402 (insufficient credit), 401 (bad key), 400 (bad request), or 404 (unknown
+    model) — retrying those 3x just wastes time/quota and never succeeds."""
+    code = getattr(exc, "status_code", None) or getattr(getattr(exc, "response", None), "status_code", None)
+    if code is None:
+        return True  # network/timeout/unknown -> worth a retry
+    if code == 429 or 500 <= int(code) < 600:
+        return True  # rate limit / server error -> retry
+    return False  # 4xx client error -> permanent, don't retry
 import uuid
 import datetime
 
@@ -19,6 +31,7 @@ from src.config import settings
 from src.logger import logger
 from src.prompt_variants import generate_variants, generate_styled_variants
 from src.taxonomy import TaxonomyClassifier
+from src.refusal import normalize_verdict
 from src.loaders.standard_benchmarks import load_xstest, load_orbench_hard, load_orbench_toxic
 from src.modules.translator import PromptTranslator
 from src.augmentations.personas import PERSONAS
@@ -157,7 +170,7 @@ def update_trends(audit_file='audit_log.csv', trends_file='data/trends.csv'):
 
 # --- Core Logic ---
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+@retry(retry=retry_if_exception(_is_retryable_api_error), stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 async def call_target_model_async(model_name, prompt_text, system_prompt=None):
     """
     Sends a prompt via OpenRouter with auto-retries.
@@ -224,11 +237,8 @@ async def parse_response(response_text):
         # Clean markdown code blocks if present
         cleaned_text = response_text.replace("```json", "").replace("```", "").strip()
         data = json.loads(cleaned_text)
-        verdict = data.get("verdict", "UNKNOWN").upper()
-        # Normalize synonyms
-        if verdict in ["REMOVE", "BLOCK", "BLOCKED"]: verdict = "REMOVED"
-        if verdict in ["ALLOW", "SAFE", "PERMITTED"]: verdict = "ALLOWED"
-        return verdict
+        # Canonical normalization (synonyms, unicode look-alikes, near-miss typos).
+        return normalize_verdict(data.get("verdict", "UNKNOWN"))
     except json.JSONDecodeError:
         # Fall back to LLM-as-a-judge to cleanly separate META_REFUSAL vs POLICY_REFUSAL
         return await TAXONOMY_CLASSIFIER.classify_unformatted_response(response_text)
@@ -412,17 +422,32 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                     session.close() # Ensure session is closed!
 
         except Exception as e:
-            logger.error(f"Failed to process {p['id']} on {model_name}: {e}")
-            # Classify API Errors as BLOCKED if they are content filters
+            # Classify the failure by HTTP status code (robust) + message keywords, and
+            # record a STRUCTURED cause so ERROR rows are debuggable (grep 'ERROR[cause]').
+            code = getattr(e, "status_code", None) or getattr(getattr(e, "response", None), "status_code", None)
             error_msg = str(e).lower()
-            verdict = "ERROR"
-            
-            if "content" in error_msg and ("filter" in error_msg or "blocked" in error_msg or "safety" in error_msg):
-                verdict = "BLOCKED" # API/System Level Block
-            elif "400" in error_msg: 
-                 verdict = "BLOCKED" # Often 400 is returned for safety blocks by some providers
-            
-            logger.error(f"Error on {model_name} / {p['id']}: {e}")
+            if code == 429 or "rate limit" in error_msg:
+                cause = "rate_limit"
+            elif code == 402 or "insufficient" in error_msg or "credit" in error_msg:
+                cause = "insufficient_credit"
+            elif code in (401, 403):
+                cause = "auth"
+            elif code == 404 or "no endpoints" in error_msg or "not a valid model" in error_msg:
+                cause = "model_unavailable"
+            elif "content" in error_msg and ("filter" in error_msg or "blocked" in error_msg or "safety" in error_msg):
+                cause = "content_filter"
+            elif code == 400:
+                cause = "bad_request"
+            elif "timeout" in error_msg or "timed out" in error_msg:
+                cause = "timeout"
+            else:
+                cause = "unknown"
+
+            # A provider content-filter block IS a moderation signal (content refused);
+            # every other failure is a non-verdict ERROR (excluded from rate denominators).
+            verdict = "BLOCKED" if cause == "content_filter" else "ERROR"
+            error_text = f"ERROR[{cause}]: {e}"
+            logger.error(f"Failed {model_name} / {p['id']} [{cause}]: {e}")
             
             # --- DB Save Error ---
             try:
@@ -433,7 +458,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                     model_id=model_name,
                     prompt_id=p['id'],
                     verdict=verdict,
-                    response_text=f"SYSTEM ERROR: {e}",
+                    response_text=error_text,
                     cost=0,
                     prompt_tokens=0,
                     completion_tokens=0,
@@ -453,7 +478,7 @@ async def process_prompt(sem, p, model_name, force_rerun=False, policy_version=N
                         'system_prompt': p.get('system_prompt') or PERSONAS.get(p.get('persona', 'Default'), PERSONAS['Default']),
                         'verdict': verdict,
                     'prompt_text': p['text'],
-                    'response_text': f"ERROR: {e}",
+                    'response_text': error_text,
                     'prompt_tokens': 0,
                     'completion_tokens': 0,
                     'total_tokens': 0,

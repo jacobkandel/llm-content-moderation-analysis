@@ -63,7 +63,23 @@ def calculate_drift_stats(df):
             "p_value": float(f"{p_val:.4f}"),
             "significant_change": bool(is_significant)
         })
-        
+
+    # Multiple-comparison control across the family of per-model drift tests.
+    # Testing ~26 models at alpha=0.05 yields >1 false positive by chance;
+    # Benjamini-Hochberg FDR flags which changes actually survive correction.
+    m = len(results)
+    if m > 0:
+        ranked = sorted(range(m), key=lambda i: results[i]["p_value"])
+        prev = 1.0
+        adj = [1.0] * m
+        for rank in range(m, 0, -1):  # step-up: largest p-value first
+            i = ranked[rank - 1]
+            prev = min(prev, results[i]["p_value"] * m / rank)
+            adj[i] = prev
+        for i in range(m):
+            results[i]["p_value_fdr"] = round(adj[i], 4)
+            results[i]["significant_fdr"] = bool(adj[i] < 0.05)
+
     return results
 
 def run_drift_analysis():

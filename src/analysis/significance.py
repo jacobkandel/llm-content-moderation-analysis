@@ -45,8 +45,13 @@ def calculate_significance():
         # Binary Refusal: 1 if refused, 0 otherwise (canonical definition)
         df['is_refusal'] = df['verdict'].apply(lambda x: 1 if x in REFUSAL_VERDICTS else 0)
 
-        # Pivot: Index=Prompt, Columns=Model, Values=is_refusal
-        pivot = df.pivot_table(index='prompt_text', columns='model', values='is_refusal', aggfunc='max')
+        # Pivot: Index=Prompt, Columns=Model, Values=is_refusal.
+        # Collapse the N repetitions/variants per (prompt, model) by MAJORITY vote,
+        # not max — max meant "refused if refused in ANY repetition", which biased
+        # every pair toward refusal. Majority (mean >= 0.5) reflects the model's
+        # dominant behavior on that prompt.
+        pivot = df.pivot_table(index='prompt_text', columns='model', values='is_refusal',
+                               aggfunc=lambda x: 1 if x.mean() >= 0.5 else 0)
 
         models = pivot.columns.tolist()
         if len(models) < 2:

@@ -1,76 +1,84 @@
+#!/usr/bin/env python3
+"""
+Reproducibility check for the Moderation Bias benchmark.
 
+This does NOT call any model or spend money. It recomputes the published headline
+statistics *directly from the raw audit log* (web/public/audit_log.csv.gz) using
+the same canonical definitions the pipeline uses (src/refusal.py), then verifies
+they match the shipped JSON artifacts (spectrum_data.json / summary_stats.json).
+
+The point: prove that the published numbers are a deterministic function of the
+released raw data — the core reproducibility claim a reviewer will check.
+
+    python reproduce_results.py            # check against web/public/*.json
+
+Exit code 0 if everything matches within tolerance, 1 otherwise. If per-model
+rates diverge, the shipped JSON predates the current analysis code — regenerate
+it with `python scripts/compress_data.py`.
+"""
+import gzip
+import json
 import os
-import random
-import logging
-import argparse
 import sys
-from src.audit_runner import main as audit_main
 
-# Set fixed seed for global reproducibility
-SEED = 42
+import pandas as pd
 
-def reproduce():
-    """
-    Master reproduction script.
-    1. Sets environment seed.
-    2. Runs the audit pipeline with strict parameters.
-    3. Verifies output artifacts exist.
-    """
-    print(f"🔬 REPRODUCIBILITY MODE INITIATED (SEED={SEED})")
-    
-    # 1. Set Seeds
-    random.seed(SEED)
-    os.environ['PYTHONHASHSEED'] = str(SEED)
-    
-    # 2. Mock Arguments for audit_runner
-    # We want to run a SMALL but rigorous test.
-    # We'll use --limit to avoid huge costs during verification, 
-    # but strictly enforce N=5 and --perturb.
-    
-    # Note: We are simulating command line args by hacking sys.argv or calling main logic directly.
-    # Calling main logic directly is safer if refactored, but audit_runner.main() parses sys.argv.
-    # Let's override sys.argv.
-    
-    original_argv = sys.argv
-    sys.argv = [
-        "audit_runner.py",
-        "--model", "google/gemini-2.0-flash-001", # Cheap, fast, smart enough
-        "--consistency", "5",
-        "--perturb",
-        "--limit", "1", # Process 1 prompt (which becomes 3 variants * 5 runs = 15 calls)
-        "--output", "data/reproduction_audit.csv"
-    ]
-    
-    print(f"Running command: {' '.join(sys.argv)}")
-    
-    try:
-        audit_main()
-        print("\n✅ Audit Run Complete.")
-    except Exception as e:
-        print(f"\n❌ Audit Run Failed: {e}")
-        return
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from src.refusal import REFUSAL_VERDICTS, NON_VERDICTS  # noqa: E402
 
-    # 3. Verify Artifacts
-    print("\nVerifying Artifacts...")
-    
-    # Check CSV
-    if os.path.exists("data/reproduction_audit.csv"):
-        print(" -> Output CSV found.")
-        # Optional: Check row count. Should be ~15 rows (3 variants * 5 runs)
-        # unless errors occurred.
-    else:
-        print(" -> ❌ Output CSV MISSING.")
-        
-    # Check Raw Traces
-    trace_dir = "data/raw_traces"
-    if os.path.exists(trace_dir) and len(os.listdir(trace_dir)) > 0:
-        count = len(os.listdir(trace_dir))
-        print(f" -> Raw Traces directory found with {count} files.")
-    else:
-        print(" -> ❌ Raw Traces MISSING or EMPTY.")
-        
-    # Restore sys.argv
-    sys.argv = original_argv
+CSV = "web/public/audit_log.csv.gz"
+SPECTRUM = "web/public/spectrum_data.json"
+TOL_PP = 1.0  # allowed percentage-point difference in a model's refusal rate
+
+
+def _load_raw() -> pd.DataFrame:
+    with gzip.open(CSV, "rt") as f:
+        return pd.read_csv(f, on_bad_lines="skip", engine="python")
+
+
+def main() -> int:
+    for path in (CSV, SPECTRUM):
+        if not os.path.exists(path):
+            print(f"❌ Required file missing: {path}")
+            return 1
+
+    print("🔬 Recomputing published refusal rates from the raw audit log (no API calls)...")
+    df = _load_raw()
+    df = df[~df["verdict"].isin(NON_VERDICTS)]  # scorable rows only (canonical)
+
+    recomputed = (
+        df.groupby("model")["verdict"]
+        .apply(lambda s: round(s.isin(REFUSAL_VERDICTS).mean() * 100, 2))
+        .to_dict()
+    )
+
+    published = {d["fullName"]: d["refusalRate"] for d in json.load(open(SPECTRUM))}
+
+    mismatches = []
+    checked = 0
+    for model, pub_rate in published.items():
+        if model not in recomputed:
+            mismatches.append(f"{model}: published but absent from raw log")
+            continue
+        checked += 1
+        delta = abs(recomputed[model] - pub_rate)
+        status = "✓" if delta <= TOL_PP else "✗"
+        print(f"  {status} {model:45s} published={pub_rate:5.1f}%  recomputed={recomputed[model]:5.1f}%  Δ={delta:.1f}pp")
+        if delta > TOL_PP:
+            mismatches.append(f"{model}: Δ={delta:.1f}pp")
+
+    print()
+    if mismatches:
+        print(f"❌ Reproduction MISMATCH on {len(mismatches)}/{checked} models (tolerance {TOL_PP}pp):")
+        for m in mismatches:
+            print(f"   {m}")
+        print("\n   → The shipped JSON likely predates the current analysis code.")
+        print("     Regenerate with: python scripts/compress_data.py")
+        return 1
+
+    print(f"✅ Reproduced {checked} model refusal rates from raw data within {TOL_PP}pp.")
+    return 0
+
 
 if __name__ == "__main__":
-    reproduce()
+    sys.exit(main())

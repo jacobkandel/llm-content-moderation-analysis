@@ -26,6 +26,7 @@ REQUIRED_FILES = {
         "type": "array",
         "min_length": 5,           # At least 5 models
         "item_keys": ["name", "refusalRate", "total"],
+        "item_ranges": {"refusalRate": [0, 100], "total": [0, None]},
     },
     "heatmap_matrix.json": {
         "required_keys": ["models", "categories", "cells"],
@@ -41,6 +42,7 @@ REQUIRED_FILES = {
     },
     "reliability_scores.json": {
         "required_keys": ["globalKappa", "interpretation", "modelsCount"],
+        "ranges": {"globalKappa": [-1, 1]},
     },
     "significance_pairwise.json": {
         "type": "array",
@@ -94,6 +96,17 @@ def validate_file(filepath: Path, spec: dict) -> list[str]:
             if missing:
                 errors.append(f"SCHEMA: {filepath.name}[0] missing keys: {missing}")
 
+        # Value-range checks across every item (e.g. refusalRate must be 0..100).
+        item_ranges = spec.get("item_ranges", {})
+        for idx, item in enumerate(data):
+            if not isinstance(item, dict):
+                continue
+            for key, (lo, hi) in item_ranges.items():
+                if key in item and isinstance(item[key], (int, float)):
+                    v = item[key]
+                    if (lo is not None and v < lo) or (hi is not None and v > hi):
+                        errors.append(f"RANGE: {filepath.name}[{idx}].{key}={v} outside [{lo}, {hi}]")
+
         return errors
 
     # Object type checks
@@ -126,6 +139,13 @@ def validate_file(filepath: Path, spec: dict) -> list[str]:
         total = data.get("totalEvaluations", 0)
         if total < min_evals:
             errors.append(f"DATA: {filepath.name} has {total} evaluations, expected >= {min_evals}")
+
+    # Top-level numeric range checks (e.g. globalKappa must be in [-1, 1]).
+    for key, (lo, hi) in spec.get("ranges", {}).items():
+        if key in data and isinstance(data[key], (int, float)):
+            v = data[key]
+            if (lo is not None and v < lo) or (hi is not None and v > hi):
+                errors.append(f"RANGE: {filepath.name}.{key}={v} outside [{lo}, {hi}]")
 
     return errors
 
