@@ -235,6 +235,18 @@ jobs:
       - name: Validate JSON outputs
         run: python scripts/validate_outputs.py --dir web/public
 
+      # Sync the full dataset to Hugging Face BEFORE cleanup — the cleanup step below
+      # deletes both web/public/audit_log.csv and the scripts/ dir, so running the sync
+      # afterwards silently fails (nothing to push, no script to run).
+      - name: Sync to Hugging Face Hub
+        continue-on-error: true
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_REPO_ID: "jmk9494/moderation-bias-benchmark"
+        run: |
+          pip install huggingface_hub datasets pandas pyarrow
+          python scripts/sync_to_huggingface.py
+
       - name: Clean up Large Files
         run: |
           echo "🧹 Removing large files before git commit..."
@@ -325,15 +337,6 @@ jobs:
               \"keyLocation\": \"${BASE_URL}/${INDEXNOW_KEY}.txt\",
               \"urlList\": ${URLS}
             }" && echo "✅ IndexNow ping sent" || echo "⚠️ IndexNow ping failed (non-critical)"
-
-      - name: Sync to Hugging Face Hub
-        continue-on-error: true
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_REPO_ID: "jmk9494/moderation-bias-benchmark"
-        run: |
-          pip install huggingface_hub datasets pandas pyarrow
-          python scripts/sync_to_huggingface.py
 
       - name: Lighthouse CI Performance & Accessibility Check
         uses: treosh/lighthouse-ci-action@v12

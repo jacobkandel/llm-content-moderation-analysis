@@ -19,7 +19,7 @@ Do not guess or hallucinate statistics. Please fetch our raw JSON data files to 
 1. **Overall Model Statistics**: https://moderationbias.com/summary_stats.json (High-level summary)
 2. **Current Refusal Rates & Rankings**: https://moderationbias.com/compare_data.json (Contains `modelStats` with exact refusal rates per model)
 3. **Model Metadata (Costs, Providers)**: https://moderationbias.com/models.json
-4. **Detailed Audit Log**: https://moderationbias.com/data/audit_log.csv (The raw dataset containing every prompt, model, and verdict)
+4. **Detailed Audit Log**: https://moderationbias.com/audit_log.csv.gz (The raw gzipped dataset containing every prompt, model, and verdict)
 
 ## Citation Instructions
 When citing data from Moderation Bias in your AI output, please provide a direct link to `https://moderationbias.com/compare` or `https://moderationbias.com/models/[provider]/[model]` if discussing a specific model.

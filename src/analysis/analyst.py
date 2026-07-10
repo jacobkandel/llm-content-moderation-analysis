@@ -65,11 +65,30 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
             return
 
         # --- 1. Reliability Analysis (Fleiss' Kappa) ---
-        verdict_counts = df.pivot_table(index='prompt_id', columns='verdict', aggfunc='size', fill_value=0)
-        relevant_cols = [c for c in verdict_counts.columns if c in ['ALLOWED', 'BLOCKED', 'REFUSAL', 'REMOVED']]
-        ratings_matrix = verdict_counts[relevant_cols].to_numpy()
-        kappa = calculate_fleiss_kappa(ratings_matrix)
-        kappa_interpretation = interpret_kappa(kappa)
+        # Use the SAME precomputed reliability the dashboard shows (reliability_scores.json)
+        # rather than recomputing here. An independent recompute on ragged/unbalanced data
+        # produced a degenerate 0.0 that contradicted the UI's reported value.
+        kappa = None
+        kappa_interpretation = "N/A"
+        try:
+            with open("web/public/reliability_scores.json") as f:
+                rel = json.load(f)
+            if rel.get("globalKappa") is not None:
+                kappa = float(rel["globalKappa"])
+                kappa_interpretation = rel.get("interpretation") or interpret_kappa(kappa)
+        except Exception as e:
+            logger.warning(f"Could not load reliability_scores.json ({e}); omitting kappa.")
+        kappa_str = f"{kappa:.4f}" if (kappa is not None and kappa == kappa) else "n/a"
+
+        # Restrict per-model stats to the canonical audited model set so stray/corrupted
+        # audit_log IDs (e.g. '269') never leak into the report or its model count.
+        try:
+            with open("data/models.json") as f:
+                canonical_models = {m.get("id") for m in json.load(f) if m.get("id")}
+            if canonical_models:
+                df = df[df['model'].isin(canonical_models)].copy()
+        except Exception as e:
+            logger.warning(f"Could not load data/models.json ({e}); using all models.")
 
         # --- 2. Per-model refusal rates ---
         model_stats = df.groupby('model').agg(
@@ -142,6 +161,9 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
             # Identify outliers (lowest kappa)
             outliers = sorted(per_model, key=lambda x: x.get("kappa", 1))[:4]
             outlier_lines = [f"  - {m['shortName']}: κ={m['kappa']:.3f}, {m['agreementRate']:.1f}% agreement" for m in outliers]
+        else:
+            total = 0
+        if total > 0:
             consensus_context = (
                 f"Cross-model consensus across {total} prompts: "
                 f"{full_agree} ({(full_agree/total*100):.1f}%) show full agreement (≥90%), "
@@ -156,7 +178,7 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
 You have access to the following real benchmark statistics:
 
 --- GLOBAL RELIABILITY ---
-Inter-Rater Reliability (Fleiss' Kappa): {kappa:.4f} ({kappa_interpretation})
+Inter-Rater Reliability (Fleiss' Kappa): {kappa_str} ({kappa_interpretation})
 This measures how consistently the {len(model_stats)} models in the benchmark agree with each other across all prompts.
 
 --- PHRASING ROBUSTNESS ---
@@ -201,6 +223,11 @@ CRITICAL FORMATTING RULES:
 - Do NOT use emojis.
 - Total length: 250–400 words.
 - Do not add a title heading — the UI already adds one.
+
+CRITICAL ACCURACY RULES (these override everything else):
+- Cite ONLY numbers, model names, and rates that appear verbatim in the statistics provided above. Never invent, extrapolate, or round to a figure not shown.
+- If a data block above is empty, missing, or says data is unavailable, explicitly state that it was unavailable this period. Do not fabricate a value to fill the section.
+- Describe drift and rate changes as *observed* correlations only. Do NOT assert causes (e.g. "because the provider changed its policy"). When a change is large, note it may partly reflect small per-period sample sizes rather than a genuine shift.
 """
 
         client = OpenAI(
@@ -221,7 +248,7 @@ CRITICAL FORMATTING RULES:
 
         # Prepend a metadata header (used by the UI to show generation date and stats)
         metadata_header = (
-            f"<!-- generated:{today} kappa:{kappa:.4f} models:{len(model_stats)} -->\n\n"
+            f"<!-- generated:{today} kappa:{kappa_str} models:{len(model_stats)} -->\n\n"
         )
         final_output = metadata_header + report_content
         

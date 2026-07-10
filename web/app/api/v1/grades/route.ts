@@ -89,9 +89,11 @@ export async function POST(request: NextRequest) {
             gradeId: `${safeAnnotator}_${safeItem}`,
         });
     } catch (error: unknown) {
+        // Log full detail server-side; return a generic message so raw exception
+        // text (paths, internals) never reaches the client.
         console.error('Grade submission error:', error);
         return NextResponse.json(
-            { error: 'Failed to save grade', details: error instanceof Error ? error.message : String(error) },
+            { error: 'Failed to save grade' },
             { status: 500 }
         );
     }

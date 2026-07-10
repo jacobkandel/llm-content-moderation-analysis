@@ -15,6 +15,7 @@ import {
     Layers
 } from 'lucide-react';
 import { sanitizeSearchInput } from '@/lib/utils';
+import { CATEGORY_SLUGS } from '@/lib/categories';
 
 interface CommandItem {
     id: string;
@@ -58,11 +59,8 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
             .catch(err => console.error('Failed to pre-fetch prompts for command palette', err));
     }, []);
 
-    const hardcodedCategories = [
-        'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
-        'false-positive-control', 'harassment', 'hate-speech', 'health-misinformation',
-        'incitement-to-violence', 'paternalism', 'political', 'self-harm', 'weapons'
-    ];
+    // Single source of truth — avoids linking to category slugs that 404.
+    const hardcodedCategories = CATEGORY_SLUGS;
 
     const staticCommands: CommandItem[] = [
         // Compare

@@ -49,7 +49,7 @@ export async function GET() {
       <link>${baseUrl}/analysis/summary</link>
       <guid>${baseUrl}/analysis/summary#${lastUpdated.getTime()}</guid>
       <pubDate>${lastUpdated.toUTCString()}</pubDate>
-      <description>We just published a fresh audit of AI content moderation thresholds across ${models.length} models. Check out the latest refusal rates and policy alignments.</description>
+      <description>We just published a fresh audit of AI content moderation thresholds across ${stats.allModels?.length ?? stats.modelsCount ?? models.length} models. Check out the latest refusal rates and policy alignments.</description>
     </item>
 `;
 
