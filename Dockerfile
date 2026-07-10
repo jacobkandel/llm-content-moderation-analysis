@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
-# Expose port (if needed for a web server, adjust as appropriate)
-EXPOSE 8000
-
-# Default command (adjust to your entrypoint)
-CMD ["python", "src/audit_runner.py"]
+# This image runs the batch audit pipeline (not a long-lived server), so no port
+# is exposed. Provide OPENROUTER_API_KEY at runtime and pass audit args, e.g.:
+#   docker run -e OPENROUTER_API_KEY=sk-... <image> --tier efficiency
+ENTRYPOINT ["python", "src/audit_runner.py"]
+CMD ["--help"]

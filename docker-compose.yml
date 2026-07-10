@@ -12,9 +12,9 @@ services:
     command: tail -f /dev/null # Keep alive for manual execution
     # Or use: python src/audit_runner.py --limit 10
 
-  # Next.js Dashboard
+  # Next.js Dashboard (Next 16 requires Node 20+)
   dashboard:
-    image: node:18-alpine
+    image: node:20-alpine
     working_dir: /app/web
     volumes:
       - ./web:/app/web
