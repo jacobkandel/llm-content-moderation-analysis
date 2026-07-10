@@ -5,6 +5,11 @@ import sys
 import json
 from collections import defaultdict
 
+# Ensure `src` is importable when this script is run directly (python scripts/compress_data.py).
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.refusal import REFUSAL_VERDICTS, SAFE_VERDICTS  # noqa: E402
+from src.judge_config import is_judge_model  # noqa: E402
+
 INPUT_FILE = "web/public/audit_log.csv"
 OUTPUT_FILE_FULL = "web/public/audit_log.csv.gz"
 OUTPUT_FILE_LITE = "web/public/audit_log_lite.csv.gz"
@@ -12,9 +17,8 @@ OUTPUT_FILE_LITE = "web/public/audit_log_lite.csv.gz"
 # Must match frontend filters exactly
 BLOCKLIST = ['yi-34b', 'mistral-medium', 'gpt-audio']
 SKIP_CATEGORIES = {'EdgeCase', 'Jailbreak', 'Multilingual', 'Roleplay'}
-REFUSAL_VERDICTS = {'REFUSAL', 'REMOVED', 'unsafe', 'Hard Refusal'}
-SAFE_VERDICTS = {'ALLOWED', 'safe', 'safe_response'}
-HEATMAP_REFUSAL_VERDICTS = REFUSAL_VERDICTS | {'Soft Censorship'}
+# REFUSAL_VERDICTS / SAFE_VERDICTS now come from src.refusal (single source of truth).
+HEATMAP_REFUSAL_VERDICTS = set(REFUSAL_VERDICTS) | {'Soft Censorship'}
 
 # Minimum sample size for a model×category cell to be included in
 # significance testing and heatmap display (n < 30 is unreliable).
@@ -80,10 +84,15 @@ def generate_precomputed_json(df):
     model_counts = df['model'].value_counts()
     model_refusals = df[df['verdict'].isin(REFUSAL_VERDICTS)].groupby('model').size()
 
-    # Filter: min 50 entries, blocklist with 0 refusals, skip categories
+    # Filter: min 50 entries, blocklist with 0 refusals, skip categories.
+    # Also exclude the judge/classifier model from the subject pool so it never
+    # appears in the leaderboard grading its own responses (see src/judge_config.py).
     keep_models = set()
     for model, count in model_counts.items():
         if count < 50:
+            continue
+        if is_judge_model(model):
+            print(f"   ⚖️  Excluding judge model from subject pool: {model}")
             continue
         refusal_count = model_refusals.get(model, 0)
         if refusal_count == 0 and any(b in model.lower() for b in BLOCKLIST):
@@ -309,9 +318,9 @@ def generate_precomputed_json(df):
 
     # --- 3.6. soft_censorship_stats.json ---
     # Per-model breakdown: Hard Refusal, Soft Censorship, Allowed
-    HARD_REFUSAL_VERDICTS = {'REFUSAL', 'REMOVED', 'unsafe', 'Hard Refusal'}
+    HARD_REFUSAL_VERDICTS = REFUSAL_VERDICTS  # canonical refusal set (vs. Soft Censorship)
     SOFT_CENSORSHIP_VERDICTS = {'Soft Censorship'}
-    ALLOWED_VERDICTS = {'ALLOWED', 'safe', 'safe_response'}
+    ALLOWED_VERDICTS = SAFE_VERDICTS
 
     soft_censor_stats = []
     for model in sorted(keep_models):
@@ -777,7 +786,7 @@ def _generate_overrefusal_json():
     """
     XSTEST_CSV = 'web/public/xstest_results.csv'
     OUT_PATH = 'web/public/overrefusal_stats.json'
-    REFUSAL_VERDICTS_SET = {'REFUSAL', 'REMOVED', 'Hard Refusal', 'BLOCKED', 'META_REFUSAL', 'POLICY_REFUSAL'}
+    REFUSAL_VERDICTS_SET = REFUSAL_VERDICTS  # canonical refusal set (single source of truth)
 
     if not os.path.exists(XSTEST_CSV):
         print("   ℹ️  xstest_results.csv not found — skipping over-refusal stats")

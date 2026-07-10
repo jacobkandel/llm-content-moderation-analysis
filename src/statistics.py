@@ -35,16 +35,31 @@ def calculate_fleiss_kappa(ratings_matrix: np.ndarray) -> float:
         ])
         kappa = calculate_fleiss_kappa(matrix)
     """
+    ratings_matrix = np.asarray(ratings_matrix)
     N, k = ratings_matrix.shape
-    
+
     if N == 0 or k == 0:
         return 0.0
-        
-    n = ratings_matrix.sum(axis=1)[0]  # Number of raters per subject
-    
-    if n == 0:
+
+    # Fleiss' Kappa requires a FIXED number of raters per subject. Our audit is a
+    # ragged design (not every model rates every prompt, and ERROR rows drop out),
+    # so restrict to "complete cases": subjects rated by the modal number of raters.
+    # This keeps the fixed-n formula valid rather than silently misapplying it to
+    # unbalanced rows. (For a uniform matrix this is a no-op.)
+    row_totals = ratings_matrix.sum(axis=1)
+    row_totals = row_totals[row_totals > 0]
+    if row_totals.size == 0:
         return 0.0
-    
+    values, counts = np.unique(row_totals, return_counts=True)
+    modal_n = int(values[np.argmax(counts)])  # most common rater count
+    if modal_n < 2:
+        return 0.0
+    ratings_matrix = ratings_matrix[ratings_matrix.sum(axis=1) == modal_n]
+    N = ratings_matrix.shape[0]
+    if N == 0:
+        return 0.0
+    n = modal_n  # Number of raters per (retained) subject
+
     # Calculate proportion of all assignments to each category
     p_j = ratings_matrix.sum(axis=0) / (N * n)
     

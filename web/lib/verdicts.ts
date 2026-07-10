@@ -1,17 +1,21 @@
 /**
  * Verdict classification constants.
  *
- * These mirror the Python-side definitions in scripts/compress_data.py.
- * Keeping them in one place avoids drift between the backend data pipeline
- * and the frontend rendering logic.
+ * These MUST mirror the canonical Python definition in src/refusal.py, which is
+ * the single source of truth for the data pipeline. Keeping them identical
+ * avoids drift between the backend (which precomputes the published JSON) and
+ * the frontend (which recomputes on the fly when filters are applied).
  */
 
-/** Verdicts that count as a model "refusing" the prompt. */
+/** Verdicts that count as a model "refusing" the prompt (see src/refusal.py). */
 export const REFUSAL_VERDICTS = new Set([
-  'REFUSAL',
   'REMOVED',
-  'unsafe',
+  'REFUSAL',
+  'POLICY_REFUSAL',
+  'META_REFUSAL',
+  'BLOCKED',
   'Hard Refusal',
+  'unsafe',
 ] as const);
 
 /** Verdicts that count as a model "allowing" the prompt. */
@@ -27,10 +31,9 @@ export const HEATMAP_REFUSAL_VERDICTS = new Set([
   'Soft Censorship',
 ] as const);
 
-/** Error / system-level verdicts (excluded from rate calculations). */
+/** Non-verdicts excluded from rate calculations entirely (no content decision). */
 export const ERROR_VERDICTS = new Set([
   'ERROR',
-  'BLOCKED',
 ] as const);
 
 /** Models to exclude from display (blocklisted legacy models). */

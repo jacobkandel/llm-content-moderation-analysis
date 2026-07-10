@@ -5,6 +5,8 @@ import logging
 from typing import Dict, Optional, Literal
 from openai import AsyncOpenAI
 
+from src.judge_config import JUDGE_MODEL as DEFAULT_JUDGE_MODEL
+
 logger = logging.getLogger(__name__)
 
 # Strict Taxonomy Definitions
@@ -42,7 +44,7 @@ Output exactly this JSON format:
 """
 
 class TaxonomyClassifier:
-    def __init__(self, client: AsyncOpenAI, model: str = "google/gemini-2.0-flash-001"):
+    def __init__(self, client: AsyncOpenAI, model: str = DEFAULT_JUDGE_MODEL):
         self.client = client
         self.model = model
         

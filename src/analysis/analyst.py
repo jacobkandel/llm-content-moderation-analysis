@@ -7,6 +7,7 @@ from openai import OpenAI
 from src.config import settings
 from src.logger import logger
 from src.statistics import calculate_fleiss_kappa, interpret_kappa
+from src.refusal import REFUSAL_VERDICTS
 
 CSV_PATHS = [
     "web/public/audit_log.csv",
@@ -93,7 +94,7 @@ def generate_weekly_report(output_dir=".", report_file="web/public/latest_report
         # --- 2. Per-model refusal rates ---
         model_stats = df.groupby('model').agg(
             total=('verdict', 'count'),
-            refusals=('verdict', lambda x: (x.isin(['REMOVED', 'REFUSAL', 'BLOCKED'])).sum())
+            refusals=('verdict', lambda x: (x.isin(REFUSAL_VERDICTS)).sum())
         )
         model_stats['refusal_rate'] = (model_stats['refusals'] / model_stats['total'] * 100).round(1)
         model_stats = model_stats.sort_values('refusal_rate', ascending=False)

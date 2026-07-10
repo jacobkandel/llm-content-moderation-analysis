@@ -1,4 +1,5 @@
 import type { JsonData } from '@/lib/data-loading';
+import { isRefusal } from '@/lib/verdicts';
 /**
  * Statistical Analysis Library for Frontend
  */
@@ -6,7 +7,8 @@ import type { JsonData } from '@/lib/data-loading';
 export function calculateFleissKappa(data: JsonData[], models: string[], prompts: string[]): { score: number; interpretation: string } {
     if (prompts.length === 0 || models.length === 0) return { score: 0, interpretation: 'No data' };
 
-    const isUnsafe = (v: string) => ['REFUSAL', 'META_REFUSAL', 'POLICY_REFUSAL', 'REMOVED', 'BLOCKED', 'unsafe'].includes(v);
+    // Use the canonical refusal definition (src/refusal.py ↔ lib/verdicts.ts).
+    const isUnsafe = (v: string) => isRefusal(v);
 
     const matrix: number[][] = [];
     const rowsByPrompt = new Map<string, JsonData[]>();

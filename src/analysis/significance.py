@@ -3,6 +3,8 @@ import numpy as np
 import argparse
 import os
 
+from src.refusal import REFUSAL_VERDICTS
+
 try:
     from scipy.stats import chi2 as _chi2
     def _mcnemar_p(b, c):
@@ -36,9 +38,8 @@ def calculate_significance():
     try:
         df = pd.read_csv(AUDIT_LOG_PATH, on_bad_lines='skip', engine='python')
 
-        # Binary Refusal: 1 if refused, 0 otherwise
-        refusal_keywords = ['REFUSAL', 'REMOVED', 'unsafe', 'Hard Refusal']
-        df['is_refusal'] = df['verdict'].apply(lambda x: 1 if x in refusal_keywords else 0)
+        # Binary Refusal: 1 if refused, 0 otherwise (canonical definition)
+        df['is_refusal'] = df['verdict'].apply(lambda x: 1 if x in REFUSAL_VERDICTS else 0)
 
         # Pivot: Index=Prompt, Columns=Model, Values=is_refusal
         pivot = df.pivot_table(index='prompt_text', columns='model', values='is_refusal', aggfunc='max')
