@@ -155,7 +155,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         console.log("🚀 Triggering FULL data load...");
         setIsLoadingFull(true);
         try {
-            const fullData = await fetchAuditData(false, false); // lite=false
+            const fullData = await fetchAuditData(false); // lite=false
             setAuditData(fullData);
             setIsLite(false);
             console.log("✅ FULL data loaded (replaced lite data)");
@@ -257,7 +257,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         if (loaded.current.csv) return;
         console.log('📦 Loading lite CSV...');
         try {
-            const data = await fetchAuditData(false, true);
+            const data = await fetchAuditData(true); // lite
             setAuditData(data);
             setIsLite(true);
             loaded.current.csv = true;

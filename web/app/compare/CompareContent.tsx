@@ -204,7 +204,7 @@ export default function CompareContent({
         fullDataTriggered.current = true;
         setFullDataLoading(true);
 
-        fetchAuditData(false, false).then(rows => {
+        fetchAuditData(false).then(rows => {
             const cleanRows = (rows || []).filter(r => r.verdict !== 'ERROR');
             setFullData(cleanRows);
             setFullDataLoading(false);
