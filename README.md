@@ -4,7 +4,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20262255.svg)](https://doi.org/10.5281/zenodo.20262255)
 
-Open-source benchmark tracking censorship and content moderation bias across 27+ LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
+Open-source benchmark tracking censorship and content moderation bias across 30+ LLMs. We run identical prompts through every major model and measure exactly which ones refuse — and which ones don't.
 
 **Live site**: [moderationbias.com](https://moderationbias.com)
 
@@ -19,7 +19,7 @@ Open-source benchmark tracking censorship and content moderation bias across 27+
 
 ## Methodology
 
-2,012 evaluated prompts (2,293 in corpus) across 16 categories (Hate Speech, Health Misinformation, Misinformation, Incitement to Violence, Explicit/Sexual, Violence, Crime, Cybersecurity, Harassment, Self-Harm, Deception, Theft, Dangerous, Medical Misinformation, International Controversy, and False Positive Controls), grounded in Wikipedia's *List of Controversial Issues* and filtered by search volume to minimize selection bias. Every model receives an identical system prompt at `temperature=0` for reproducibility. Verdicts (ALLOWED / REMOVED) are scored by an independent judge model (`gpt-4o-mini`) with position-swapping to mitigate ordering bias. Exact model version strings are logged per run for drift attribution. Minimum n ≥ 30 per model×category cell for statistical validity (models with <50 total evaluations are excluded from analysis). See [METHODOLOGY.md](METHODOLOGY.md) and [LIMITATIONS.md](LIMITATIONS.md) for full details.
+2,012 evaluated prompts (2,323 in corpus) across 16 categories (Hate Speech, Health Misinformation, Misinformation, Incitement to Violence, Explicit/Sexual, Violence, Crime, Cybersecurity, Harassment, Self-Harm, Deception, Theft, Dangerous, Medical Misinformation, International Controversy, and False Positive Controls), grounded in Wikipedia's *List of Controversial Issues* and filtered by search volume to minimize selection bias. Every model receives an identical system prompt at `temperature=0` for reproducibility. Verdicts (ALLOWED / REMOVED) are scored by an independent judge model (`gpt-4o-mini`) with position-swapping to mitigate ordering bias. Exact model version strings are logged per run for drift attribution. Minimum n ≥ 30 per model×category cell for statistical validity (models with <50 total evaluations are excluded from analysis). See [METHODOLOGY.md](METHODOLOGY.md) and [LIMITATIONS.md](LIMITATIONS.md) for full details.
 
 ---
 
@@ -27,16 +27,16 @@ Open-source benchmark tracking censorship and content moderation bias across 27+
 
 ```
 ├── src/                    # Python backend
-│   ├── audit_runner.py     # Main auditing script
-│   ├── analyst.py          # AI analysis agent
-│   └── statistics.py       # Statistical analysis (McNemar's, Fleiss' Kappa)
+│   ├── audit_runner.py       # Main auditing script
+│   ├── analysis/analyst.py   # AI analysis agent (weekly report + IAA pipeline)
+│   └── statistics.py         # Statistical analysis (McNemar's, Fleiss' Kappa)
 ├── web/                    # Next.js frontend
 │   ├── app/                # App Router — compare, analysis, audit, about
 │   ├── components/         # React components
 │   ├── lib/                # Utilities and design system
 │   └── public/             # Precomputed JSON data assets
 ├── data/
-│   ├── prompts.csv         # 2,293 test prompts by category
+│   ├── prompts.csv         # 2,323 test prompts by category
 │   └── models.json         # Model registry (31 models)
 └── .github/workflows/      # CI and scheduled audits
 ```
@@ -136,7 +136,7 @@ python -m pytest tests/
   author    = {Kandel, J.},
   year      = {2026},
   url       = {https://moderationbias.com},
-  version   = {2.0.0},
+  version   = {2.1.0},
   license   = {MIT}
 }
 ```

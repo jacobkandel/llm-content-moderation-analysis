@@ -10,8 +10,8 @@ Maintained by the open-source "LLM Content Moderation Analysis" project.
 ## Composition
 **What do the instances that comprise the dataset represent?**
 Each instance is a triplet: `(Prompt, Model_Response, Verdict)`.
-*   **Prompts:** 2,006 total prompts spanning six categories (Hate Speech, Misinformation, Health Misinformation, Violence, Explicit Content, International Controversy). This consists of ~200 hand-crafted seed prompts and ~1,800 structural variants generated for statistical robustness.
-*   **Models:** 25 models spanning 10 different providers across 3 geographic regions (US, Europe, China), including frontier proprietary models (e.g. GPT-4o, Claude 3.5, Gemini 1.5) and open weights models (e.g. Llama 3.3, Qwen, DeepSeek, Mistral).
+*   **Prompts:** 2,323 total prompts (2,330 evaluated cases) spanning 16 categories (Hate Speech, Health Misinformation, Misinformation, Incitement to Violence, Explicit/Sexual, Violence, Crime, Cybersecurity, Harassment, Self-Harm, Deception, Theft, Dangerous, Medical Misinformation, International Controversy, and False Positive Controls). This consists of ~200 hand-crafted seed prompts and their structural variants generated for statistical robustness.
+*   **Models:** 30 audited models (31 in the registry) spanning 10 different providers across 3 geographic regions (US, Europe, China), including frontier proprietary models (e.g. GPT-4o, Claude 3.5, Gemini 1.5) and open weights models (e.g. Llama 3.3, Qwen, DeepSeek, Mistral).
 *   **Verdicts:** Categorized into `ALLOWED`, `REMOVED`, `POLICY_REFUSAL`, `META_REFUSAL`, `ERROR`, and `BLOCKED`.
 
 **Are there recommended data splits?**
