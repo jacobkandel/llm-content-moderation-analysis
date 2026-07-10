@@ -28,12 +28,18 @@ type PValueRow = {
 };
 
 // --- Types for precomputed data ---
+// categoryRates values may be a bare number (legacy) or {rate, ciLower, ciUpper} (current).
+type CategoryRate = number | { rate: number; ciLower?: number; ciUpper?: number };
 type CompareModelStats = {
     refusalRate: number;
     avgVerbosity: number;
     total: number;
-    categoryRates: Record<string, number>;
+    categoryRates: Record<string, CategoryRate>;
 };
+
+/** Extract the numeric refusal rate from a categoryRates value (handles number or {rate}). */
+const catRate = (v: CategoryRate | undefined): number =>
+    (typeof v === 'number' ? v : v?.rate) ?? 0;
 
 type CompareData = {
     models: string[];
@@ -322,13 +328,17 @@ export default function CompareContent({
         const statsForB = compareData.modelStats[modelB];
         if (!statsForA || !statsForB) return [];
 
-        return compareData.categories.map(cat => ({
-            subject: cat,
-            A: statsForA.categoryRates[cat] || 0,
-            B: statsForB.categoryRates[cat] || 0,
-            diff: Math.abs((statsForA.categoryRates[cat] || 0) - (statsForB.categoryRates[cat] || 0)),
-            fullMark: 100,
-        }));
+        return compareData.categories.map(cat => {
+            const a = catRate(statsForA.categoryRates[cat]);
+            const b = catRate(statsForB.categoryRates[cat]);
+            return {
+                subject: cat,
+                A: a,
+                B: b,
+                diff: Math.abs(a - b),
+                fullMark: 100,
+            };
+        });
     }, [compareData, modelA, modelB]);
 
     // Apply "Highlight Differences" filter
