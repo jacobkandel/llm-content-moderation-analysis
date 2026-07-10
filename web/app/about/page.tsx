@@ -22,7 +22,7 @@ export default function AboutPage() {
     };
 
     return (
-        <main className="max-w-4xl mx-auto py-12 space-y-16">
+        <div className="max-w-4xl mx-auto py-12 space-y-16">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -303,6 +303,6 @@ export default function AboutPage() {
                     View Source on GitHub
                 </a>
             </div>
-        </main>
+        </div>
     );
 }

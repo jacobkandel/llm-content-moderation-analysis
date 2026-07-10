@@ -5,7 +5,8 @@ import LeaderboardClient from './LeaderboardClient';
 
 export const metadata: Metadata = {
     title: 'Model Leaderboard — Moderation Bias',
-    description: 'All 27 LLMs ranked by content moderation refusal rate with confidence intervals. Filter by category, sort by any metric.',
+    description: 'Every audited LLM ranked by content moderation refusal rate with confidence intervals. Filter by category, sort by any metric.',
+    alternates: { canonical: '/leaderboard' },
     openGraph: {
         title: 'LLM Moderation Leaderboard — Moderation Bias',
         description: 'Sortable rankings of 27 AI models by refusal rate across 16 harm categories.',

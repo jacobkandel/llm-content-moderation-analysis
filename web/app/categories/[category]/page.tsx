@@ -67,11 +67,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
         modelRankings = compare.models
             .map((id: string) => {
-                const rate = compare.modelStats?.[id]?.categoryRates?.[label];
+                // categoryRates value is {rate, ciLower, ciUpper} (current) or a bare number (legacy).
+                const raw = compare.modelStats?.[id]?.categoryRates?.[label];
+                const rate = typeof raw === 'number' ? raw : (raw?.rate ?? null);
                 const info = modelMap.get(id);
-                return { id, name: info?.display_name || id.split('/').pop() || id, rate: rate ?? null };
+                return { id, name: info?.display_name || id.split('/').pop() || id, rate };
             })
-            .filter((m: JsonData) => m.rate !== null)
+            .filter((m: JsonData) => typeof m.rate === 'number' && isFinite(m.rate))
             .sort((a: JsonData, b: JsonData) => b.rate - a.rate);
     } catch { }
 
@@ -103,7 +105,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     };
 
     return (
-        <main className="max-w-4xl mx-auto py-12 px-6 space-y-10">
+        <div className="max-w-4xl mx-auto py-12 px-6 space-y-10">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -182,6 +184,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                     Full Analysis
                 </Link>
             </div>
-        </main>
+        </div>
     );
 }

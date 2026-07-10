@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Filter } from 'lucide-react';
+import { CATEGORIES } from '@/lib/categories';
 
 export const metadata: Metadata = {
     title: 'Content Categories — ModerationBias',
@@ -14,18 +15,9 @@ export const metadata: Metadata = {
     twitter: { card: 'summary_large_image', title: 'Content Categories — ModerationBias' },
 };
 
-const CATEGORIES: Record<string, string> = {
-    'explicit-sexual': 'Explicit/Sexual',
-    'hate-speech': 'Hate Speech',
-    'health-misinformation': 'Health Misinformation',
-    'incitement-to-violence': 'Incitement to Violence',
-    'paternalism': 'Paternalism',
-    'political': 'Political',
-};
-
 export default function CategoriesIndex() {
     return (
-        <main className="min-h-screen bg-background py-16 px-4">
+        <div className="min-h-screen bg-background py-16 px-4">
             <div className="max-w-4xl mx-auto space-y-8">
                 <div>
                     <h1 className="text-4xl font-bold mb-4 text-foreground flex items-center gap-3">
@@ -54,6 +46,6 @@ export default function CategoriesIndex() {
                     ))}
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

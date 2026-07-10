@@ -210,6 +210,11 @@
   --primary: 357 52% 42%;
   --primary-foreground: 0 0% 100%;
 
+  /* Brand accent lightened so text-brand meets WCAG AA on the near-black background
+     (#800000 maroon is far too dark against #1a1a1a). */
+  --color-brand: #e07a7a;
+  --color-brand-dark: #eb9a9a;
+
   /* Secondary: Dark Greystone */
   --secondary: 0 0% 45%;
   --secondary-foreground: 0 0% 100%;

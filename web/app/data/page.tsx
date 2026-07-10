@@ -5,6 +5,7 @@ import { Database, Download, ExternalLink, FileJson, Github, Table2 } from 'luci
 export const metadata: Metadata = {
     title: 'Access the Data — Moderation Bias',
     description: 'Download or query the full Moderation Bias audit dataset. Available as CSV, JSON, and via the HuggingFace Datasets API.',
+    alternates: { canonical: '/data' },
     openGraph: {
         title: 'Moderation Bias — Dataset Access',
         description: 'Full audit log, precomputed JSON endpoints, and HuggingFace dataset for the LLM censorship benchmark.',
@@ -72,7 +73,7 @@ const endpoints = [
 
 export default function DataPage() {
     return (
-        <main className="max-w-4xl mx-auto py-12 px-6 space-y-12">
+        <div className="max-w-4xl mx-auto py-12 px-6 space-y-12">
             <header className="space-y-3">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">Open Data</p>
                 <h1 className="text-3xl md:text-4xl font-black text-foreground leading-tight">
@@ -229,6 +230,6 @@ df = ds["train"].to_pandas()`}</pre>
                     </Link>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

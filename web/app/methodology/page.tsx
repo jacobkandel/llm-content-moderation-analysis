@@ -5,6 +5,7 @@ import { FileText, Database, BarChart2, Shield, Microscope, Scale, Users } from 
 export const metadata: Metadata = {
     title: 'Methodology — Moderation Bias',
     description: 'How we benchmark LLM content moderation: prompt design, model querying, verdict classification, statistical testing, and reproducibility.',
+    alternates: { canonical: '/methodology' },
 };
 
 const sections = [

@@ -39,7 +39,7 @@ export default async function ProviderModels({ params }: { params: Promise<{ pro
   }
 
   return (
-    <main className="min-h-screen bg-background py-16 px-4">
+    <div className="min-h-screen bg-background py-16 px-4">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
           <h1 className="text-4xl font-bold mb-4 text-foreground">{getProviderName(provider)}</h1>
@@ -72,6 +72,6 @@ export default async function ProviderModels({ params }: { params: Promise<{ pro
           ))}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

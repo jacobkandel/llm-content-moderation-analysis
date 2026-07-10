@@ -1,7 +1,7 @@
 {
-    "name": "Moderation Bias Analyst",
+    "name": "Moderation Bias",
     "short_name": "ModBias",
-    "description": "Content Moderation Analysis Dashboard",
+    "description": "Open-source benchmark tracking censorship and content-moderation bias across 30+ LLMs, with biweekly automated audits.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#09090b",

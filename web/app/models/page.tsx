@@ -35,7 +35,7 @@ export default async function ModelsIndex() {
     }
 
     return (
-        <main className="min-h-screen bg-background py-16 px-4">
+        <div className="min-h-screen bg-background py-16 px-4">
             <div className="max-w-4xl mx-auto space-y-8">
                 <div>
                     <h1 className="text-4xl font-bold mb-4 text-foreground">AI Models</h1>
@@ -73,6 +73,6 @@ export default async function ModelsIndex() {
                     ))}
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

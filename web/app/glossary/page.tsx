@@ -4,6 +4,7 @@ import { BookOpen } from 'lucide-react';
 export const metadata: Metadata = {
     title: 'Glossary — Moderation Bias',
     description: 'Definitions of key terms used in our LLM content moderation benchmark: refusal, over-refusal, alignment tax, paternalism, and more.',
+    alternates: { canonical: '/glossary' },
 };
 
 const terms = [

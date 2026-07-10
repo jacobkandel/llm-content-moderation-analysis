@@ -94,6 +94,7 @@ export async function generateMetadata({ params }: { params: Promise<{ provider:
         return {
             title: `${md.display_name} Censorship Analysis — Moderation Bias`,
             description: `How does ${md.display_name} handle content moderation? ${refusalPct !== null ? `Refusal rate: ${refusalPct}%. ` : ''}Category breakdown, behavioral trends, and side-by-side comparisons with other LLMs.`,
+            alternates: { canonical: `/models/${provider}/${model}` },
             openGraph: {
                 title: `${md.display_name} Content Moderation Profile`,
                 description: `Refusal rates, category breakdown, and behavioral analysis for ${md.display_name} (${md.provider}).`,
@@ -140,10 +141,10 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
 
     if (!modelInfo) {
         return (
-            <main className="max-w-4xl mx-auto py-12 px-6">
+            <div className="max-w-4xl mx-auto py-12 px-6">
                 <p className="text-muted-foreground">Model not found: <code>{id}</code></p>
                 <Link href="/compare" className="text-primary hover:underline mt-4 inline-block">← Back to Compare</Link>
-            </main>
+            </div>
         );
     }
 
@@ -219,7 +220,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
     };
 
     return (
-        <main className="max-w-4xl mx-auto py-12 px-6 space-y-10">
+        <div className="max-w-4xl mx-auto py-12 px-6 space-y-10">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -441,6 +442,6 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                     All Model Rankings
                 </Link>
             </div>
-        </main>
+        </div>
     );
 }

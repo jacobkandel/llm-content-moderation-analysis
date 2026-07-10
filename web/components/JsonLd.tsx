@@ -32,9 +32,20 @@ export default function JsonLd({ pathname }: JsonLdProps) {
             '@context': 'https://schema.org',
             '@type': 'Dataset',
             name: 'LLM Content Moderation Audit Log',
-            description: 'A comprehensive benchmark of content-moderation biases in large language models including GPT-4o, Claude 3.5 Sonnet, Gemini, and Llama 3.',
+            description: 'A comprehensive benchmark of content-moderation biases across 30+ large language models (GPT-4o, Claude, Gemini, Llama, DeepSeek, Qwen, Mistral), with biweekly automated audits and statistical significance testing.',
             url: `${BASE}/data`,
-            sameAs: 'https://github.com/jacobkandel/llm-content-moderation-analysis',
+            sameAs: [
+                'https://github.com/jacobkandel/llm-content-moderation-analysis',
+                'https://doi.org/10.5281/zenodo.20262255',
+                'https://huggingface.co/datasets/jmk9494/moderation-bias-benchmark',
+            ],
+            identifier: {
+                '@type': 'PropertyValue',
+                propertyID: 'DOI',
+                value: '10.5281/zenodo.20262255',
+            },
+            keywords: ['LLM', 'content moderation', 'AI bias', 'censorship', 'refusal rate', 'AI safety', 'benchmark'],
+            isAccessibleForFree: true,
             license: 'https://creativecommons.org/licenses/by/4.0/',
             creator: {
                 '@type': 'Person',

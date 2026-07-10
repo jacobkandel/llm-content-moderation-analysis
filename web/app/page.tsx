@@ -29,7 +29,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="flex flex-col">
+    <div className="flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -202,6 +202,6 @@ export default function HomePage() {
         </div>
       </section>
 
-    </main>
+    </div>
   );
 }
