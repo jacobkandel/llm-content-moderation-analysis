@@ -15,6 +15,11 @@ interface JsonLdProps {
 }
 
 export default function JsonLd({ pathname }: JsonLdProps) {
+    // Model-detail pages (/models/<provider>/<model>) render their OWN richer,
+    // model-specific Dataset + BreadcrumbList, so the generic global ones are
+    // suppressed here to avoid duplicate JSON-LD nodes on the same page.
+    const isModelDetail = pathname.startsWith('/models/') && pathname.split('/').filter(Boolean).length === 3;
+
     const jsonLd: object[] = [
         {
             '@context': 'https://schema.org',
@@ -63,6 +68,12 @@ export default function JsonLd({ pathname }: JsonLdProps) {
         },
     ];
 
+    // Drop the generic Dataset node on model-detail pages (they emit their own).
+    if (isModelDetail) {
+        const dsIdx = jsonLd.findIndex((o) => (o as { '@type'?: string })['@type'] === 'Dataset');
+        if (dsIdx !== -1) jsonLd.splice(dsIdx, 1);
+    }
+
     // FAQPage schema — only on the homepage where the FAQ content is visible
     if (pathname === '/') {
         jsonLd.push({
@@ -106,7 +117,8 @@ export default function JsonLd({ pathname }: JsonLdProps) {
     }
 
     // BreadcrumbList — generated from pathname for all non-root pages
-    if (pathname && pathname !== '/') {
+    // (except model-detail pages, which emit their own labelled breadcrumb).
+    if (pathname && pathname !== '/' && !isModelDetail) {
         const segments = pathname.split('/').filter(Boolean);
         const itemListElement: object[] = [
             {

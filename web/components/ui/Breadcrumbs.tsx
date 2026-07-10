@@ -8,17 +8,33 @@ import React, { useMemo } from 'react';
 // Maps certain route segments to more friendly display names
 const routeNames: Record<string, string> = {
     'analysis': 'Analysis',
+    // Analysis sub-pages
+    'overview': 'Overview',
     'summary': 'Summary',
     'significance': 'Statistical Significance',
     'reliability': 'Model Reliability',
     'paternalism': 'Paternalism',
+    'political': 'Political Compass',
     'political-compass': 'Political Compass',
     'drift': 'Model Drift',
+    'longitudinal': 'Longitudinal Trends',
+    'consensus': 'Council Consensus',
     'clusters': 'Semantic Clustering',
+    'triggers': 'Trigger Words',
+    'alignment': 'Alignment Tax',
+    'iaa': 'Inter-Annotator Agreement',
+    'overrefusal': 'Over-Refusal',
+    'family': 'Model Families',
+    // Top-level pages
     'compare': 'Compare Models',
     'audit': 'Raw Audit Log',
     'categories': 'Categories',
     'models': 'Models',
+    'leaderboard': 'Leaderboard',
+    'annotate': 'Annotate',
+    'data': 'Access the Data',
+    'prompts': 'Prompt Explorer',
+    'glossary': 'Glossary',
     // Technical sub-pages
     'technical': 'Technical',
     'methodology': 'Methodology',
