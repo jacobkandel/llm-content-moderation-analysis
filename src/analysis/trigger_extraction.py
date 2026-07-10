@@ -11,6 +11,20 @@ STOP_WORDS = {
     'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'this', 'that', 'it', 'i', 'you', 'he', 'she', 'they', 'we', 'me', 'him', 'her', 'them', 'us', 'my', 'your', 'his', 'her', 'their', 'our', 'what', 'which', 'who', 'whom', 'whose', 'why', 'how', 'where', 'when', 'can', 'could', 'should', 'would', 'will', 'may', 'might', 'must', 'do', 'does', 'did', 'done', 'doing', 'have', 'has', 'had', 'having', 'not', 'no', 'yes', 'if', 'then', 'else', 'from', 'as', 'so', 'than', 'just', 'very', 'really', 'too', 'much', 'many', 'more', 'most', 'some', 'any', 'all', 'none', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'make', 'write', 'create', 'generate', 'tell', 'me', 'about', 'like', 'know'
 }
 
+# Moderation-harness / judge scaffolding. Prompts are wrapped in a moderator
+# template and some rows carry judge-response vocabulary, so without this filter
+# the "top triggers" are dominated by structural words (verdict, allowed,
+# removed, flagged, redacted…) rather than the actual content signal. Keep this
+# in sync with SCAFFOLDING_WORDS in scripts/clean_analysis_artifacts.py.
+SCAFFOLDING_WORDS = {
+    'context', 'redacted', 'check', 'allowed', 'removed', 'user', 'users', 'content',
+    'verdict', 'flagged', 'flag', 'request', 'requests', 'safety', 'review', 'response',
+    'responses', 'moderation', 'moderate', 'moderator', 'policy', 'policies', 'platform',
+    'guidelines', 'guideline', 'classification', 'classify', 'assistant', 'system',
+    'reason', 'reasons', 'post', 'posts', 'contains', 'contain',
+}
+STOP_WORDS |= SCAFFOLDING_WORDS
+
 def extract_triggers(input_file, output_file):
     if not os.path.exists(input_file):
         logger.error(f"Input file {input_file} not found")

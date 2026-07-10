@@ -41,6 +41,13 @@ export default function AlignmentPage() {
         ...d,
         xCost: d.costPer1k > 0 ? d.costPer1k : costFloor,
     }));
+    // Explicit decade ticks — letting Recharts auto-generate ticks on a log axis
+    // produces colliding tick keys (React duplicate-key warnings) at the floor.
+    const costMax = scatterData.reduce((m: number, d: JsonData) => Math.max(m, d.xCost), costFloor);
+    const costTicks: number[] = [];
+    for (let e = Math.floor(Math.log10(costFloor)); e <= Math.ceil(Math.log10(costMax)); e++) {
+        costTicks.push(Math.pow(10, e));
+    }
 
     if (loading) return <SkeletonLoader />;
 
@@ -70,7 +77,8 @@ export default function AlignmentPage() {
                                 dataKey="xCost"
                                 name="Cost"
                                 scale="log"
-                                domain={[costFloor, 'dataMax']}
+                                domain={[costTicks[0], costTicks[costTicks.length - 1]]}
+                                ticks={costTicks}
                                 allowDataOverflow
                                 tickFormatter={(v: number) => `$${v < 0.1 ? v.toFixed(3) : v.toFixed(2)}`}
                                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}

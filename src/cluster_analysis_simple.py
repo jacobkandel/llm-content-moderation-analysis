@@ -65,6 +65,13 @@ def get_top_words(texts, n=5):
         'provide', 'content', 'information', 'response', 'request',
         'able', 'help', 'please', 'sorry', 'cannot', 'cant', 'dont',
         'model', 'language', 'text', 'user', 'post', 'based', 'including',
+        # Judge-reason scaffolding: verbs/nouns the model uses to *justify* a
+        # verdict, which otherwise crowd out the actual topic of the content.
+        'against', 'policy', 'policies', 'violate', 'violates', 'violated',
+        'violation', 'promote', 'promotes', 'promoting', 'promotion',
+        'platform', 'guideline', 'guidelines', 'flagged', 'flag', 'safety',
+        'review', 'moderation', 'contains', 'contain', 'users', 'allowed',
+        'because', 'which', 'could', 'this', 'that', 'requests',
     }
     words = []
     for text in texts:
@@ -74,6 +81,47 @@ def get_top_words(texts, n=5):
                 words.append(w)
     counts = collections.Counter(words)
     return [w for w, _ in counts.most_common(n)]
+
+
+# Matches a JSON "reason"/"explanation" field even when the response is
+# truncated mid-string (common in the stored exemplars).
+_REASON_RE = re.compile(r'"(?:reason|explanation|justification)"\s*:\s*"(.*?)(?:"|$)', re.IGNORECASE | re.DOTALL)
+
+
+def extract_reason(response):
+    """
+    Pull the human-readable refusal rationale out of a judge response.
+
+    Judge responses are typically ```json {"verdict": "...", "reason": "..."}```.
+    We want the reason prose for clustering/keywords/exemplars — not the JSON
+    scaffolding (verdict/braces/fences), which dominates otherwise.
+    Falls back to the fence-stripped text when there is no reason field.
+    """
+    if not response:
+        return ""
+    text = response.strip()
+    # Strip Markdown code fences (```json ... ```)
+    text = re.sub(r'^```[a-zA-Z]*\s*', '', text)
+    text = re.sub(r'\s*```$', '', text).strip()
+
+    # Try strict JSON first
+    if text.startswith('{'):
+        try:
+            obj = json.loads(text)
+            for key in ('reason', 'Reason', 'explanation', 'justification', 'message'):
+                if isinstance(obj.get(key), str) and obj[key].strip():
+                    return obj[key].strip()
+        except (json.JSONDecodeError, AttributeError):
+            pass
+        # Regex fallback for truncated/relaxed JSON
+        m = _REASON_RE.search(text)
+        if m and m.group(1).strip():
+            return m.group(1).strip()
+        # Last resort: drop obvious JSON scaffolding tokens
+        stripped = re.sub(r'["{}]|verdict|reason|:\s*|REMOVED|ALLOWED|,', ' ', text, flags=re.IGNORECASE)
+        return re.sub(r'\s+', ' ', stripped).strip()
+
+    return text
 
 
 def load_refusals():
@@ -93,8 +141,12 @@ def load_refusals():
                 response = row.get('response_text') or row.get('response', '')
                 if not response or len(response.strip()) < 20:
                     continue  # Skip empty/trivial responses
+                # Cluster on the refusal *rationale*, not the JSON scaffolding.
+                reason = extract_reason(response)
+                if not reason or len(reason) < 20:
+                    continue  # No usable rationale
                 refusals.append({
-                    'response': response.strip(),
+                    'response': reason,
                     'model': row.get('model') or row.get('model_id', ''),
                     'prompt_id': row.get('prompt_id') or row.get('case_id', ''),
                     'category': row.get('category', 'Uncategorized'),

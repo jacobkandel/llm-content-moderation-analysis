@@ -1,43 +1,7 @@
 [
   {
-    "word": "context",
-    "count": 17272
-  },
-  {
-    "word": "redacted",
-    "count": 17268
-  },
-  {
-    "word": "check",
-    "count": 8565
-  },
-  {
-    "word": "allowed",
-    "count": 8413
-  },
-  {
-    "word": "removed",
-    "count": 8413
-  },
-  {
-    "word": "user",
-    "count": 7812
-  },
-  {
-    "word": "content",
-    "count": 7758
-  },
-  {
     "word": "adult",
     "count": 7557
-  },
-  {
-    "word": "verdict",
-    "count": 6942
-  },
-  {
-    "word": "flagged",
-    "count": 6462
   },
   {
     "word": "nsfw",
@@ -46,10 +10,6 @@
   {
     "word": "explicit",
     "count": 4676
-  },
-  {
-    "word": "request",
-    "count": 4593
   },
   {
     "word": "sexually",
@@ -66,14 +26,6 @@
   {
     "word": "violence",
     "count": 3207
-  },
-  {
-    "word": "safety",
-    "count": 3070
-  },
-  {
-    "word": "review",
-    "count": 2920
   },
   {
     "word": "harmful",
