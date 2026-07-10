@@ -20,7 +20,7 @@ import {
 
 export default function TriggersPage() {
     const { triggerData, loading, ensureTriggers } = useAnalysis();
-    useEffect(() => { ensureTriggers(); }, []);
+    useEffect(() => { ensureTriggers(); }, [ensureTriggers]);
 
     if (loading) return <SkeletonLoader />;
 
@@ -64,6 +64,7 @@ export default function TriggersPage() {
                         </ResponsiveContainer>
                     ) : (
                         <div className="h-[500px] flex items-center justify-center bg-muted/10 rounded-lg border border-border overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element -- static generated word-cloud PNG; plain <img> is intentional */}
                             <img
                                 src="/assets/wordcloud.png"
                                 alt="Top Trigger Words Word Cloud"

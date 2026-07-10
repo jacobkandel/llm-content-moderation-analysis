@@ -14,6 +14,30 @@ const eslintConfig = defineConfig([
       react: { version: "19.2" },
     },
   },
+  // Standalone Node build/utility scripts are CommonJS, so require() and the
+  // occasional ts-directive are legitimate there, not app-code smells.
+  {
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+    },
+  },
+  // Allow deliberately-unused bindings when prefixed with an underscore
+  // (e.g. positional callback args, caught errors we intentionally ignore).
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -82,7 +82,7 @@ export default function OverviewContent() {
                                 {meta.kappa && (
                                     <div className="flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
                                         <Activity className="w-3 h-3" />
-                                        <span>Fleiss' κ = {parseFloat(meta.kappa).toFixed(3)}</span>
+                                        <span>Fleiss&apos; κ = {parseFloat(meta.kappa).toFixed(3)}</span>
                                     </div>
                                 )}
                             </div>

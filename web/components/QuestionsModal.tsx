@@ -44,6 +44,7 @@ export default function QuestionsModal({ isOpen, onClose, questions }: Questions
     }, [questions, debouncedSearch]);
 
     // Virtualizer for performance
+    // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual returns non-memoizable functions; React Compiler skips this component, which is fine here
     const rowVirtualizer = useVirtualizer({
         count: filteredQuestions.length,
         getScrollElement: () => parentRef.current,
@@ -190,7 +191,7 @@ export default function QuestionsModal({ isOpen, onClose, questions }: Questions
                                 {filteredQuestions.length === 0 && (
                                     <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                                         <Search className="w-8 h-8 mb-2 opacity-20" />
-                                        <p>No questions found matching "{search}"</p>
+                                        <p>No questions found matching &quot;{search}&quot;</p>
                                     </div>
                                 )}
                             </div>

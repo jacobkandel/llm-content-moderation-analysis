@@ -1,14 +1,21 @@
 import type { NextConfig } from "next";
+import bundleAnalyzer from '@next/bundle-analyzer';
+import withPWAInit from '@ducanh2912/next-pwa';
 
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const withPwa = require('@ducanh2912/next-pwa').default({
+const withPwa = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  skipWaiting: true,
+  // skipWaiting is a Workbox option; it belongs under workboxOptions rather than
+  // at the top level (where the old `require()`-typed-as-any config silently
+  // dropped it). Its default is already true, so behaviour is unchanged.
+  workboxOptions: {
+    skipWaiting: true,
+  },
 });
 
 const nextConfig: NextConfig = {

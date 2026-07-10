@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Search, ChevronDown, ChevronRight, ShieldCheck, ShieldX } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight } from 'lucide-react';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { sanitizeSearchInput } from '@/lib/utils';
 
@@ -49,7 +49,7 @@ export default function PromptsPage() {
                 setPrompts(data.filter(p => p.text && p.text.trim()));
                 setLoading(false);
             })
-            .catch(e => {
+            .catch(() => {
                 setError('Could not load prompt data. The data may still be generating.');
                 setLoading(false);
             });

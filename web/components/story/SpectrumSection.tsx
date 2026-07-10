@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useRef } from 'react';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { TooltipHover } from '@/components/ui/TooltipHover';
@@ -27,12 +27,6 @@ function getRateColor(rate: number): string {
  */
 export function SpectrumSection({ modelData }: SpectrumSectionProps) {
     const ref = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: ref,
-        offset: ["start end", "end start"]
-    });
-
-    const scaleX = useTransform(scrollYProgress, [0.1, 0.4], [0, 1]);
     const sortedModels = [...modelData].sort((a, b) => a.rate - b.rate);
 
     return (
@@ -78,7 +72,7 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
 
                 {/* Model cards */}
                 <div className="space-y-4">
-                    {sortedModels.map((model, idx) => (
+                    {sortedModels.map((model) => (
                         <motion.div
                             key={model.name}
                             initial={{ opacity: 0, y: 20 }}
@@ -92,6 +86,7 @@ export function SpectrumSection({ modelData }: SpectrumSectionProps) {
                             >
                                 {/* Provider Logo */}
                                 <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-muted/20 border border-border flex items-center justify-center overflow-hidden">
+                                    {/* eslint-disable-next-line @next/next/no-img-element -- small fixed-size provider logo; plain <img> is intentional */}
                                     <img
                                         src={getLogoUrl(model.name)}
                                         alt={getProviderName(model.name)}

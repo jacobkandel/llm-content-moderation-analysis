@@ -1,11 +1,8 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef, useCallback, Suspense, useDeferredValue } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback, useDeferredValue } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Calendar, Users, X, ChevronDown, Filter, Search, Download, RefreshCw, Share2, Check, Info, AlertTriangle, ArrowLeftRight, ExternalLink, CheckCircle } from 'lucide-react';
-import { TooltipHover } from '@/components/ui/TooltipHover';
+import { AlertTriangle } from 'lucide-react';
 
 import { ModelSelector } from './ModelSelector';
 import { FiltersBar } from './FiltersBar';
@@ -19,7 +16,6 @@ const RadarSection = dynamic(() => import('./RadarSection').then(mod => mod.Rada
 });
 import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
 import { getLogoUrl } from '@/lib/provider-logos';
-import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
 import { sanitizeSearchInput } from '@/lib/utils';
 
 // Type for p-value significance rows (from p_values.csv)
@@ -111,7 +107,7 @@ export default function CompareContent({
     const router = useRouter();
 
     // --- Phase 1: Instant data (passed from Server, no loading spinner required) ---
-    const [compareData, setCompareData] = useState<CompareData | null>(initialCompareData);
+    const [compareData] = useState<CompareData | null>(initialCompareData);
 
     // --- Phase 2: Full CSV data (lazy, for disagreement text) ---
     const [fullData, setFullData] = useState<AuditRow[] | null>(null);
@@ -126,7 +122,7 @@ export default function CompareContent({
     const [isClient, setIsClient] = useState(false);
     const [showStats, setShowStats] = useState(false);
     const [highlightDiffs, setHighlightDiffs] = useState(false);
-    const [pValues, setPValues] = useState<PValueRow[]>(initialPValues);
+    const [pValues] = useState<PValueRow[]>(initialPValues);
     const [copied, setCopied] = useState(false);
 
     const handleShare = useCallback(() => {
@@ -138,7 +134,6 @@ export default function CompareContent({
 
     // Filters
     const [searchKeyword, setSearchKeyword] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedDate, setSelectedDate] = useState('all');
@@ -150,10 +145,14 @@ export default function CompareContent({
     // Use deferred value for smooth typing performance
     const deferredSearch = useDeferredValue(searchKeyword);
 
-    // --- Phase 1: Initialize model pair from URL/localStorage ---
+    // --- Phase 1: Initialize model pair from URL/localStorage (once, when data is ready) ---
+    const didInitModels = useRef(false);
     useEffect(() => {
+        // Mount guard + one-time init from URL/localStorage; running once on mount is intended.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsClient(true);
-        if (!compareData) return;
+        if (!compareData || didInitModels.current) return;
+        didInitModels.current = true;
 
         const urlModelA = searchParams.get('modelA');
         const urlModelB = searchParams.get('modelB');
@@ -181,7 +180,7 @@ export default function CompareContent({
 
         setModelA(resolveA ?? '');
         setModelB(resolveB ?? '');
-    }, []);
+    }, [compareData, searchParams]);
 
     // Sync model selection → URL + localStorage
     const isInitialMount = useRef(true);
@@ -196,7 +195,7 @@ export default function CompareContent({
         if (modelA) params.set('modelA', modelA);
         if (modelB) params.set('modelB', modelB);
         router.replace(`?${params.toString()}`, { scroll: false });
-    }, [modelA, modelB]);
+    }, [modelA, modelB, router]);
 
     // --- Phase 2: Lazy-load full CSV when disagreement section is visible ---
     const loadFullData = useCallback(() => {
@@ -358,8 +357,8 @@ export default function CompareContent({
         let filtered = fullData;
         if (selectedCategory !== 'all') filtered = filtered.filter(d => d.category === selectedCategory);
         if (selectedDate !== 'all') filtered = filtered.filter(d => d.timestamp?.startsWith(selectedDate));
-        if (debouncedSearch) {
-            const cleanSearch = sanitizeSearchInput(debouncedSearch).toLowerCase();
+        if (deferredSearch) {
+            const cleanSearch = sanitizeSearchInput(deferredSearch).toLowerCase();
             filtered = filtered.filter(d => d.prompt?.toLowerCase().includes(cleanSearch));
         }
 
@@ -410,15 +409,10 @@ export default function CompareContent({
         };
     }, [fullData, modelA, modelB, selectedCategory, selectedDate, deferredSearch, disagreements]);
 
-    const clearFilters = () => {
-        setSearchKeyword('');
-        setSelectedCategory('all');
-        setSelectedDate('all');
-        setVisibleCount(batchSize);
-    };
-
     // Reset visible count when model pair or filters change
     useEffect(() => {
+        // Derived reset driven by several filter inputs; setState in the effect is intended here.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setVisibleCount(batchSize);
     }, [modelA, modelB, selectedCategory, selectedDate, deferredSearch, batchSize]);
 
@@ -446,7 +440,7 @@ export default function CompareContent({
                 {modelA && modelB && modelA === modelB && (
                     <div role="alert" className="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl text-sm text-amber-800 dark:text-amber-300">
                         <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-                        <span>You've selected the same model for both A and B. Pick two different models to see a meaningful comparison.</span>
+                        <span>You&apos;ve selected the same model for both A and B. Pick two different models to see a meaningful comparison.</span>
                     </div>
                 )}
 

@@ -28,7 +28,6 @@ export function FiltersBar({
     selectedDate,
     setSelectedDate,
     dates,
-    visibleCount,
     batchSize,
     setVisibleCount
 }: FiltersBarProps) {

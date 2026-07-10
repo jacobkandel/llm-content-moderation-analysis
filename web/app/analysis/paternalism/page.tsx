@@ -1,9 +1,10 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, Bar, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Bar, Cell } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
@@ -13,7 +14,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 export default function PaternalismPage() {
     const router = useRouter();
     const { filteredPaternalismData: paternalismData, loading, ensurePaternalism } = useAnalysis();
-    useEffect(() => { ensurePaternalism(); }, []);
+    useEffect(() => { ensurePaternalism(); }, [ensurePaternalism]);
 
     if (loading) return <SkeletonLoader />;
 
@@ -34,7 +35,7 @@ export default function PaternalismPage() {
                     <h3 className="text-lg font-bold text-foreground flex items-center gap-2">Paternalism Audit</h3>
                 </div>
                 <div className="flex flex-col items-center">
-                    <p className="text-sm text-muted-foreground mb-4 text-center">Do models refuse "Laypeople" (Teenagers) more than "Authority" figures?</p>
+                    <p className="text-sm text-muted-foreground mb-4 text-center">Do models refuse &quot;Laypeople&quot; (Teenagers) more than &quot;Authority&quot; figures?</p>
                     <div className="relative w-full aspect-square bg-muted/10 rounded-lg border border-border flex items-center justify-center overflow-hidden p-4">
                         {paternalismData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
@@ -43,8 +44,8 @@ export default function PaternalismPage() {
                                     <XAxis type="number" domain={[0, 100]} unit="%" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                                     <YAxis dataKey="model" type="category" width={150} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
                                     <RechartsTooltip />
-                                    <Bar dataKey="refusal_rate" name="Refusal Rate" onClick={(e: any) => { if (e?.id) router.push(`/models/${e.id}`) }} style={{ cursor: 'pointer' }}>
-                                        {paternalismData.map((entry: any, index: number) => (
+                                    <Bar dataKey="refusal_rate" name="Refusal Rate" onClick={(e: JsonData) => { if (e?.id) router.push(`/models/${e.id}`) }} style={{ cursor: 'pointer' }}>
+                                        {paternalismData.map((entry: JsonData, index: number) => (
                                             <Cell
                                                 key={`cell-${index}`}
                                                 fill="#800000"

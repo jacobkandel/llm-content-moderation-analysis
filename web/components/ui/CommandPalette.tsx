@@ -38,6 +38,14 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
+    // Reset transient UI state and open the palette. Doing the resets here (in an
+    // event-driven handler) rather than in an effect avoids cascading renders.
+    const openPalette = useCallback(() => {
+        setSearch('');
+        setSelectedIndex(0);
+        setIsOpen(true);
+    }, []);
+
     useEffect(() => {
         fetch('/models.json')
             .then(res => res.json())
@@ -170,7 +178,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
-                setIsOpen(true);
+                openPalette();
             }
             if (e.key === 'Escape') {
                 setIsOpen(false);
@@ -178,14 +186,12 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [openPalette]);
 
-    // Focus input when opened
+    // Focus input when opened (DOM side effect only)
     useEffect(() => {
         if (isOpen) {
             inputRef.current?.focus();
-            setSearch('');
-            setSelectedIndex(0);
         }
     }, [isOpen]);
 
@@ -204,17 +210,12 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
         }
     }, [filteredCommands, selectedIndex]);
 
-    // Reset selection when search changes
-    useEffect(() => {
-        setSelectedIndex(0);
-    }, [search]);
-
     return (
         <>
             {/* Trigger hint - shown in sidebar */}
             {isCollapsed ? (
                 <button
-                    onClick={() => setIsOpen(true)}
+                    onClick={openPalette}
                     className="w-full flex justify-center p-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
                     title="Search (Cmd+K)"
                 >
@@ -222,7 +223,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
                 </button>
             ) : (
                 <button
-                    onClick={() => setIsOpen(true)}
+                    onClick={openPalette}
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-accent/50 rounded-lg border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
                     <Search className="h-4 w-4" />
@@ -263,7 +264,10 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
                                         type="text"
                                         placeholder="Search commands..."
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) => {
+                                            setSearch(e.target.value);
+                                            setSelectedIndex(0);
+                                        }}
                                         onKeyDown={handleKeyDown}
                                         className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base"
                                     />

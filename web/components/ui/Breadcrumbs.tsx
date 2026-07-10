@@ -72,7 +72,7 @@ export function Breadcrumbs() {
     return (
         <nav aria-label="Breadcrumb" className="mb-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
             <ol className="flex items-center text-sm text-muted-foreground">
-                {breadcrumbs.map((crumb, index) => {
+                {breadcrumbs.map((crumb) => {
                     const isLast = crumb.isLast;
                     return (
                         <li key={crumb.href} className="flex items-center">

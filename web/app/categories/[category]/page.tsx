@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import type { Metadata } from 'next';
 import fs from 'fs';
 import path from 'path';
@@ -39,8 +40,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
     // Load compare_data to get per-model category rates
     let modelRankings: { id: string; name: string; rate: number }[] = [];
-    let models: any[] = [];
-    let categoryPrompts: any[] = [];
+    let models: JsonData[] = [];
+    let categoryPrompts: JsonData[] = [];
     try {
         const comparePath = path.join(process.cwd(), 'public', 'compare_data.json');
         const modelsPath = path.join(process.cwd(), 'public', 'models.json');
@@ -57,12 +58,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
         try {
             const allPrompts = JSON.parse(promptsFile);
-            categoryPrompts = allPrompts.filter((p: any) => p.category === label);
+            categoryPrompts = allPrompts.filter((p: JsonData) => p.category === label);
         } catch {
             // Ignore parse errors for prompts
         }
 
-        const modelMap = new Map(models.map((m: any) => [m.id, m]));
+        const modelMap = new Map(models.map((m: JsonData) => [m.id, m]));
 
         modelRankings = compare.models
             .map((id: string) => {
@@ -70,8 +71,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 const info = modelMap.get(id);
                 return { id, name: info?.display_name || id.split('/').pop() || id, rate: rate ?? null };
             })
-            .filter((m: any) => m.rate !== null)
-            .sort((a: any, b: any) => b.rate - a.rate);
+            .filter((m: JsonData) => m.rate !== null)
+            .sort((a: JsonData, b: JsonData) => b.rate - a.rate);
     } catch { }
 
     const maxRate = modelRankings.length > 0 ? Math.max(...modelRankings.map(m => m.rate)) : 100;

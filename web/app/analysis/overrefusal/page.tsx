@@ -117,6 +117,7 @@ export default function OverrefusalPage() {
                                 return (
                                     <div key={model.model} className="flex items-center gap-3 py-2 border-b border-border/50 last:border-0 hover:bg-muted/20 transition-colors rounded -mx-2 px-2">
                                         <span className="text-xs text-muted-foreground w-5 font-mono">{i + 1}</span>
+                                        {/* eslint-disable-next-line @next/next/no-img-element -- small fixed-size provider logo; plain <img> is intentional */}
                                         <img
                                             src={getLogoUrl(model.model)}
                                             alt=""

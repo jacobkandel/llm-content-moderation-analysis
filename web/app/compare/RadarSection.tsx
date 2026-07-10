@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { TOOLTIP_STYLE } from '@/lib/chart-theme';
 
@@ -10,7 +11,7 @@ interface RadarSectionProps {
     modelB: string;
     highlightDiffs: boolean;
     setHighlightDiffs: (val: boolean) => void;
-    displayRadarData: any[];
+    displayRadarData: JsonData[];
 }
 
 export function RadarSection({

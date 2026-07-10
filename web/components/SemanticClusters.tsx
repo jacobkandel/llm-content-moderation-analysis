@@ -41,7 +41,7 @@ export function SemanticClustersView({ clusters }: { clusters: Cluster[] }) {
                             <div>
                                 <h3 className="font-bold text-foreground text-lg mb-2">{clusterTitle} ({c.size} cases)</h3>
                                 <p className="text-sm italic text-muted-foreground bg-muted/30 p-2 rounded">
-                                    "{displayExemplar}"
+                                    &quot;{displayExemplar}&quot;
                                 </p>
                             </div>
                         </div>

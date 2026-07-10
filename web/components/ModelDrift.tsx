@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
 import { Activity } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import type { JsonData } from '@/lib/data-loading';
 import { TOOLTIP_STYLE, TOOLTIP_CURSOR, AXIS_TICK_STYLE, GRID_STYLE } from '@/lib/chart-theme';
 
 interface ModelDriftProps {
-    data?: any[];
+    data?: JsonData[];
     onModelClick?: (modelId: string) => void;
 }
 
@@ -34,8 +35,11 @@ export function ModelDrift({ data = [] }: ModelDriftProps) {
                             <XAxis type="number" domain={[-20, 20]} tick={AXIS_TICK_STYLE} />
                             <YAxis dataKey="model" type="category" width={100} tick={AXIS_TICK_STYLE} />
                             <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} />
-                            <Bar dataKey="rate_change" fill="#A4343A" name="Rate Change (%)" onClick={(e: any) => { if (e?.model) router.push(`/models/${e.model}`) }} style={{ cursor: 'pointer' }}>
+                            <Bar dataKey="rate_change" fill="#A4343A" name="Rate Change (%)" onClick={(e: JsonData) => { if (e?.model) router.push(`/models/${e.model}`) }} style={{ cursor: 'pointer' }}>
                                 {data.map((entry, index) => (
+                                    // recharts' Cell radius type is number|string, but the underlying
+                                    // SVG rect accepts a per-corner [tl,tr,br,bl] tuple, which we rely on here.
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                     <Cell key={`cell-${index}`} radius={(entry.rate_change > 0 ? [0, 4, 4, 0] : [4, 0, 0, 4]) as any} />
                                 ))}
                             </Bar>

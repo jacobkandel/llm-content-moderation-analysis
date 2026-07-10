@@ -1,4 +1,5 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,10 +7,9 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
-import { RelatedPages } from '@/components/ui/RelatedPages';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
-    ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+    ResponsiveContainer, Tooltip,
     PieChart, Pie, Cell, Legend
 } from 'recharts';
 import {
@@ -27,7 +27,7 @@ export default function ConsensusPage() {
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
 
     // Load CSV only when filters are active
-    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters, ensureAuditData]);
 
     // Compute consensus data dynamically from audit data (only when filters active)
     const consensusStats = useMemo(() => {
@@ -36,7 +36,7 @@ export default function ConsensusPage() {
             return {
                 totalPrompts: precomputedConsensus.totalPrompts,
                 distribution: precomputedConsensus.distribution,
-                perModel: precomputedConsensus.perModel.map((m: any) => ({
+                perModel: precomputedConsensus.perModel.map((m: JsonData) => ({
                     ...m,
                     provider: getProviderName(m.model),
                     logo: getLogoUrl(m.model),
@@ -181,13 +181,14 @@ export default function ConsensusPage() {
                     How often each model agrees with the majority verdict across {consensusStats.totalPrompts.toLocaleString()} prompts evaluated by multiple models
                 </p>
                 <div className="space-y-2">
-                    {consensusStats.perModel.map((m: any, i: number) => (
+                    {consensusStats.perModel.map((m: JsonData, i: number) => (
                         <div
                             key={m.model}
                             className="flex items-center gap-3 py-2 border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer rounded -mx-2 px-2"
                             onClick={() => router.push(`/models/${m.model}`)}
                         >
                             <span className="text-xs text-muted-foreground w-5 font-mono">{i + 1}</span>
+                            {/* eslint-disable-next-line @next/next/no-img-element -- small fixed-size provider logo; plain <img> is intentional */}
                             <img
                                 src={m.logo}
                                 alt={`${m.provider} logo`}
@@ -245,7 +246,7 @@ export default function ConsensusPage() {
                                 animationDuration={ANIMATION_DURATION}
                                 animationEasing={ANIMATION_EASING}
                             >
-                                {consensusStats.distribution.map((_: any, index: number) => (
+                                {consensusStats.distribution.map((_: JsonData, index: number) => (
                                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index]} stroke="hsl(var(--background))" strokeWidth={2} />
                                 ))}
                             </Pie>

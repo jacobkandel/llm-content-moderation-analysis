@@ -40,7 +40,7 @@ export default function AnnotatePage() {
     const [sessionCount, setSessionCount] = useState(0);
     const [confidence, setConfidence] = useState<'high' | 'medium' | 'low'>('high');
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-    const [startTime, setStartTime] = useState(Date.now());
+    const [startTime, setStartTime] = useState(() => Date.now());
     const [expandPrompt, setExpandPrompt] = useState(false);
 
     const fetchItem = useCallback(async () => {
@@ -83,6 +83,10 @@ export default function AnnotatePage() {
     }, []);
 
     useEffect(() => {
+        // Kick off the initial data load on mount. fetchItem intentionally resets
+        // the UI to its loading state before the async request; that synchronous
+        // setState is expected here, not a cascading-render bug.
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount
         fetchItem();
         fetchStats();
     }, [fetchItem, fetchStats]);
@@ -141,7 +145,7 @@ export default function AnnotatePage() {
                 try {
                     const data = await res.json();
                     if (data.error) errorMsg = `${data.error}${data.details ? `: ${data.details}` : ''}`;
-                } catch (e) {}
+                } catch {}
                 setFeedback({ type: 'error', message: errorMsg });
             }
         } catch {
@@ -162,7 +166,7 @@ export default function AnnotatePage() {
                     Help Validate AI Moderation Decisions
                 </h1>
                 <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
-                    You'll see a user post and an AI model's response to it. Your job: <strong>should this content
+                    You&apos;ll see a user post and an AI model&apos;s response to it. Your job: <strong>should this content
                     be ALLOWED or REMOVED</strong> from a social media platform? Your annotations help us measure
                     how well AI models align with human judgment.
                 </p>
@@ -317,9 +321,9 @@ export default function AnnotatePage() {
                         </p>
                         <ul className="space-y-1 pl-5 list-disc">
                             <li>The content is legitimate speech, even if uncomfortable</li>
-                            <li>It's educational, journalistic, or artistic in nature</li>
+                            <li>It&apos;s educational, journalistic, or artistic in nature</li>
                             <li>It discusses sensitive topics without promoting harm</li>
-                            <li>It's opinion or satire, even if controversial</li>
+                            <li>It&apos;s opinion or satire, even if controversial</li>
                         </ul>
                     </div>
                     <div className="space-y-2">
@@ -336,7 +340,7 @@ export default function AnnotatePage() {
                 </div>
                 <p className="text-[10px] text-muted-foreground/60 pt-2 border-t border-border">
                     Your annotations are stored anonymously. Each annotator receives a random ID stored in your browser.
-                    We use Krippendorff's Alpha to measure inter-annotator agreement across all participants.
+                    We use Krippendorff&apos;s Alpha to measure inter-annotator agreement across all participants.
                 </p>
             </div>
 

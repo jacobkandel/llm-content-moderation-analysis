@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
-import { Calendar, Users, X, ChevronDown, Filter, Search, Download, RefreshCw } from 'lucide-react';
+import { Calendar, Users, X, ChevronDown, Filter } from 'lucide-react';
 import Image from 'next/image';
 import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Box, LayoutDashboard, FileBarChart, BarChart3, ArrowRightLeft, Settings, Brain, Menu, X } from 'lucide-react';
+import { Box, ArrowRightLeft, Brain, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [

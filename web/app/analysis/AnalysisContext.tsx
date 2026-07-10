@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useRef, useCallback, useTransition } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { fetchAuditData, type AuditRow } from '@/lib/data-loading';
+import { fetchAuditData, type AuditRow, type JsonData } from '@/lib/data-loading';
 import { calculateFleissKappa } from '@/app/analysis/stats';
 
 // --- Types ---
@@ -17,11 +17,11 @@ export type Cluster = {
 interface AnalysisContextType {
     auditData: AuditRow[];
     clusters: Cluster[];
-    driftData: any[];
-    consensusData: any[];
-    politicalData: any[];
-    paternalismData: any[];
-    triggerData: any[];
+    driftData: JsonData[];
+    consensusData: JsonData[];
+    politicalData: JsonData[];
+    paternalismData: JsonData[];
+    triggerData: JsonData[];
     reportContent: string;
     loading: boolean;
     dateRange: { start: string; end: string };
@@ -32,20 +32,20 @@ interface AnalysisContextType {
     setShowSeedOnly: React.Dispatch<React.SetStateAction<boolean>>;
     allModels: string[];
     filteredAuditData: AuditRow[];
-    filteredPoliticalData: any[];
-    filteredPaternalismData: any[];
-    filteredDriftData: any[];
-    filteredConsensusData: any[];
+    filteredPoliticalData: JsonData[];
+    filteredPaternalismData: JsonData[];
+    filteredDriftData: JsonData[];
+    filteredConsensusData: JsonData[];
     filteredClusters: Cluster[];
     timelineDates: string[];
-    stats: any;
-    efficiencyData: any[];
+    stats: JsonData;
+    efficiencyData: JsonData[];
     precomputedPrompts: { id: string; text: string; category: string; source: string }[];
-    precomputedHeatmap: any;
-    precomputedConsensus: any;
-    precomputedSignificance: any[];
-    precomputedReliability: any;
-    precomputedLongitudinal: any;
+    precomputedHeatmap: JsonData;
+    precomputedConsensus: JsonData;
+    precomputedSignificance: JsonData[];
+    precomputedReliability: JsonData;
+    precomputedLongitudinal: JsonData;
     isLite: boolean;
     isLoadingFull: boolean;
     loadFullDetails: () => Promise<void>;
@@ -83,22 +83,22 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
     const [isLoadingFull, setIsLoadingFull] = useState(false);
 
     const [clusters, setClusters] = useState<Cluster[]>([]);
-    const [driftData, setDriftData] = useState<any[]>([]);
-    const [consensusData, setConsensusData] = useState<any[]>([]);
-    const [politicalData, setPoliticalData] = useState<any[]>([]);
-    const [paternalismData, setPaternalismData] = useState<any[]>([]);
-    const [triggerData, setTriggerData] = useState<any[]>([]);
+    const [driftData, setDriftData] = useState<JsonData[]>([]);
+    const [consensusData, setConsensusData] = useState<JsonData[]>([]);
+    const [politicalData, setPoliticalData] = useState<JsonData[]>([]);
+    const [paternalismData, setPaternalismData] = useState<JsonData[]>([]);
+    const [triggerData, setTriggerData] = useState<JsonData[]>([]);
     const [reportContent, setReportContent] = useState<string>('');
     const [loading, setLoading] = useState(true);
 
     // Pre-computed JSON data (loaded instantly)
-    const [precomputedSummary, setPrecomputedSummary] = useState<any>(null);
-    const [precomputedSpectrum, setPrecomputedSpectrum] = useState<any[]>([]);
-    const [precomputedHeatmap, setPrecomputedHeatmap] = useState<any>(null);
-    const [precomputedConsensus, setPrecomputedConsensus] = useState<any>(null);
-    const [precomputedSignificance, setPrecomputedSignificance] = useState<any[]>([]);
-    const [precomputedReliability, setPrecomputedReliability] = useState<any>(null);
-    const [precomputedLongitudinal, setPrecomputedLongitudinal] = useState<any>(null);
+    const [precomputedSummary, setPrecomputedSummary] = useState<JsonData>(null);
+    const [precomputedSpectrum, setPrecomputedSpectrum] = useState<JsonData[]>([]);
+    const [precomputedHeatmap, setPrecomputedHeatmap] = useState<JsonData>(null);
+    const [precomputedConsensus, setPrecomputedConsensus] = useState<JsonData>(null);
+    const [precomputedSignificance, setPrecomputedSignificance] = useState<JsonData[]>([]);
+    const [precomputedReliability, setPrecomputedReliability] = useState<JsonData>(null);
+    const [precomputedLongitudinal, setPrecomputedLongitudinal] = useState<JsonData>(null);
     const [precomputedPrompts, setPrecomputedPrompts] = useState<{ id: string; text: string; category: string; source: string }[]>([]);
 
     // Global Filters – initialised from URL
@@ -309,15 +309,18 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         loadPrecomputed().then(() => {
             ensureAuditData();
         });
-    }, []);
+    }, [ensureAuditData]);
 
     // PHASE 2 (deferred): Load CSV only when filters are applied
     const hasFiltersForCsv = selectedModels.length > 0 || dateRange.start !== '' || dateRange.end !== '' || showSeedOnly;
     useEffect(() => {
         if (hasFiltersForCsv) {
+            // ensureAuditData fetches asynchronously; its setState runs after an await,
+            // not synchronously in this effect body.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             ensureAuditData();
         }
-    }, [hasFiltersForCsv]);
+    }, [hasFiltersForCsv, ensureAuditData]);
 
     // All available models — prefer pre-computed, fall back to raw data
     const allModels = useMemo(() => {
@@ -337,7 +340,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         let data = auditData;
 
         if (showSeedOnly) {
-            data = data.filter((d: any) => d.style === 'Original');
+            data = data.filter((d) => d.style === 'Original');
         }
 
         if (dateRange.start || dateRange.end) {
@@ -463,7 +466,7 @@ export function AnalysisProvider({ children }: { children: React.ReactNode }) {
         const powerMdes = Math.round(mdes * 10000) / 100;
 
         return { reliability, models, prompts, distribution, statisticalPowerMDES: powerMdes };
-    }, [filteredAuditData, hasFilters, precomputedSummary]);
+    }, [filteredAuditData, hasFilters, precomputedSummary, precomputedReliability]);
 
     const efficiencyData = useMemo(() => {
         // Use pre-computed spectrum when no filters are active

@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import { MetadataRoute } from 'next';
 import models from '../public/models.json';
 import { CATEGORY_SLUGS } from '@/lib/categories';
@@ -66,7 +67,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     try {
         // Provider index pages (e.g. /models/openai) — were missing before
-        const providers = [...new Set((models as any[]).map((m: any) => m.id?.split('/')[0]).filter(Boolean))];
+        const providers = [...new Set((models as JsonData[]).map((m: JsonData) => m.id?.split('/')[0]).filter(Boolean))];
         for (const provider of providers) {
             sitemapData.push({
                 url: `${BASE_URL}/models/${provider}`,
@@ -76,7 +77,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             });
         }
         // Individual model detail pages
-        for (const model of models as any[]) {
+        for (const model of models as JsonData[]) {
             if (model.id) {
                 sitemapData.push({
                     url: `${BASE_URL}/models/${model.id}`,

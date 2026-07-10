@@ -1,14 +1,12 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
-import Link from 'next/link';
 import { useMemo, useEffect } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import KeyMetrics from '@/components/KeyMetrics';
 import RestrictivenessScale from '@/components/RestrictivenessScale';
 import { CensorshipHeatmap } from '@/components/CensorshipHeatmap';
 import SkeletonLoader from '@/components/SkeletonLoader';
-import ShareButton from '@/components/ShareButton';
-import { getLogoUrl, getProviderName } from '@/lib/provider-logos';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 import DataFreshnessBanner from '@/components/DataFreshnessBanner';
 
@@ -93,14 +91,14 @@ export default function SummaryPage() {
             }
         }
 
-        return efficiencyData.map((m: any) => ({
+        return efficiencyData.map((m: JsonData) => ({
             id: m.fullName,
             name: m.fullName,
             lastTested: lastTestedMap[m.fullName]
                 ? new Date(lastTestedMap[m.fullName]).toLocaleDateString()
                 : 'N/A',
             totalEvaluations: m.total || 0,
-        })).sort((a: any, b: any) => b.totalEvaluations - a.totalEvaluations);
+        })).sort((a: JsonData, b: JsonData) => b.totalEvaluations - a.totalEvaluations);
     }, [efficiencyData, precomputedLongitudinal]);
 
     if (loading) return <SkeletonLoader />;

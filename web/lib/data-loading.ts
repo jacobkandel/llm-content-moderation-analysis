@@ -8,6 +8,16 @@
 
 import Papa from 'papaparse';
 
+/**
+ * Loosely-typed value from one of the pre-computed JSON datasets (drift,
+ * consensus, political, heatmap, …). These files have heterogeneous, evolving
+ * shapes and are consumed dynamically across the app, so we intentionally model
+ * them as `any` rather than forcing brittle interfaces that fall out of date.
+ * Prefer a concrete type whenever a shape is actually stable.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonData = any;
+
 export interface AuditRow {
   model: string;
   verdict: string;
@@ -21,7 +31,7 @@ export interface AuditRow {
   style?: string;
   cost?: number;
   model_version?: string;
-  [key: string]: any;
+  [key: string]: JsonData;
 }
 
 /** Columns included in lite mode (no prompt/response text = much smaller). */
@@ -80,7 +90,7 @@ export async function fetchAuditData(
   // Map to AuditRow[]
   const rows: AuditRow[] = parsed.data.map((row) => {
     if (lite) {
-      const liteRow: Record<string, any> = {};
+      const liteRow: Record<string, JsonData> = {};
       for (const key of Object.keys(row)) {
         if (LITE_COLUMNS.has(key)) {
           liteRow[key] = row[key];

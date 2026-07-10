@@ -3,6 +3,15 @@
 import { useMemo, useState } from 'react';
 import { ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
 
+type SortKey = 'refusalRate' | 'model' | 'count' | 'avgLength';
+
+// Defined at module scope (not inside the render function) so it is a stable
+// component identity across renders — react-hooks/static-components.
+function SortIcon({ column, sortKey, sortOrder }: { column: SortKey; sortKey: SortKey; sortOrder: 'asc' | 'desc' }) {
+    if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 opacity-30 group-hover:opacity-100 transition-opacity" />;
+    return sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-brand" /> : <ArrowDown className="h-3 w-3 text-brand" />;
+}
+
 type AuditRow = {
     model: string;
     verdict: string;
@@ -74,7 +83,7 @@ function normalCDF(x: number): number {
 }
 
 export default function ModelComparison({ data, onModelSelect }: { data: AuditRow[], onModelSelect?: (model: string) => void }) {
-    const [sortKey, setSortKey] = useState<'refusalRate' | 'model' | 'count' | 'avgLength'>('refusalRate');
+    const [sortKey, setSortKey] = useState<SortKey>('refusalRate');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
     const handleSort = (key: typeof sortKey) => {
@@ -141,19 +150,6 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
         return `${ci.lower.toFixed(1)}–${ci.upper.toFixed(1)}%`;
     };
 
-    const getSignificanceLabel = (pValue: number | null) => {
-        if (pValue === null) return '';
-        if (pValue < 0.001) return '***';
-        if (pValue < 0.01) return '**';
-        if (pValue < 0.05) return '*';
-        return '';
-    };
-
-    const SortIcon = ({ column }: { column: typeof sortKey }) => {
-        if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 opacity-30 group-hover:opacity-100 transition-opacity" />;
-        return sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-brand" /> : <ArrowDown className="h-3 w-3 text-brand" />;
-    };
-
     return (
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -170,8 +166,8 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
                         value={`${sortKey}-${sortOrder}`}
                         onChange={(e) => {
                             const [k, o] = e.target.value.split('-');
-                            setSortKey(k as any);
-                            setSortOrder(o as any);
+                            setSortKey(k as SortKey);
+                            setSortOrder(o as 'asc' | 'desc');
                         }}
                     >
                         <option value="refusalRate-desc">Refusal Rate (High to Low)</option>
@@ -191,7 +187,7 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
                                 className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider cursor-pointer group hover:bg-muted/70 transition-colors"
                                 onClick={() => handleSort('model')}
                             >
-                                <div className="flex items-center gap-1">Model <SortIcon column="model" /></div>
+                                <div className="flex items-center gap-1">Model <SortIcon column="model" sortKey={sortKey} sortOrder={sortOrder} /></div>
                             </th>
                             <th
                                 className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider cursor-pointer group hover:bg-muted/70 transition-colors"
@@ -200,7 +196,7 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
                                 <div className="flex items-center gap-1">
                                     Refusal Rate
                                     <span title="Percentage of prompts refused or flagged as unsafe" className="cursor-help">ⓘ</span>
-                                    <SortIcon column="refusalRate" />
+                                    <SortIcon column="refusalRate" sortKey={sortKey} sortOrder={sortOrder} />
                                 </div>
                             </th>
                             <th className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider">
@@ -213,13 +209,13 @@ export default function ModelComparison({ data, onModelSelect }: { data: AuditRo
                                 className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider cursor-pointer group hover:bg-muted/70 transition-colors"
                                 onClick={() => handleSort('avgLength')}
                             >
-                                <div className="flex items-center gap-1">Avg Response <SortIcon column="avgLength" /></div>
+                                <div className="flex items-center gap-1">Avg Response <SortIcon column="avgLength" sortKey={sortKey} sortOrder={sortOrder} /></div>
                             </th>
                             <th
                                 className="p-4 font-semibold text-muted-foreground uppercase text-xs tracking-wider text-right cursor-pointer group hover:bg-muted/70 transition-colors"
                                 onClick={() => handleSort('count')}
                             >
-                                <div className="flex items-center justify-end gap-1"><SortIcon column="count" /> Prompts</div>
+                                <div className="flex items-center justify-end gap-1"><SortIcon column="count" sortKey={sortKey} sortOrder={sortOrder} /> Prompts</div>
                             </th>
                         </tr>
                     </thead>

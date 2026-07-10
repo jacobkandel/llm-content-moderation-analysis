@@ -10,7 +10,7 @@ import { RelatedPages } from '@/components/ui/RelatedPages';
 
 export default function ClustersPage() {
     const { filteredClusters: clusters, loading, ensureClusters } = useAnalysis();
-    useEffect(() => { ensureClusters(); }, []);
+    useEffect(() => { ensureClusters(); }, [ensureClusters]);
 
     if (loading) return <SkeletonLoader />;
 

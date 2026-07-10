@@ -13,9 +13,12 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    // Persist state
+    // Hydrate the persisted collapse state from localStorage on mount. This must
+    // happen in an effect rather than in the initial useState value: the server
+    // has no localStorage, so reading it eagerly would cause a hydration mismatch.
     useEffect(() => {
         const stored = localStorage.getItem('sidebar-collapsed');
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration from localStorage; see comment above
         if (stored) setIsCollapsed(stored === 'true');
     }, []);
 

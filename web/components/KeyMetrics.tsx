@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { BarChart3, Users, Calendar, TrendingUp } from 'lucide-react';
+import { BarChart3, Users, Calendar } from 'lucide-react';
 import QuestionsModal from './QuestionsModal';
 import ModelsModal from './ModelsModal';
 
@@ -62,7 +61,6 @@ interface KeyMetricsProps {
 export default function KeyMetrics({
     totalCases,
     modelsCount,
-    consistencyScore,
     dateRange,
     totalEvaluations,
     lastUpdated,
@@ -72,7 +70,6 @@ export default function KeyMetrics({
 }: KeyMetricsProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
-    const router = useRouter();
 
     const handleOpenModal = () => {
         setIsModalOpen(true);

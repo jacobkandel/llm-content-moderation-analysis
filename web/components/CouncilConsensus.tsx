@@ -1,4 +1,5 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Scale } from 'lucide-react';
 import { TOOLTIP_STYLE, TOOLTIP_CURSOR, AXIS_TICK_STYLE, GRID_STYLE } from '@/lib/chart-theme';
 
 interface CouncilConsensusProps {
-    data?: any[];
+    data?: JsonData[];
 }
 
 const COLORS = ['#800000', '#737373', '#EAAA00', '#A4343A', '#007396', '#275D38'];
@@ -18,7 +19,7 @@ export function CouncilConsensus({ data = [] }: CouncilConsensusProps) {
         if (data.length === 0) return [];
 
         const leaningMap = new Map<string, { count: number; totalAgreement: number }>();
-        data.forEach((row: any) => {
+        data.forEach((row: JsonData) => {
             const leaning = row.consensus_leaning || 'Unknown';
             if (!leaningMap.has(leaning)) leaningMap.set(leaning, { count: 0, totalAgreement: 0 });
             const m = leaningMap.get(leaning)!;
@@ -39,7 +40,7 @@ export function CouncilConsensus({ data = [] }: CouncilConsensusProps) {
     const agreementDistribution = useMemo(() => {
         if (data.length === 0) return [];
         let full = 0, majority = 0, split = 0;
-        data.forEach((row: any) => {
+        data.forEach((row: JsonData) => {
             const score = parseFloat(row.agreement_score || 0);
             if (score >= 0.9) full++;
             else if (score >= 0.6) majority++;

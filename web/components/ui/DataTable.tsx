@@ -1,6 +1,7 @@
 'use client';
 
 import {
+    Column,
     ColumnDef,
     flexRender,
     getCoreRowModel,
@@ -13,7 +14,6 @@ import {
     ColumnFiltersState,
     VisibilityState,
     ExpandedState,
-    Row,
 } from '@tanstack/react-table';
 import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
@@ -59,6 +59,7 @@ export function DataTable<TData, TValue>({
     const [expanded, setExpanded] = useState<ExpandedState>({});
     const [showColumnMenu, setShowColumnMenu] = useState(false);
 
+    // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table returns non-memoizable functions; React Compiler skips this component, which is fine here
     const table = useReactTable({
         data,
         columns,
@@ -316,7 +317,7 @@ export function DataTable<TData, TValue>({
 }
 
 // Helper for sortable headers
-export function SortableHeader({ column, title }: { column: any; title: string }) {
+export function SortableHeader<TData>({ column, title }: { column: Column<TData, unknown>; title: string }) {
     return (
         <button
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}

@@ -88,10 +88,10 @@ export async function POST(request: NextRequest) {
             message: 'Grade saved',
             gradeId: `${safeAnnotator}_${safeItem}`,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Grade submission error:', error);
         return NextResponse.json(
-            { error: 'Failed to save grade', details: error.message || String(error) },
+            { error: 'Failed to save grade', details: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         );
     }

@@ -5,10 +5,13 @@ import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
 export function ThemeToggle() {
-    const { setTheme, theme, resolvedTheme } = useTheme()
+    const { setTheme, resolvedTheme } = useTheme()
     const [mounted, setMounted] = React.useState(false)
 
     React.useEffect(() => {
+        // Standard next-themes hydration guard: render a stable placeholder until
+        // mounted so server and client markup match. The one-time setState is intentional.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true)
     }, [])
 

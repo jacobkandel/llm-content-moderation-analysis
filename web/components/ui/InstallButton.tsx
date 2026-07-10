@@ -4,26 +4,28 @@ import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// The `beforeinstallprompt` event is not yet in the standard DOM lib types.
+interface BeforeInstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
 export function InstallButton() {
-    const [installPrompt, setInstallPrompt] = useState<any>(null);
+    const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const handleBeforeInstallPrompt = (e: any) => {
+        const handleBeforeInstallPrompt = (e: Event) => {
+            const promptEvent = e as BeforeInstallPromptEvent;
             // Prevent Chrome 67 and earlier from automatically showing the prompt
-            e.preventDefault();
+            promptEvent.preventDefault();
             // Stash the event so it can be triggered later.
-            setInstallPrompt(e);
+            setInstallPrompt(promptEvent);
             // Update UI notify the user they can install the PWA
             setIsVisible(true);
         };
 
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-        // Check if already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            setIsVisible(false);
-        }
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
