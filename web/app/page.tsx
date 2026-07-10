@@ -1,25 +1,26 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, BarChart2, Zap, RefreshCw, ChevronRight } from 'lucide-react';
 import { StatsGrid } from '@/components/StatsGrid';
+import { CATEGORY_SLUGS } from '@/lib/categories';
 import modelsJson from '../public/models.json';
 import summaryStats from '../public/summary_stats.json';
+
+// Explicit homepage canonical (the root layout no longer sets a shared one).
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 export default function HomePage() {
   const modelsData = modelsJson as { id: string; display_name: string; provider: string }[];
   const stats = summaryStats as { totalCases: number; modelsCount: number; totalEvaluations: number };
-
-  const hardcodedCategories = [
-    'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
-    'false-positive-control', 'harassment', 'hate-speech', 'health-misinformation',
-    'incitement-to-violence', 'paternalism', 'political', 'self-harm', 'weapons'
-  ];
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Moderation Bias',
     url: 'https://moderationbias.com',
-    description: 'Tracking the political and social biases of Llama-3, GPT-4, and Claude via automated red-teaming.',
+    description: 'Open-source benchmark tracking censorship and content moderation bias across 30+ LLMs including GPT-4o, Claude, Gemini, Llama 4, DeepSeek, and Mistral, with biweekly automated audits.',
     author: {
       '@type': 'Person',
       name: 'Jacob Kandel',
@@ -185,7 +186,7 @@ export default function HomePage() {
                 Explore Categories
               </h3>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                {hardcodedCategories.map((cat) => (
+                {CATEGORY_SLUGS.map((cat) => (
                   <li key={cat}>
                     <Link
                       href={`/categories/${cat}`}

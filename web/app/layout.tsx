@@ -32,12 +32,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://moderationbias.com'),
   title: 'Moderation Bias - Into the Black Box',
-  description: 'Open-source benchmark tracking censorship and content moderation bias across 26+ LLMs including GPT-4o, Claude, Gemini, Llama 4, DeepSeek, and Mistral. Biweekly automated audits with statistical significance testing.',
+  description: 'Open-source benchmark tracking censorship and content moderation bias across 30+ LLMs including GPT-4o, Claude, Gemini, Llama 4, DeepSeek, and Mistral. Biweekly automated audits with statistical significance testing.',
   keywords: ['LLM', 'AI Bias', 'Content Moderation', 'Censorship', 'GPT-4o', 'Claude', 'Gemini', 'Llama 4', 'DeepSeek', 'Mistral', 'AI Safety', 'Red Teaming', 'LLM Benchmark', 'AI Research'],
   authors: [{ name: 'Jacob Kandel', url: 'https://github.com/jacobkandel' }],
   creator: 'Jacob Kandel',
   alternates: {
-    canonical: 'https://moderationbias.com',
+    // No root-level canonical: it would be inherited verbatim by every subpage,
+    // making them all self-canonicalize to the homepage. The homepage sets its
+    // own canonical in app/page.tsx; each route sets (or defaults to) its own.
     types: {
       'application/rss+xml': '/feed.xml',
     },
@@ -54,14 +56,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'LLM Censorship Benchmark: Live Audit',
-    description: 'Open-source benchmark tracking censorship and content moderation bias across 26+ LLMs. Biweekly automated audits with statistical significance testing.',
+    description: 'Open-source benchmark tracking censorship and content moderation bias across 30+ LLMs. Biweekly automated audits with statistical significance testing.',
     url: 'https://moderationbias.com',
     siteName: 'Moderation Bias',
     images: [
       {
         url: '/assets/heatmap.png',
-        width: 1200,
-        height: 630,
+        width: 1024,
+        height: 1024,
         alt: 'LLM Bias Heatmap',
       },
     ],
@@ -72,7 +74,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     creator: '@jmk9494',
     title: 'LLM Censorship Benchmark — ModerationBias.com',
-    description: 'Open-source benchmark tracking censorship bias across 26+ LLMs. Live biweekly audits with statistical significance testing.',
+    description: 'Open-source benchmark tracking censorship bias across 30+ LLMs. Live biweekly audits with statistical significance testing.',
     images: [{ url: '/assets/heatmap.png', alt: 'ModerationBias Heatmap' }],
   },
   robots: {

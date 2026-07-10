@@ -256,7 +256,7 @@ export default function AboutPage() {
                     <li>API-mediated testing (via OpenRouter) may differ from direct model inference. Routing, load balancing, and provider-side caching could affect results.</li>
                     <li>Results reflect US-East API responses. Regional routing differences may produce different outputs for the same model in other geographies.</li>
                     <li>The judge model introduces its own potential bias in scoring.</li>
-                    <li>The generated prompt variants (~1,800 of 2,006 total) are structural augmentations of ~200 seed prompts. Results are reported separately for seed and generated sets.</li>
+                    <li>The generated prompt variants (~2,100 of 2,323 total) are structural augmentations of ~200 seed prompts. Results are reported separately for seed and generated sets.</li>
                     <li>English-language prompts only — cross-lingual behaviour is not yet tested at scale.</li>
                 </ul>
             </section>

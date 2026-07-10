@@ -1,6 +1,4 @@
 import { ImageResponse } from 'next/og';
-import fs from 'fs';
-import path from 'path';
 
 export const runtime = 'edge';
 export const alt = 'Model Refusal Rate Analysis';

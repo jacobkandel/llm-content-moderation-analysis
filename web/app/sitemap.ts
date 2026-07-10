@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import models from '../public/models.json';
+import { CATEGORY_SLUGS } from '@/lib/categories';
 
 const BASE_URL = 'https://moderationbias.com';
 
@@ -35,11 +36,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'weekly',
             priority: 0.8,
         },
-        // Analysis Deep Dives (all 14)
+        // Analysis Deep Dives (all 15)
         ...[
             'consensus', 'political', 'drift', 'paternalism', 'significance',
             'summary', 'overview', 'triggers', 'clusters', 'alignment',
-            'reliability', 'iaa', 'overrefusal', 'longitudinal'
+            'reliability', 'iaa', 'overrefusal', 'longitudinal', 'family'
         ].map(slug => ({
             url: `${BASE_URL}/analysis/${slug}`,
             lastModified: new Date(),
@@ -53,12 +54,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly' as const,
             priority: 0.6,
         })),
-        // Category detail pages
-        ...[
-            'crime', 'cybersecurity', 'dangerous', 'deception', 'explicit-sexual',
-            'false-positive-control', 'harassment', 'hate-speech', 'health-misinformation',
-            'incitement-to-violence', 'paternalism', 'political', 'self-harm', 'weapons'
-        ].map(cat => ({
+        // Category detail pages — derived from the same source as the route so the
+        // sitemap can never list a slug that renders a 404.
+        ...CATEGORY_SLUGS.map(cat => ({
             url: `${BASE_URL}/categories/${cat}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
