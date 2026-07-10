@@ -89,10 +89,10 @@ export async function POST(request: NextRequest) {
             message: 'Annotation saved',
             annotationId: `${body.annotatorId}_${body.itemId}`,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Annotation submission error:', error);
         return NextResponse.json(
-            { error: 'Failed to save annotation', details: error.message || String(error) },
+            { error: 'Failed to save annotation', details: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         );
     }

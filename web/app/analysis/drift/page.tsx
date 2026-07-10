@@ -12,7 +12,7 @@ import { RelatedPages } from '@/components/ui/RelatedPages';
 export default function DriftPage() {
     const router = useRouter();
     const { filteredDriftData: driftData, loading, ensureDrift } = useAnalysis();
-    useEffect(() => { ensureDrift(); }, []);
+    useEffect(() => { ensureDrift(); }, [ensureDrift]);
 
     if (loading) return <SkeletonLoader />;
 

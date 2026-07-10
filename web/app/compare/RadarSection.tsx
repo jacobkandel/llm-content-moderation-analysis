@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 /** Safely call .toFixed() — returns '0' if the value is not a finite number. */
@@ -9,7 +10,7 @@ interface RadarSectionProps {
     modelB: string;
     highlightDiffs: boolean;
     setHighlightDiffs: (val: boolean) => void;
-    displayRadarData: any[];
+    displayRadarData: JsonData[];
 }
 
 export function RadarSection({

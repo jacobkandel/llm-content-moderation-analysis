@@ -53,16 +53,21 @@ export function SkeletonTable({ rows = 5 }: { rows?: number }) {
     );
 }
 
+// Fixed bar heights for the chart skeleton. Using a static pattern instead of
+// Math.random() keeps render pure (no react-hooks/purity violation) and avoids
+// layout shift between renders.
+const CHART_SKELETON_HEIGHTS = [72, 48, 90, 60, 84, 54];
+
 export function SkeletonChart() {
     return (
         <div className="rounded-lg border border-border dark:border-border bg-card dark:bg-card p-6">
             <Skeleton className="h-5 w-32 mb-4" />
             <div className="flex items-end gap-2 h-48">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {CHART_SKELETON_HEIGHTS.map((height, i) => (
                     <Skeleton
                         key={i}
                         className="flex-1"
-                        style={{ height: `${Math.random() * 60 + 40}%` }}
+                        style={{ height: `${height}%` }}
                     />
                 ))}
             </div>

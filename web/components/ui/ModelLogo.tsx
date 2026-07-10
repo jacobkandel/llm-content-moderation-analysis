@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Bot, Zap, Globe, Cpu } from 'lucide-react';
+import { Bot, Zap, Globe, Cpu, type LucideIcon } from 'lucide-react';
 
 interface ModelLogoProps {
     modelId: string;
@@ -13,7 +13,7 @@ export function ModelLogo({ modelId, className }: ModelLogoProps) {
     const provider = modelId.split('/')[0]?.toLowerCase() || 'unknown';
 
     // Define provider styles
-    const styles: Record<string, { bg: string; text: string; icon: any; initial: string }> = {
+    const styles: Record<string, { bg: string; text: string; icon: LucideIcon; initial: string }> = {
         openai: {
             bg: 'bg-[#9CAF88]', // Light Forest
             text: 'text-safe', // Forest
@@ -70,8 +70,6 @@ export function ModelLogo({ modelId, className }: ModelLogoProps) {
         icon: Bot,
         initial: provider.charAt(0).toUpperCase()
     };
-
-    const Icon = style.icon;
 
     return (
         <div className={cn("rounded-2xl flex items-center justify-center shadow-inner", style.bg, style.text, className)}>

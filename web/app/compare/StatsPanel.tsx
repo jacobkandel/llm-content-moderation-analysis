@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronDown, Info, ExternalLink } from 'lucide-react';
@@ -10,11 +11,11 @@ const safeFixed = (n: number | null | undefined, d = 1): string =>
 interface StatsPanelProps {
     modelA: string;
     modelB: string;
-    statsA: any;
-    statsB: any;
+    statsA: JsonData;
+    statsB: JsonData;
     showStats: boolean;
     setShowStats: (show: boolean | ((prev: boolean) => boolean)) => void;
-    pairResult: any;
+    pairResult: JsonData;
     getProviderLogo: (model: string) => string;
 }
 
@@ -57,7 +58,7 @@ export function StatsPanel({
                         {pairResult ? (
                             <div className="flex flex-wrap items-start gap-8 mt-3">
                                 <div>
-                                    <span className="text-xs text-muted-foreground uppercase tracking-wider">P-Value (McNemar's)</span>
+                                    <span className="text-xs text-muted-foreground uppercase tracking-wider">P-Value (McNemar&apos;s)</span>
                                     <div className="text-2xl font-black font-mono text-foreground mt-1">
                                         {(() => { const pv = parseFloat(String(pairResult['P-Value'])); return isFinite(pv) ? pv.toExponential(2) : 'N/A'; })()}
                                     </div>

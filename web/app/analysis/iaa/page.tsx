@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import AnalysisOverview from '@/components/AnalysisOverview';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { RelatedPages } from '@/components/ui/RelatedPages';
-import { Users, Target, BarChart3, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Users, Target, BarChart3, Clock, CheckCircle, AlertTriangle, type LucideIcon } from 'lucide-react';
 
 interface IAAStats {
     lastUpdated: string;
@@ -69,7 +69,7 @@ function AlphaBadge({ value, interpretation }: { value: number | null; interpret
     );
 }
 
-function StatCard({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string | number; sub?: string }) {
+function StatCard({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: string; value: string | number; sub?: string }) {
     return (
         <div className="bg-card rounded-xl border border-border p-4 flex flex-col gap-1">
             <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium">

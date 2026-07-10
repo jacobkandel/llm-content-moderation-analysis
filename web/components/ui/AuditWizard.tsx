@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, RefreshCw, Play, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle, XCircle, Play, RotateCcw } from 'lucide-react';
 import { AuditRow } from '@/lib/data-loading';
 
 interface AuditWizardProps {
@@ -33,7 +33,6 @@ export function AuditWizard({ data }: AuditWizardProps) {
     };
 
     const handleVote = (verdict: 'safe' | 'unsafe') => {
-        const currentItem = sample[currentIndex];
         // Use a unique key based on index to avoid collision if IDs missing
         setHumanVerdicts(prev => ({ ...prev, [currentIndex]: verdict }));
 
@@ -86,7 +85,7 @@ export function AuditWizard({ data }: AuditWizardProps) {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Start Human Audit</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Audit 20 random model responses to calculate your agreement score (Cohen's Kappa) with the AI systems.
+                    Audit 20 random model responses to calculate your agreement score (Cohen&apos;s Kappa) with the AI systems.
                 </p>
                 <button
                     onClick={startAudit}
@@ -165,7 +164,7 @@ export function AuditWizard({ data }: AuditWizardProps) {
                 <h3 className="text-xl font-bold mb-6">Audit Complete</h3>
 
                 <div className="mb-8">
-                    <div className="text-sm text-muted-foreground mb-1">Your Cohen's Kappa Score</div>
+                    <div className="text-sm text-muted-foreground mb-1">Your Cohen&apos;s Kappa Score</div>
                     <div className={`text-6xl font-black ${color} mb-2`}>
                         {kappa?.toFixed(3)}
                     </div>

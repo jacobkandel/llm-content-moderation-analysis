@@ -1,4 +1,5 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,13 +10,12 @@ import AnalysisOverview from '@/components/AnalysisOverview';
 import { RelatedPages } from '@/components/ui/RelatedPages';
 import { EmptyState } from '@/components/ui/EmptyState';
 
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#06b6d4', '#84cc16'];
 
 
 export default function PoliticalPage() {
     const router = useRouter();
     const { filteredPoliticalData: politicalData, loading, ensurePolitical } = useAnalysis();
-    useEffect(() => { ensurePolitical(); }, []);
+    useEffect(() => { ensurePolitical(); }, [ensurePolitical]);
 
     if (loading) return <SkeletonLoader />;
 
@@ -66,8 +66,8 @@ export default function PoliticalPage() {
                                     <ReferenceLine x={0} stroke="#000" />
                                     <ReferenceLine y={0} stroke="#000" />
 
-                                    <Scatter name="Models" data={politicalData} fill="#800000" onClick={(e: any) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
-                                        {politicalData.map((entry: any, index: number) => (
+                                    <Scatter name="Models" data={politicalData} fill="#800000" onClick={(e: JsonData) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
+                                        {politicalData.map((entry: JsonData, index: number) => (
                                             <Cell key={`cell-${index}`} fill="#800000" stroke="hsl(var(--background))" strokeWidth={1} style={{ cursor: 'pointer' }} />
                                         ))}
                                     </Scatter>

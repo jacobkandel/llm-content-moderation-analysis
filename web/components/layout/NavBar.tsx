@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
-    LayoutDashboard, FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
+    FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
     Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles, ClipboardCheck, Layers, Trophy, BookOpen
 } from 'lucide-react';
 import { useState } from 'react';
@@ -64,7 +64,7 @@ const mobileOnlyItems = [
 export function NavBar() {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const [, setActiveDropdown] = useState<string | null>(null);
 
     return (
         <nav aria-label="Main Navigation" className="sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">

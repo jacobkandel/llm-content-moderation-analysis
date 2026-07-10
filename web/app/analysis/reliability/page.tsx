@@ -1,4 +1,5 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import { useEffect, useMemo } from 'react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
@@ -13,7 +14,7 @@ export default function ReliabilityPage() {
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
 
     // Load CSV only when filters are active
-    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters, ensureAuditData]);
 
     // Per-model self-consistency: how consistent is each model with itself across repeated prompts?
     const perModelKappa = useMemo(() => {
@@ -76,14 +77,6 @@ export default function ReliabilityPage() {
         return 'text-foreground/20';
     };
 
-    const getScoreLabel = (s: number) => {
-        if (s >= 0.81) return 'Almost Perfect';
-        if (s >= 0.61) return 'Substantial';
-        if (s >= 0.41) return 'Moderate';
-        if (s >= 0.21) return 'Fair';
-        return 'Slight';
-    };
-
     const getBgColor = (s: number) => {
         if (s >= 0.81) return 'bg-foreground/10 border-foreground/20';
         if (s >= 0.61) return 'bg-foreground/5 border-foreground/10';
@@ -126,13 +119,14 @@ export default function ReliabilityPage() {
                     <p className="text-xs text-muted-foreground mb-6">How often each model agrees with the majority verdict across all prompts</p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {perModelKappa.map((m: any) => (
+                        {perModelKappa.map((m: JsonData) => (
                             <div
                                 key={m.model}
                                 className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors bg-card"
                             >
                                 {/* Provider Logo */}
                                 <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center overflow-hidden">
+                                    {/* eslint-disable-next-line @next/next/no-img-element -- small fixed-size provider logo; plain <img> is intentional */}
                                     <img
                                         src={getLogoUrl(m.model)}
                                         alt={`${getProviderName(m.model)} logo`}

@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import type { Metadata } from 'next';
 import fs from 'fs';
 import path from 'path';
@@ -47,7 +48,7 @@ async function getModelData() {
     let drift = [];
     let political = [];
     let paternalism = [];
-    let consensus: any = {};
+    let consensus: JsonData = {};
     try { drift = JSON.parse(await fs.promises.readFile(driftPath, 'utf8')); } catch { }
     try { political = JSON.parse(await fs.promises.readFile(politicalPath, 'utf8')); } catch { }
     try { paternalism = JSON.parse(await fs.promises.readFile(paternalismPath, 'utf8')); } catch { }
@@ -112,14 +113,14 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
     let stats: ModelStats | null = null;
     let categories: string[] = [];
     let allModels: string[] = [];
-    let longitudinalChart: any[] = [];
+    let longitudinalChart: JsonData[] = [];
     let modelInfo: ModelInfo | undefined;
 
-    let compareData: any = null;
-    let driftData: any = null;
-    let politicalData: any = null;
-    let paternalismData: any = null;
-    let consensusData: any = null;
+    let compareData: JsonData = null;
+    let driftData: JsonData = null;
+    let politicalData: JsonData = null;
+    let paternalismData: JsonData = null;
+    let consensusData: JsonData = null;
 
     try {
         const data = await getModelData();
@@ -131,10 +132,10 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
         longitudinalChart = Array.isArray(data.longitudinal.chartData) ? data.longitudinal.chartData : [];
         compareData = data.compare;
 
-        driftData = data.drift?.find((d: any) => d.model === id);
-        politicalData = data.political?.find((d: any) => d.model === id);
-        paternalismData = data.paternalism?.find((d: any) => d.model === id);
-        consensusData = data.consensus?.perModel?.find((d: any) => d.model === id);
+        driftData = data.drift?.find((d: JsonData) => d.model === id);
+        politicalData = data.political?.find((d: JsonData) => d.model === id);
+        paternalismData = data.paternalism?.find((d: JsonData) => d.model === id);
+        consensusData = data.consensus?.perModel?.find((d: JsonData) => d.model === id);
     } catch { }
 
     if (!modelInfo) {
@@ -340,7 +341,7 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                                     <h3 className="text-lg font-black text-foreground">Majority Agreement</h3>
                                     <span className="text-xl font-bold text-brand">{consensusData.agreementRate.toFixed(1)}%</span>
                                 </div>
-                                <p className="text-sm text-muted-foreground mb-3">Model's alignment with the council decision.</p>
+                                <p className="text-sm text-muted-foreground mb-3">Model&apos;s alignment with the council decision.</p>
                                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                                     <div className="h-full bg-brand rounded-full" style={{ width: `${consensusData.agreementRate}%` }} />
                                 </div>
@@ -440,9 +441,6 @@ export default async function ModelPage({ params }: { params: Promise<{ provider
                     All Model Rankings
                 </Link>
             </div>
-
-            {/* Hidden variable to avoid build error */}
-            {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
         </main>
     );
 }

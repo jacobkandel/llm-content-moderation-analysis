@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-    Box, LayoutDashboard, ArrowRightLeft, Brain,
+    Box, ArrowRightLeft, Brain,
     Menu, X, ChevronRight,
     FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
     Network, ListChecks, Users, Sparkles
@@ -13,10 +13,10 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { useSidebar } from '@/components/providers/SidebarProvider';
-import { Search, Filter } from 'lucide-react';
+import { Filter, type LucideIcon } from 'lucide-react';
 
 
-const mainNavItems: { name: string; href: string; icon: any }[] = [
+const mainNavItems: { name: string; href: string; icon: LucideIcon }[] = [
     { name: 'AI Overview', href: '/analysis/overview', icon: Sparkles },
     { name: 'Comparison', href: '/compare', icon: ArrowRightLeft },
     { name: 'Models', href: '/models', icon: Box },

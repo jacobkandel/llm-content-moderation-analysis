@@ -9,10 +9,10 @@ export async function GET() {
         try {
             const content = await fs.promises.readFile(reportPath, 'utf-8');
             return NextResponse.json({ content });
-        } catch (e) {
+        } catch {
             return NextResponse.json({ content: '', error: 'Report not found' });
         }
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to read report', content: '' }, { status: 500 });
     }
 }

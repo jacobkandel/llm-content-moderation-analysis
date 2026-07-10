@@ -1,12 +1,33 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 interface FadeInProps {
     children: React.ReactNode;
     className?: string;
     delay?: number;
     duration?: number;
+}
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+function subscribeReducedMotion(onChange: () => void) {
+    const mql = window.matchMedia(REDUCED_MOTION_QUERY);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+}
+
+/**
+ * Reads the user's reduced-motion preference via useSyncExternalStore so the
+ * value stays in sync without calling setState synchronously inside an effect.
+ * The server snapshot assumes motion is allowed to avoid hydration mismatches.
+ */
+function usePrefersReducedMotion() {
+    return useSyncExternalStore(
+        subscribeReducedMotion,
+        () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
+        () => false,
+    );
 }
 
 /**
@@ -19,28 +40,25 @@ interface FadeInProps {
  * Respects `prefers-reduced-motion` to disable movement for accessibility.
  */
 export function FadeIn({ children, className = '', delay = 0, duration = 500 }: FadeInProps) {
-    const [visible, setVisible] = useState(false);
+    const [inView, setInView] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+    const prefersReducedMotion = usePrefersReducedMotion();
 
     useEffect(() => {
+        // Reduced motion: reveal immediately, no observer needed.
+        if (prefersReducedMotion) return;
+
         const el = ref.current;
         if (!el) return;
-
-        // Check reduced motion preference
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) {
-            setVisible(true);
-            return;
-        }
 
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
                     // Delay before triggering animation
                     if (delay > 0) {
-                        setTimeout(() => setVisible(true), delay);
+                        setTimeout(() => setInView(true), delay);
                     } else {
-                        setVisible(true);
+                        setInView(true);
                     }
                     observer.disconnect();
                 }
@@ -50,7 +68,9 @@ export function FadeIn({ children, className = '', delay = 0, duration = 500 }: 
 
         observer.observe(el);
         return () => observer.disconnect();
-    }, [delay]);
+    }, [delay, prefersReducedMotion]);
+
+    const visible = prefersReducedMotion || inView;
 
     return (
         <div

@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { Download, Loader2, Image, FileText, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Download, Loader2, Image as ImageIcon, FileText, Check } from 'lucide-react';
 
 interface ExportButtonProps {
     targetId?: string;
@@ -108,7 +108,7 @@ export default function ExportButton({
                         onClick={exportToPNG}
                         className="w-full px-4 py-2 text-left hover:bg-muted/30 flex items-center gap-3 text-foreground/80"
                     >
-                        <Image className="h-4 w-4 text-primary" />
+                        <ImageIcon className="h-4 w-4 text-primary" />
                         <div>
                             <div className="font-medium">Export as PNG</div>
                             <div className="text-xs text-muted-foreground/70">Dashboard screenshot</div>

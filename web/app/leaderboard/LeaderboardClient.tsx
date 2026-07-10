@@ -1,4 +1,5 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown, ExternalLink } from 'lucide-react';
@@ -23,7 +24,7 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
 }
 
 interface Props {
-    compareData: any;
+    compareData: JsonData;
 }
 
 export default function LeaderboardClient({ compareData }: Props) {
@@ -57,7 +58,7 @@ export default function LeaderboardClient({ compareData }: Props) {
                 const shortName = fullName.split('/')[1] ?? fullName;
                 return { fullName, provider, shortName, refusalRate: catRate, ciLower, ciUpper, avgVerbosity: stats.avgVerbosity ?? 0, total: stats.total ?? 0 };
             })
-            .filter((r: any) => {
+            .filter((r: JsonData) => {
                 if (!search) return true;
                 return r.fullName.toLowerCase().includes(search.toLowerCase()) ||
                        r.provider.toLowerCase().includes(search.toLowerCase());
@@ -66,7 +67,7 @@ export default function LeaderboardClient({ compareData }: Props) {
 
     const sorted = useMemo(() => {
         const dir = sortDir === 'desc' ? -1 : 1;
-        return [...rows].sort((a: any, b: any) => {
+        return [...rows].sort((a: JsonData, b: JsonData) => {
             if (sortKey === 'rank' || sortKey === 'refusalRate') {
                 return ((b.refusalRate ?? -1) - (a.refusalRate ?? -1)) * (sortDir === 'desc' ? 1 : -1);
             }
@@ -77,7 +78,7 @@ export default function LeaderboardClient({ compareData }: Props) {
         });
     }, [rows, sortKey, sortDir]);
 
-    const rankedSorted = sorted.map((r: any, i: number) => ({ ...r, rank: i + 1 }));
+    const rankedSorted = sorted.map((r: JsonData, i: number) => ({ ...r, rank: i + 1 }));
 
     function toggleSort(key: SortKey) {
         if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -157,7 +158,7 @@ export default function LeaderboardClient({ compareData }: Props) {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {rankedSorted.map((row: any) => (
+                            {rankedSorted.map((row: JsonData) => (
                                 <tr key={row.fullName} className="hover:bg-muted/20 transition-colors group">
                                     {/* Rank */}
                                     <td className="px-4 py-3">

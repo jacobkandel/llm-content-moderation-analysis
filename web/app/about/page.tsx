@@ -45,6 +45,7 @@ export default function AboutPage() {
                     <div className="p-6 flex flex-col gap-4">
                         <div className="flex items-center gap-4">
                             <div className="h-14 w-14 rounded-xl bg-muted border border-border flex items-center justify-center text-brand text-lg font-black select-none flex-shrink-0 overflow-hidden">
+                                {/* eslint-disable-next-line @next/next/no-img-element -- small external avatar; plain <img> is intentional here */}
                                 <img src="https://github.com/jacobkandel.png" alt="Jacob Kandel" className="h-full w-full object-cover" />
                             </div>
                             <div>

@@ -35,9 +35,9 @@ export default function SignificancePage() {
     const hasFilters = selectedModels.length > 0 || dateRange.start || dateRange.end;
 
     // Load significance data on mount (lazy)
-    useEffect(() => { ensureSignificance(); }, []);
+    useEffect(() => { ensureSignificance(); }, [ensureSignificance]);
     // Load CSV only when filters are active
-    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters, ensureAuditData]);
 
     const [showAll, setShowAll] = useState(false);
     const [sortBy, setSortBy] = useState<'pValue' | 'disagreements'>('pValue');
@@ -47,9 +47,9 @@ export default function SignificancePage() {
         if (!hasFilters && precomputedSignificance.length > 0) {
             const results = [...precomputedSignificance];
             if (sortBy === 'pValue') {
-                results.sort((a: any, b: any) => a.pValue - b.pValue);
+                results.sort((a, b) => a.pValue - b.pValue);
             } else {
-                results.sort((a: any, b: any) => b.disagreements - a.disagreements);
+                results.sort((a, b) => b.disagreements - a.disagreements);
             }
             return results;
         }
@@ -187,7 +187,7 @@ export default function SignificancePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-card p-6 rounded-2xl border border-border">
-                    <h3 className="text-lg font-bold text-foreground mb-4">Categorical Effect Size (Cramér's V)</h3>
+                    <h3 className="text-lg font-bold text-foreground mb-4">Categorical Effect Size (Cramér&apos;s V)</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                         Measures the strength of association between two categorical variables (0 = no association, 1 = perfect association). A larger value indicates a stronger predictor of refusal.
                     </p>
@@ -214,7 +214,7 @@ export default function SignificancePage() {
                 </div>
 
                 <div className="bg-card p-6 rounded-2xl border border-border">
-                    <h3 className="text-lg font-bold text-foreground mb-4">Continuous Effect Size (Cohen's d)</h3>
+                    <h3 className="text-lg font-bold text-foreground mb-4">Continuous Effect Size (Cohen&apos;s d)</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                         Measures the standardized difference in mean response length (verbosity) between allowed and refused responses.
                     </p>
@@ -223,7 +223,7 @@ export default function SignificancePage() {
                             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Verbosity Difference</p>
                             <p className="text-3xl font-bold text-foreground">
                                 {stats?.cohensDVerbosity ? stats.cohensDVerbosity.toFixed(2) : 'N/A'}
-                                <span className="text-sm font-normal text-muted-foreground ml-2">Cohen's d</span>
+                                <span className="text-sm font-normal text-muted-foreground ml-2">Cohen&apos;s d</span>
                             </p>
                         </div>
                         <div className="flex-1 space-y-2">
@@ -247,7 +247,7 @@ export default function SignificancePage() {
                         <select
                             className="text-xs border border-border rounded-lg px-2 py-1 text-foreground bg-background"
                             value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
+                            onChange={(e) => setSortBy(e.target.value as 'pValue' | 'disagreements')}
                         >
                             <option value="pValue">Sort by P-Value</option>
                             <option value="disagreements">Sort by Disagreements</option>

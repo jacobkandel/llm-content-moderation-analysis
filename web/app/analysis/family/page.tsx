@@ -221,7 +221,7 @@ export default function FamilyPage() {
             {view === 'progression' && (
                 <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                        Each card shows how a model family's refusal rate has changed across successive versions. Bars grow taller with higher refusal rates. The Δ badge shows the net change from earliest to latest model.
+                        Each card shows how a model family&apos;s refusal rate has changed across successive versions. Bars grow taller with higher refusal rates. The Δ badge shows the net change from earliest to latest model.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {familiesWithMultiple.map(f => (

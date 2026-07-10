@@ -37,7 +37,6 @@ export function InsightsSummary({ data }: InsightsSummaryProps) {
 
         // Calculate overall pass rate
         const safeCount = data.filter(d => isSafe(d.verdict)).length;
-        const unsafeCount = data.filter(d => !isSafe(d.verdict)).length;
         const passRate = data.length > 0 ? (safeCount / data.length * 100) : 0;
 
         // 1. Overall status insight

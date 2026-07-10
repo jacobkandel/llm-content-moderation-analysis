@@ -1,15 +1,16 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, Loader2, X } from 'lucide-react';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
 
 type HeatmapProps = {
-    data: any[];
+    data: JsonData[];
     title?: string;
     description?: string;
-    onCellClick?: (model: string, category: string, entries: any[]) => void;
+    onCellClick?: (model: string, category: string, entries: JsonData[]) => void;
 };
 
 /** Minimum sample size for a cell to be considered statistically meaningful. */
@@ -57,10 +58,10 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
 
     // 1. Process data to get Refusal Rate per Model per Category
     //    Use pre-computed JSON when no filters are active
-    const matrix = useMemo((): { models: string[]; categories: string[]; stats: Record<string, Record<string, { total: number; refusals: number; entries: any[] }>> } => {
+    const matrix = useMemo((): { models: string[]; categories: string[]; stats: Record<string, Record<string, { total: number; refusals: number; entries: JsonData[] }>> } => {
         // Use pre-computed heatmap when available and no filters active
         if (!hasFilters && precomputedHeatmap) {
-            const stats: Record<string, Record<string, { total: number; refusals: number; entries: any[] }>> = {};
+            const stats: Record<string, Record<string, { total: number; refusals: number; entries: JsonData[] }>> = {};
             for (const model of precomputedHeatmap.models) {
                 stats[model] = {};
                 for (const cat of precomputedHeatmap.categories) {
@@ -76,7 +77,7 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
         // Normalize categories before creating unique set
         const categories = Array.from(new Set(data.map(d => normalizeCategory(d.category)))).filter(c => c).sort();
 
-        const stats: Record<string, Record<string, { total: number; refusals: number; entries: any[] }>> = {};
+        const stats: Record<string, Record<string, { total: number; refusals: number; entries: JsonData[] }>> = {};
 
         // Init stats
         allModels.forEach(m => {

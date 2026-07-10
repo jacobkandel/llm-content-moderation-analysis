@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import Image from 'next/image';
 import { ExternalLink, CheckCircle } from 'lucide-react';
 import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
@@ -5,9 +6,9 @@ import { getPromptSource, getSourceBadgeClass } from '@/lib/prompt-source';
 interface DisagreementLogProps {
     modelA: string;
     modelB: string;
-    disagreements: any[];
+    disagreements: JsonData[];
     disagreementCount: number;
-    fullData: any[] | null;
+    fullData: JsonData[] | null;
     fullDataLoading: boolean;
     visibleCount: number;
     setVisibleCount: (val: number | ((prev: number) => number)) => void;

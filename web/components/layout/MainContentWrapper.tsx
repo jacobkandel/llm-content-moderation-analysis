@@ -1,7 +1,5 @@
 'use client';
 
-import { useSidebar } from '@/components/providers/SidebarProvider';
-
 export function MainContentWrapper({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
         <div

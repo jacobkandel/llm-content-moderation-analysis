@@ -1,4 +1,5 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
@@ -10,7 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 
 // No colors needed for monochrome design
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: JsonData) => {
     if (active && payload && payload.length) {
         const d = payload[0].payload;
         return (
@@ -25,15 +26,6 @@ const CustomTooltip = ({ active, payload }: any) => {
         );
     }
     return null;
-};
-
-const CustomLabel = (props: any) => {
-    const { x, y, value } = props;
-    return (
-        <text x={x} y={y - 10} textAnchor="middle" className="fill-muted-foreground" fontSize={10} fontWeight={500}>
-            {value}
-        </text>
-    );
 };
 
 export default function AlignmentPage() {
@@ -82,8 +74,8 @@ export default function AlignmentPage() {
                                 <Label value="Refusal Rate (%)" angle={-90} position="insideLeft" offset={-10} style={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
                             </YAxis>
                             <RechartsTooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-                            <Scatter name="Models" data={efficiencyData} onClick={(e: any) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
-                                {efficiencyData.map((e: any, index: number) => {
+                            <Scatter name="Models" data={efficiencyData} onClick={(e: JsonData) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
+                                {efficiencyData.map((e: JsonData, index: number) => {
                                     // Maroon scale based on Refusal Rate
                                     let color = '#D6D6CE'; // Low refusal -> Light Gray
                                     if (e.refusalRate > 20) color = '#800000'; // High -> Maroon

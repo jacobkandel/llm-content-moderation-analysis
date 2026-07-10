@@ -31,15 +31,16 @@ export function ScrollSection({
         offset: ["start end", "end start"] // Track from when it enters bottom to when it exits top
     });
 
+    // Hooks must run unconditionally on every render, so always compute the
+    // transforms and pick which one to apply based on the props.
+    const opacityTransform = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+    const yTransform = useTransform(scrollYProgress, [0, 1], [100, -100]);
+
     // Fade in when entering, fade out when leaving
-    const opacity = fadeIn
-        ? useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
-        : 1;
+    const opacity = fadeIn ? opacityTransform : 1;
 
     // Parallax effect - subtle upward movement as you scroll
-    const y = translateY
-        ? useTransform(scrollYProgress, [0, 1], [100, -100])
-        : 0;
+    const y = translateY ? yTransform : 0;
 
     return (
         <motion.section

@@ -1,6 +1,5 @@
+import type { JsonData } from '@/lib/data-loading';
 import { ImageResponse } from 'next/og';
-import fs from 'fs';
-import path from 'path';
 
 export const runtime = 'edge';
 export const alt = 'Model Refusal Rate Analysis';
@@ -25,7 +24,7 @@ export default async function Image({ params }: { params: Promise<{ provider: st
 
         const res = await fetch(`${appUrl}/spectrum_data.json`);
         const data = await res.json();
-        const modelData = data.find((d: any) => d.fullName === rawId);
+        const modelData = data.find((d: JsonData) => d.fullName === rawId);
         if (modelData && modelData.refusalRate !== undefined) {
             refusalRate = `${modelData.refusalRate}%`;
             if (modelData.name) displayName = modelData.name;
@@ -84,6 +83,7 @@ export default async function Image({ params }: { params: Promise<{ provider: st
                             src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
                             width={96}
                             height={96}
+                            alt=""
                         />
                     </div >
 

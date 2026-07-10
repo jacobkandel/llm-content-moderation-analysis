@@ -49,7 +49,19 @@ jobs:
     - name: Install Dependencies
       run: npm ci
       working-directory: web
-    
+
+    - name: Lint
+      run: npm run lint
+      working-directory: web
+
+    - name: Type Check
+      run: npm run typecheck
+      working-directory: web
+
+    - name: Unit Tests
+      run: npm test
+      working-directory: web
+
     - name: Build Next.js App
       env:
         NEXT_TELEMETRY_DISABLED: 1

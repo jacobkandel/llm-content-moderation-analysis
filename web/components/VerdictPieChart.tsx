@@ -3,11 +3,6 @@
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
-type VerdictData = {
-    verdict: string;
-    count: number;
-};
-
 const COLORS = {
     safe: '#275D38',      // Forest
     unsafe: '#800000',    // Maroon
@@ -27,7 +22,7 @@ interface CustomLabelProps {
     name?: string;
 }
 
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: CustomLabelProps) => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: CustomLabelProps) => {
     // Guard against undefined values
     if (cx === undefined || cy === undefined || midAngle === undefined ||
         innerRadius === undefined || outerRadius === undefined || percent === undefined) {

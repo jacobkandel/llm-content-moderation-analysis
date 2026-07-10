@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Calendar, Box } from 'lucide-react';
+import { X, Search, Calendar } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Image from 'next/image';
 
@@ -47,6 +47,7 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
     }, [models, debouncedSearch]);
 
     // Virtualizer for performance
+    // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual returns non-memoizable functions; React Compiler skips this component, which is fine here
     const rowVirtualizer = useVirtualizer({
         count: filteredModels.length,
         getScrollElement: () => parentRef.current,
@@ -187,7 +188,7 @@ export default function ModelsModal({ isOpen, onClose, models }: ModelsModalProp
                                 {filteredModels.length === 0 && (
                                     <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                                         <Search className="w-8 h-8 mb-2 opacity-20" />
-                                        <p>No models found matching "{search}"</p>
+                                        <p>No models found matching &quot;{search}&quot;</p>
                                     </div>
                                 )}
                             </div>

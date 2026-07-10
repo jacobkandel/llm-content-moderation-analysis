@@ -1,3 +1,4 @@
+import type { JsonData } from '@/lib/data-loading';
 import { Suspense } from 'react';
 import CompareContent from './CompareContent';
 import { RefreshCw } from 'lucide-react';
@@ -69,7 +70,7 @@ export default async function ComparePage() {
     try {
         const pValuesFile = await fs.promises.readFile(pValuesPath, 'utf8');
         const rawPValues = JSON.parse(pValuesFile);
-        initialPValues = rawPValues.map((d: any) => ({
+        initialPValues = rawPValues.map((d: JsonData) => ({
             'Model A': d.modelA,
             'Model B': d.modelB,
             'P-Value': d.pValue,

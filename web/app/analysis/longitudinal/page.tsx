@@ -1,4 +1,5 @@
 'use client';
+import type { JsonData } from '@/lib/data-loading';
 
 import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { useState, useEffect, useMemo } from 'react';
@@ -29,9 +30,9 @@ export default function LongitudinalPage() {
     const router = useRouter();
 
     // Load CSV only when filters are active
-    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters]);
+    useEffect(() => { if (hasFilters) ensureAuditData(); }, [hasFilters, ensureAuditData]);
     // Local filter state for this view
-    const [longitudinalModels, setLongitudinalModels] = useState<string[]>([]);
+    const [longitudinalModels] = useState<string[]>([]);
 
     const longitudinalData = useMemo(() => {
         // Use pre-computed data when no global filters active
@@ -41,8 +42,8 @@ export default function LongitudinalPage() {
                 : precomputedLongitudinal.activeModels;
             // If local model filter, filter down the pre-computed chart data
             const chartData = longitudinalModels.length > 0
-                ? precomputedLongitudinal.chartData.map((entry: any) => {
-                    const row: any = { date: entry.date };
+                ? precomputedLongitudinal.chartData.map((entry: JsonData) => {
+                    const row: JsonData = { date: entry.date };
                     longitudinalModels.forEach((model: string) => {
                         if (entry[model] !== undefined) {
                             row[model] = entry[model];
@@ -63,7 +64,7 @@ export default function LongitudinalPage() {
 
         const chartData = uniqueDates.map(date => {
             const dayRows = filtered.filter(d => (d.timestamp?.split('T')[0]) === date);
-            const row: any = { date };
+            const row: JsonData = { date };
             activeModels.forEach(model => {
                 const modelRows = dayRows.filter(d => d.model === model);
                 if (modelRows.length > 0) {
@@ -114,7 +115,7 @@ export default function LongitudinalPage() {
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart
                                 data={longitudinalData.chartData}
-                                onClick={(data: any) => {
+                                onClick={(data: JsonData) => {
                                     if (data && data.activePayload && data.activePayload.length > 0) {
                                         const clickedDate = data.activePayload[0].payload.date;
                                         setDateRange({ start: clickedDate, end: clickedDate });

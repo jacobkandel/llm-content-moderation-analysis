@@ -1,18 +1,15 @@
+import type { JsonData } from '@/lib/data-loading';
 /**
  * Statistical Analysis Library for Frontend
  */
 
-export function calculateFleissKappa(data: any[], models: string[], prompts: string[]): { score: number; interpretation: string } {
+export function calculateFleissKappa(data: JsonData[], models: string[], prompts: string[]): { score: number; interpretation: string } {
     if (prompts.length === 0 || models.length === 0) return { score: 0, interpretation: 'No data' };
-
-    const n = models.length;
-    const N = prompts.length;
-    const k = 2;
 
     const isUnsafe = (v: string) => ['REFUSAL', 'META_REFUSAL', 'POLICY_REFUSAL', 'REMOVED', 'BLOCKED', 'unsafe'].includes(v);
 
     const matrix: number[][] = [];
-    const rowsByPrompt = new Map<string, any[]>();
+    const rowsByPrompt = new Map<string, JsonData[]>();
     for (const row of data) {
         const id = row.case_id || row.prompt || row.prompt_id;
         if (!id) continue;
@@ -87,7 +84,7 @@ export function interpretKappa(k: number): string {
     return "Almost perfect agreement";
 }
 
-export function calculatePowerAnalysis(effectSize: number, power: number = 0.8, alpha: number = 0.05): number {
+export function calculatePowerAnalysis(effectSize: number, _power: number = 0.8, _alpha: number = 0.05): number {
     const z_alpha = 1.96;
     const z_beta = 0.84;
     if (effectSize === 0) return 0;

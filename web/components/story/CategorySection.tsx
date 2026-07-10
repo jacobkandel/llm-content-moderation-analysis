@@ -64,7 +64,7 @@ export function CategorySection({ topCategories }: CategorySectionProps) {
                             </h2>
 
                             <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
-                                Across all models, certain categories triggered refusals far more than others. Here's what the data reveals:
+                                Across all models, certain categories triggered refusals far more than others. Here&apos;s what the data reveals:
                             </p>
 
                             {/* Top 5 callouts */}
