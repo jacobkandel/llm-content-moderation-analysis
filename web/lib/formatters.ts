@@ -61,11 +61,16 @@ export function interpretEffectSize(h: number): string {
 }
 
 /**
- * Format a model ID to a display-friendly short name.
- * @example shortModelName("openai/gpt-4o-mini") => "gpt-4o-mini"
+ * Format a model ID to a display-friendly short name: drops the provider
+ * prefix, a leading "~" (alias/"latest" pointer), and a trailing ":free" tag.
+ * @example shortModelName("openai/gpt-4o-mini")            => "gpt-4o-mini"
+ * @example shortModelName("~openai/gpt-mini-latest")       => "gpt-mini-latest"
+ * @example shortModelName("nousresearch/hermes-3:free")    => "hermes-3"
  */
 export function shortModelName(modelId: string): string {
-  return modelId.includes('/') ? modelId.split('/').pop()! : modelId;
+  let s = modelId.startsWith('~') ? modelId.slice(1) : modelId;
+  if (s.includes('/')) s = s.split('/').pop()!;
+  return s.replace(/:free$/, '');
 }
 
 /**

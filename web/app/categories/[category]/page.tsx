@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getLogoUrl } from '@/lib/provider-logos';
+import { shortModelName } from '@/lib/formatters';
 import { CATEGORIES } from '@/lib/categories';
 import { CategoryPromptsTable } from './CategoryPromptsTable';
 
@@ -71,7 +72,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 const raw = compare.modelStats?.[id]?.categoryRates?.[label];
                 const rate = typeof raw === 'number' ? raw : (raw?.rate ?? null);
                 const info = modelMap.get(id);
-                return { id, name: info?.display_name || id.split('/').pop() || id, rate };
+                return { id, name: info?.display_name || shortModelName(id), rate };
             })
             .filter((m: JsonData) => typeof m.rate === 'number' && isFinite(m.rate))
             .sort((a: JsonData, b: JsonData) => b.rate - a.rate);

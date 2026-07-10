@@ -32,6 +32,16 @@ export default function AlignmentPage() {
     const router = useRouter();
     const { efficiencyData, loading } = useAnalysis();
 
+    // A log x-axis keeps the cheap cluster readable despite the expensive outlier.
+    // Log can't plot $0, so free models are floored to just below the cheapest paid
+    // model (the tooltip still reports the true $0.0000). `xCost` drives the axis only.
+    const paidCosts = efficiencyData.map((d: JsonData) => d.costPer1k).filter((c: number) => c > 0);
+    const costFloor = paidCosts.length ? Math.min(...paidCosts) / 2 : 0.0001;
+    const scatterData = efficiencyData.map((d: JsonData) => ({
+        ...d,
+        xCost: d.costPer1k > 0 ? d.costPer1k : costFloor,
+    }));
+
     if (loading) return <SkeletonLoader />;
 
     return (
@@ -57,12 +67,15 @@ export default function AlignmentPage() {
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                             <XAxis
                                 type="number"
-                                dataKey="costPer1k"
+                                dataKey="xCost"
                                 name="Cost"
-                                unit="$"
+                                scale="log"
+                                domain={[costFloor, 'dataMax']}
+                                allowDataOverflow
+                                tickFormatter={(v: number) => `$${v < 0.1 ? v.toFixed(3) : v.toFixed(2)}`}
                                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                             >
-                                <Label value="Cost per 1K Tokens ($)" position="bottom" offset={10} style={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+                                <Label value="Cost per 1K Tokens ($, log scale — free models shown at left)" position="bottom" offset={10} style={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
                             </XAxis>
                             <YAxis
                                 type="number"
@@ -74,8 +87,8 @@ export default function AlignmentPage() {
                                 <Label value="Refusal Rate (%)" angle={-90} position="insideLeft" offset={-10} style={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
                             </YAxis>
                             <RechartsTooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-                            <Scatter name="Models" data={efficiencyData} onClick={(e: JsonData) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
-                                {efficiencyData.map((e: JsonData, index: number) => {
+                            <Scatter name="Models" data={scatterData} onClick={(e: JsonData) => { if (e?.payload?.id) router.push(`/models/${e.payload.id}`) }}>
+                                {scatterData.map((e: JsonData, index: number) => {
                                     // Maroon scale based on Refusal Rate
                                     let color = '#D6D6CE'; // Low refusal -> Light Gray
                                     if (e.refusalRate > 20) color = '#800000'; // High -> Maroon

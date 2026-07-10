@@ -5,6 +5,7 @@ import { useAnalysis } from '@/app/analysis/AnalysisContext';
 import { useState, useEffect, useMemo } from 'react';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, Line } from 'recharts';
 import SkeletonLoader from '@/components/SkeletonLoader';
+import { shortModelName } from '@/lib/formatters';
 import { useRouter } from 'next/navigation';
 
 import AnalysisOverview from '@/components/AnalysisOverview';
@@ -114,7 +115,7 @@ export default function LongitudinalPage() {
                     <div className="min-w-[700px] h-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart
-                                data={longitudinalData.chartData}
+                                data={longitudinalData.chartData.map((d: JsonData) => ({ ...d, ts: new Date(d.date).getTime() }))}
                                 onClick={(data: JsonData) => {
                                     if (data && data.activePayload && data.activePayload.length > 0) {
                                         const clickedDate = data.activePayload[0].payload.date;
@@ -126,10 +127,14 @@ export default function LongitudinalPage() {
                             >
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                                 <XAxis
-                                    dataKey="date"
+                                    dataKey="ts"
+                                    type="number"
+                                    scale="time"
+                                    domain={['dataMin', 'dataMax']}
+                                    tickFormatter={(ts: number) => new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                     tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                                     tickMargin={10}
-                                    minTickGap={30}
+                                    minTickGap={40}
                                 />
                                 <YAxis
                                     unit="%"
@@ -139,6 +144,7 @@ export default function LongitudinalPage() {
                                 />
                                 <RechartsTooltip
                                     contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--card))', color: 'hsl(var(--foreground))' }}
+                                    labelFormatter={(ts) => new Date(Number(ts)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 />
                                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
                                 {longitudinalData.activeModels.map((m: string, i: number) => (
@@ -146,6 +152,7 @@ export default function LongitudinalPage() {
                                         key={m}
                                         type="monotone"
                                         dataKey={m}
+                                        name={shortModelName(m)}
                                         stroke={CHART_COLORS[i % CHART_COLORS.length]}
                                         strokeWidth={3}
                                         dot={{ r: 4, strokeWidth: 2 }}

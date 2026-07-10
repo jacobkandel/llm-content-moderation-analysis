@@ -178,7 +178,8 @@ export default function ConsensusPage() {
                     Model Agreement with Majority
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                    How often each model agrees with the majority verdict across {consensusStats.totalPrompts.toLocaleString()} prompts evaluated by multiple models
+                    How often each model agrees with the majority verdict across {consensusStats.totalPrompts.toLocaleString()} prompts evaluated by multiple models.{' '}
+                    <span className="text-muted-foreground/70">Bars are scaled from a 50% baseline to make differences visible; the number shows the true rate.</span>
                 </p>
                 <div className="space-y-2">
                     {consensusStats.perModel.map((m: JsonData, i: number) => (
@@ -208,7 +209,9 @@ export default function ConsensusPage() {
                                 <div
                                     className="h-full rounded-full transition-all duration-500"
                                     style={{
-                                        width: `${m.agreementRate}%`,
+                                        // Rescale from a 50% floor so the 55–90% band spreads across
+                                        // the full width — on a raw 0–100 scale every bar looks identical.
+                                        width: `${Math.max(2, Math.min(100, (m.agreementRate - 50) / 50 * 100))}%`,
                                         background: 'linear-gradient(90deg, #800000, #b91c1c)',
                                     }}
                                 />

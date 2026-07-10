@@ -8,6 +8,7 @@ import { Activity } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { JsonData } from '@/lib/data-loading';
 import { TOOLTIP_STYLE, TOOLTIP_CURSOR, AXIS_TICK_STYLE, GRID_STYLE } from '@/lib/chart-theme';
+import { shortModelName } from '@/lib/formatters';
 
 interface ModelDriftProps {
     data?: JsonData[];
@@ -16,6 +17,10 @@ interface ModelDriftProps {
 
 export function ModelDrift({ data = [] }: ModelDriftProps) {
     const router = useRouter();
+    // Symmetric domain that always contains the data — the old fixed [-20, 20]
+    // clipped larger swings (rate_change can exceed ±40).
+    const maxAbs = data.reduce((m, d) => Math.max(m, Math.abs(Number(d.rate_change) || 0)), 0);
+    const bound = Math.max(10, Math.ceil(maxAbs / 10) * 10);
     return (
         <Card className="h-full">
             <CardHeader>
@@ -32,8 +37,8 @@ export function ModelDrift({ data = [] }: ModelDriftProps) {
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data} layout="vertical">
                             <CartesianGrid {...GRID_STYLE} />
-                            <XAxis type="number" domain={[-20, 20]} tick={AXIS_TICK_STYLE} />
-                            <YAxis dataKey="model" type="category" width={100} tick={AXIS_TICK_STYLE} />
+                            <XAxis type="number" domain={[-bound, bound]} tick={AXIS_TICK_STYLE} unit="%" />
+                            <YAxis dataKey="model" type="category" width={150} tick={AXIS_TICK_STYLE} tickFormatter={shortModelName} interval={0} />
                             <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} />
                             <Bar dataKey="rate_change" fill="#A4343A" name="Rate Change (%)" onClick={(e: JsonData) => { if (e?.model) router.push(`/models/${e.model}`) }} style={{ cursor: 'pointer' }}>
                                 {data.map((entry, index) => (
