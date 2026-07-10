@@ -245,4 +245,9 @@ test_a.txt
 web/audit_screenshots/
 web/full_audit_report.json
 web/playwright-report/
+web/test-results/
+web/web_broken/
 full_audit.js
+
+# Claude Code local tooling (preview launch config, etc.)
+.claude/
