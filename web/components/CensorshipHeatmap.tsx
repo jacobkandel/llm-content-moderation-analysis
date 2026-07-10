@@ -262,8 +262,17 @@ export function CensorshipHeatmap({ data, title = "Refusal Heatmap", description
                     return (
                         <div key={m} className="border border-border rounded-xl shadow-sm bg-card overflow-hidden">
                             <div
-                                className={`p-4 flex items-center justify-between cursor-pointer transition-colors ${isExpanded ? 'bg-muted/30' : 'bg-card'}`}
+                                role="button"
+                                tabIndex={0}
+                                aria-expanded={isExpanded}
+                                className={`p-4 flex items-center justify-between cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[hsl(var(--focus-ring))] ${isExpanded ? 'bg-muted/30' : 'bg-card'}`}
                                 onClick={() => toggleModel(m)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        toggleModel(m);
+                                    }
+                                }}
                             >
                                 <div className="flex-1">
                                     <h4 className="font-bold text-foreground text-base">

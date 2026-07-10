@@ -56,7 +56,7 @@ export default function PaternalismPage() {
                             </ResponsiveContainer>
                         ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center p-8">
-                                <EmptyState title="No paternalism data" description="Adjust your filters to see data." icon="search" />
+                                <EmptyState title="No paternalism data" description="No data for the current selection — it may still be loading, or try clearing the model filter." icon="search" />
                             </div>
                         )}
                     </div>

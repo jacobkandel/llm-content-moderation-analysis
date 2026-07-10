@@ -47,7 +47,7 @@ export function ModelDrift({ data = [] }: ModelDriftProps) {
                     </ResponsiveContainer>
                 ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                        <EmptyState title="No drift data" description="Adjust your filters or select models with drift data." icon="search" />
+                        <EmptyState title="No drift data" description="No drift data for the current selection — it may still be loading, or clear the model filter to see all models with longitudinal data." icon="search" />
                     </div>
                 )}
 

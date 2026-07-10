@@ -39,8 +39,9 @@ export default function PromptsPage() {
     const PAGE_SIZE = 50;
 
     useEffect(() => {
-        // Load from pre-built prompts_list.json (fast, always available)
-        fetch('/prompts_list.json')
+        // Load the gzipped prompts list (~26KB vs ~480KB uncompressed; served with
+        // Content-Encoding: gzip so the browser transparently decompresses it).
+        fetch('/prompts_list.json.gz')
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 return r.json();
