@@ -101,8 +101,8 @@ export default function AboutPage() {
                         exact &ldquo;Reject Rates&rdquo; and compare their refusal behaviors side-by-side.
                     </p>
                     <p className="text-muted-foreground leading-relaxed">
-                        The prompt library contains approximately <strong>~200 hand-crafted seed prompts</strong> covering six
-                        content categories, augmented with <strong>~1,800 generated variants</strong> for statistical robustness.
+                        The prompt library contains approximately <strong>~230 hand-crafted seed prompts</strong> covering 16
+                        content categories, augmented with generated variants for statistical robustness (<strong>~2,300 prompts total</strong>).
                         Results are reported separately for hand-crafted and generated sets.
                         Our goal is not to decide which model is &ldquo;right,&rdquo; but to provide developers, researchers,
                         and users with hard data on how different AI systems are aligned.

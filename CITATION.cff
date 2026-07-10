@@ -15,8 +15,8 @@ abstract: >
   McNemar's test with Benjamini-Hochberg FDR correction, Fleiss' Kappa (inter-model agreement),
   Cramér's V (categorical effect size), Cohen's d (verbosity analysis), Wilson Score
   confidence intervals, and minimum detectable effect size (MDES) power analysis.
-  Key finding: model identity (Cramér's V = 0.59) is a substantially stronger predictor
-  of refusal behavior than prompt topic (V = 0.21), suggesting provider policy
+  Key finding: model identity (Cramér's V = 0.66) is a substantially stronger predictor
+  of refusal behavior than prompt topic (V = 0.20), suggesting provider policy
   idiosyncrasies rather than rational content-based moderation.
 keywords:
   - "llm"

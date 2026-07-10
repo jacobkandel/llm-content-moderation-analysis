@@ -109,7 +109,7 @@ export function CommandPalette({ isCollapsed = false }: CommandPaletteProps) {
         {
             id: 'paternalism',
             title: 'Paternalism Audit',
-            description: 'Refusal differentials across user personas',
+            description: 'Baseline refusal rates by model (persona differential planned)',
             icon: <Shield className="h-4 w-4" />,
             action: () => router.push('/analysis/paternalism'),
             keywords: ['paternalism', 'persona', 'discrimination', 'bias']

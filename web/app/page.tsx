@@ -112,7 +112,7 @@ export default function HomePage() {
               {
                 step: '01',
                 title: 'Curate Prompts',
-                body: 'We select 200 sensitive-but-legitimate questions spanning politics, health, law, and culture — sourced from Wikipedia\'s list of controversial topics.',
+                body: 'We start from ~230 sensitive-but-legitimate seed questions spanning 16 categories — politics, health, law, culture and more — sourced from Wikipedia\'s list of controversial topics, then expand them into ~2,300 structural variants.',
               },
               {
                 step: '02',
