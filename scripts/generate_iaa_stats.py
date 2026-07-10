@@ -13,20 +13,96 @@ import os
 import sys
 import urllib.request
 import urllib.error
+import urllib.parse
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 BLOB_BASE = os.environ.get(
     "BLOB_BASE_URL",
     "https://oeqbf51ent3zxva1.public.blob.vercel-storage.com"
 )
+# API host used by @vercel/blob's list() operation (needs the RW token).
+BLOB_API_BASE = "https://blob.vercel-storage.com"
+BLOB_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN")
+ANNOTATIONS_PREFIX = "annotations/"
 OUTPUT_PATH = "web/public/iaa_stats.json"
 VERDICT_TO_INT = {"ALLOWED": 0, "REMOVED": 1}
 
 
+def _list_blob_urls(prefix: str) -> list:
+    """List every blob URL under `prefix` via the Vercel Blob REST list API.
+
+    The annotation write path stores each submission as an individual JSON file
+    (annotations/{date}/{annotatorId}_{uniqueId}.json), so this is the ONLY way
+    to discover them — the legacy rollup/daily JSONL files are no longer written.
+    Requires BLOB_READ_WRITE_TOKEN; returns [] if it is unavailable.
+    """
+    if not BLOB_TOKEN:
+        return []
+    urls: list = []
+    cursor: Optional[str] = None
+    while True:
+        params = {"prefix": prefix, "limit": "1000"}
+        if cursor:
+            params["cursor"] = cursor
+        url = f"{BLOB_API_BASE}/?{urllib.parse.urlencode(params)}"
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {BLOB_TOKEN}"})
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            print(f"  ⚠️  Blob list failed: {e}")
+            break
+        for blob in data.get("blobs", []):
+            # Skip "folder" placeholders (pathnames ending in '/').
+            if blob.get("url") and not blob.get("pathname", "").endswith("/"):
+                urls.append(blob["url"])
+        if data.get("hasMore") and data.get("cursor"):
+            cursor = data["cursor"]
+        else:
+            break
+    return urls
+
+
+def _download_records(url: str) -> list:
+    """Download and parse one blob; tolerates a single JSON object or JSONL."""
+    try:
+        with urllib.request.urlopen(url, timeout=15) as resp:
+            content = resp.read().decode("utf-8").strip()
+    except Exception:
+        return []
+    out = []
+    for line in content.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            out.append(json.loads(line))
+        except Exception:
+            pass
+    return out
+
+
 def _fetch_annotations() -> list:
-    """Fetch all annotation JSONL files from Vercel Blob."""
-    # Try the summary roll-up first
+    """Fetch all annotations from Vercel Blob.
+
+    Primary path: enumerate the individual per-submission JSON blobs written by
+    the /api/annotate/submit route. Fallback: the legacy summary / daily JSONL
+    rollups (kept so historical data or a tokenless run still works).
+    """
+    # Primary: list + download the individual annotation blobs.
+    blob_urls = _list_blob_urls(ANNOTATIONS_PREFIX)
+    if blob_urls:
+        records: list = []
+        with ThreadPoolExecutor(max_workers=16) as pool:
+            for chunk in pool.map(_download_records, blob_urls):
+                records.extend(chunk)
+        if records:
+            print(f"  ✅ Fetched {len(records)} annotations from {len(blob_urls)} individual blobs")
+            return records
+
+    # Fallback: legacy summary roll-up.
     for suffix in ["annotations_summary.jsonl", "annotations/summary.jsonl"]:
         url = f"{BLOB_BASE}/{suffix}"
         try:
@@ -39,7 +115,7 @@ def _fetch_annotations() -> list:
         except Exception:
             pass
 
-    # Try daily files — enumerate known date range
+    # Fallback: legacy daily files — enumerate known date range.
     from datetime import datetime, timedelta
     records = []
     day = datetime(2026, 1, 1)

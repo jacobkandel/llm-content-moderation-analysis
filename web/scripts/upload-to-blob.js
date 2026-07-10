@@ -83,7 +83,11 @@ async function upload(data) {
     try {
         const { url } = await put('audit_data.json', JSON.stringify(data), {
             access: 'public',
-            addRandomSuffix: false // Overwrite existing file
+            addRandomSuffix: false,
+            // @vercel/blob v2 defaults allowOverwrite to false and THROWS if the
+            // blob already exists. Without this flag every re-run after the first
+            // upload fails, so the data served by /api/v1/audit could never refresh.
+            allowOverwrite: true,
         });
         console.log(`Successfully uploaded to: ${url}`);
     } catch (error) {

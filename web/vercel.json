@@ -29,23 +29,6 @@
                     "value": "public, max-age=86400, stale-while-revalidate=86400"
                 }
             ]
-        },
-        {
-            "source": "/(.*).csv.gz",
-            "headers": [
-                {
-                    "key": "Content-Encoding",
-                    "value": "gzip"
-                },
-                {
-                    "key": "Content-Type",
-                    "value": "text/csv"
-                },
-                {
-                    "key": "Cache-Control",
-                    "value": "public, max-age=3600, must-revalidate"
-                }
-            ]
         }
     ]
 }

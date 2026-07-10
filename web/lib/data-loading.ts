@@ -46,9 +46,12 @@ export async function fetchAuditData(
     return res.json();
   }
 
-  // Fetch gzipped CSV
-  const res = await fetch('/audit_log.csv.gz');
-  if (!res.ok) throw new Error(`Failed to load audit log: ${res.status}`);
+  // Fetch gzipped CSV. In lite mode fetch the pre-stripped lite file (much smaller —
+  // no prompt/response text) instead of downloading the full CSV only to discard
+  // the text columns client-side.
+  const csvUrl = lite ? '/audit_log_lite.csv.gz' : '/audit_log.csv.gz';
+  const res = await fetch(csvUrl);
+  if (!res.ok) throw new Error(`Failed to load audit log (${csvUrl}): ${res.status}`);
 
   const buffer = await res.arrayBuffer();
   let csvText = '';
