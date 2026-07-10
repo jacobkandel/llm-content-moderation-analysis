@@ -59,14 +59,8 @@ export const metadata: Metadata = {
     description: 'Open-source benchmark tracking censorship and content moderation bias across 30+ LLMs. Biweekly automated audits with statistical significance testing.',
     url: 'https://moderationbias.com',
     siteName: 'Moderation Bias',
-    images: [
-      {
-        url: '/assets/heatmap.png',
-        width: 1024,
-        height: 1024,
-        alt: 'LLM Bias Heatmap',
-      },
-    ],
+    // Image is provided by the file-based OG route (app/opengraph-image.tsx, a proper
+    // 1200x630 card) and per-page opengraph-image.tsx files — no static override here.
     locale: 'en_US',
     type: 'website',
   },
@@ -75,7 +69,6 @@ export const metadata: Metadata = {
     creator: '@jmk9494',
     title: 'LLM Censorship Benchmark — ModerationBias.com',
     description: 'Open-source benchmark tracking censorship bias across 30+ LLMs. Live biweekly audits with statistical significance testing.',
-    images: [{ url: '/assets/heatmap.png', alt: 'ModerationBias Heatmap' }],
   },
   robots: {
     index: true,
