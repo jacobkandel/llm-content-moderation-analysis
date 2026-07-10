@@ -29,11 +29,17 @@ if [ -f src/analysis/bias.py ]; then
     $PYTHON_CMD src/analysis/bias.py || echo "⚠️  bias.py failed — skipping."
 fi
 
-# 5. Political Compass Chart (real analysis — MOCK mode removed; it shipped random
-#    numbers as real measurements. Requires OPENROUTER_API_KEY. Non-fatal so the rest
-#    of the report pipeline still completes; the chart stays hidden until valid data exists.)
-echo "🧭 Generating Political Compass Chart..."
-$PYTHON_CMD src/analysis/political_compass.py || echo "⚠️  Political compass analysis failed — skipping."
+# 5. Political Compass Chart — DISABLED by default.
+#    The chart is hidden on the site (COMPASS_ENABLED=false, pending a construct
+#    rework), and the real analysis makes ~500 live API calls, so we skip it to
+#    avoid wasted cost/time. Re-enable with RUN_POLITICAL_COMPASS=1 once the
+#    measure is validated and the frontend flag is turned back on.
+if [ "$RUN_POLITICAL_COMPASS" = "1" ]; then
+    echo "🧭 Generating Political Compass Chart..."
+    $PYTHON_CMD src/analysis/political_compass.py || echo "⚠️  Political compass analysis failed — skipping."
+else
+    echo "🧭 Political Compass generation skipped (RUN_POLITICAL_COMPASS!=1; chart is hidden)."
+fi
 
 # 6. Paternalism Audit Chart
 echo "👶 Generating Paternalism Audit Chart..."
