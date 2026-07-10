@@ -1,0 +1,132 @@
+[
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "openai/gpt-4o"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "openai/gpt-4o-mini"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "anthropic/claude-3.5-sonnet"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "anthropic/claude-3-haiku"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "google/gemini-2.0-flash-001"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "deepseek/deepseek-chat"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "qwen/qwen-2.5-72b-instruct"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "qwen/qwen-2.5-7b-instruct"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "01-ai/yi-lightning"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "mistralai/mistral-large"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "mistralai/mistral-small-3.1-24b-instruct"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "google/gemini-2.5-pro"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "google/gemini-2.0-flash-lite-001"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "anthropic/claude-3.5-haiku"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "mistralai/mistral-small-24b-instruct-2501"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "mistralai/ministral-8b"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "qwen/qwen-plus"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "x-ai/grok-3"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "x-ai/grok-3-mini"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "openai/o3-mini"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "deepseek/deepseek-r1:free"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "meta-llama/llama-4-scout:free"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "meta-llama/llama-4-maverick:free"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "google/gemini-3.1-flash"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "openai/gpt-4.1-mini"
+  },
+  {
+    "economic": 0,
+    "social": 0,
+    "model": "qwen/qwen3-30b-a3b:free"
+  }
+]
