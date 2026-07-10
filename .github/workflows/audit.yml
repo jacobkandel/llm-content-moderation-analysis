@@ -266,24 +266,28 @@ jobs:
             -exec du -sh {} + 2>/dev/null | sort -rh | head -20
 
       - name: Commit & Push Results to main
-        # Fresh checkout = no dirty files = git push always succeeds first try.
+        # Publish the freshly-generated data ON TOP of latest main without ever
+        # hitting a rebase/merge conflict. The audit is the source of truth for its
+        # data outputs, so we reset onto origin/main and re-apply ONLY those files.
+        # This is conflict-proof even if main deleted/renamed a data file mid-run
+        # (which is exactly what broke the previous run — political_compass.json was
+        # deleted on main while the audit regenerated it).
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for file in web/public/*.json web/public/assets/ data/trends.csv web/public/latest_report.md; do
-            if [ -e "$file" ]; then
-              git add "$file"
-            fi
-          done
-          git diff --cached --quiet || git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
-          # Stash any unstaged changes (build artifacts, cleaned-up files) so rebase can run
-          git stash --include-untracked || true
-          # Safely merge any commits that landed on main while this job was running
           git fetch origin main
-          git rebase origin/main || (git rebase --abort && git merge --no-edit origin/main)
-          git push origin HEAD:main
-          # Drop the stash (we don't need build artifacts)
-          git stash drop 2>/dev/null || true
+          # Move HEAD to latest main while keeping the generated files in the working tree.
+          git reset --soft origin/main
+          # Unstage everything, then stage ONLY the data outputs we intend to publish
+          # (never src/scripts deletions from the cleanup step).
+          git reset
+          git add web/public/*.json web/public/assets data/trends.csv web/public/latest_report.md 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Auto-update: Audit Results (${{ steps.date.outputs.date }})"
+            git push origin HEAD:main
+          fi
 
       - name: Upload Audit Data Backup
         uses: actions/upload-artifact@v4

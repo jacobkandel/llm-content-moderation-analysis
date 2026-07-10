@@ -23,9 +23,11 @@ $PYTHON_CMD src/analysis/significance.py
 echo "📈 Analyzing Model Drift over time..."
 $PYTHON_CMD src/analysis/drift.py
 
-# 4. Bias Compass Analysis
-echo "⚖️ Analyzing Refusal Bias (requires API key)..."
-$PYTHON_CMD src/analysis/bias.py
+# 4. Bias Compass Analysis (optional — script may not be present in all checkouts)
+if [ -f src/analysis/bias.py ]; then
+    echo "⚖️ Analyzing Refusal Bias (requires API key)..."
+    $PYTHON_CMD src/analysis/bias.py || echo "⚠️  bias.py failed — skipping."
+fi
 
 # 5. Political Compass Chart (real analysis — MOCK mode removed; it shipped random
 #    numbers as real measurements. Requires OPENROUTER_API_KEY. Non-fatal so the rest
@@ -41,9 +43,11 @@ $PYTHON_CMD src/analysis/plot_paternalism.py
 echo "📉 Generating Alignment Tax Chart..."
 $PYTHON_CMD scripts/visuals/plot_pareto.py
 
-# 8. Evidence Locker Data (Traces JSON)
-echo "📂 Generating Evidence Locker Data (traces.json)..."
-$PYTHON_CMD scripts/create_sample_traces.py
+# 8. Evidence Locker Data (Traces JSON) — optional
+if [ -f scripts/create_sample_traces.py ]; then
+    echo "📂 Generating Evidence Locker Data (traces.json)..."
+    $PYTHON_CMD scripts/create_sample_traces.py || echo "⚠️  create_sample_traces.py failed — skipping."
+fi
 
 # 9. AI Analyst & Semantic Clusters
 if [ "$SKIP_LLM_ANALYSIS" != "true" ]; then
