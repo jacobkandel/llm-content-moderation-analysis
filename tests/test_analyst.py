@@ -25,12 +25,14 @@ def test_generate_report_success(mock_openai_class):
     # 2. Provide a minimal-but-valid audit frame (model / verdict / prompt_id are
     #    the only columns the stats pipeline requires; two models with a
     #    disagreement exercise the kappa + pivot paths).
+    # Use real model IDs from data/models.json — the analyst filters per-model stats
+    # to the canonical model set, so synthetic IDs would be dropped and leave no data.
     df = pd.DataFrame(
         [
-            {"model": "gpt-4", "verdict": "ALLOWED", "prompt_id": "p1"},
-            {"model": "gpt-4", "verdict": "REMOVED", "prompt_id": "p2"},
-            {"model": "claude-3", "verdict": "ALLOWED", "prompt_id": "p1"},
-            {"model": "claude-3", "verdict": "ALLOWED", "prompt_id": "p2"},
+            {"model": "openai/gpt-4o", "verdict": "ALLOWED", "prompt_id": "p1"},
+            {"model": "openai/gpt-4o", "verdict": "REMOVED", "prompt_id": "p2"},
+            {"model": "anthropic/claude-3.5-sonnet", "verdict": "ALLOWED", "prompt_id": "p1"},
+            {"model": "anthropic/claude-3.5-sonnet", "verdict": "ALLOWED", "prompt_id": "p2"},
         ]
     )
 
