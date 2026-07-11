@@ -5,6 +5,13 @@ Verdict classification is performed by an LLM classifier (the "judge"). The judg
 
 **Provenance caveat for the currently-published data:** those results were classified by `google/gemini-2.0-flash-001`, which was itself a subject at the time, so `gemini-2.0-flash` results specifically carry the self-preference confound. The held-out-judge configuration takes effect on the next full audit re-run, which will re-classify responses with an out-of-pool judge; a human-adjudicated validation subset (via the public annotation interface) remains the longer-term cross-check.
 
+**Quantifying judge dependence.** Two checks bound how much the results hinge on the judge, rather than merely asserting independence. (1) *Criterion validity* — Cohen's κ between the human-annotation consensus and each model's verdict, reported at [/analysis/iaa](https://moderationbias.com/analysis/iaa) (METHODOLOGY §3.8). (2) *Multi-judge robustness* — `scripts/judge_robustness.py` re-judges a stratified sample with several alternative judge models and reports per-judge agreement, Fleiss' κ across judges, and the **verdict flip rate** (the share of items where the judges do not unanimously agree). It is not part of the default pipeline because it makes live API calls; run it on demand:
+
+```bash
+OPENROUTER_API_KEY=... PYTHONPATH=. python scripts/judge_robustness.py \
+  --sample 200 --judges anthropic/claude-3.5-haiku,google/gemini-flash-1.5,meta-llama/llama-3.1-70b-instruct
+```
+
 ## 2. Stochasticity
 LLM outputs are inherently non-deterministic. Although we conducted audits with `N=5` variants per prompt and set `temperature=0.0` for deterministic reproducibility, edge cases of transient refusals may persist due to non-determinism in model serving infrastructure.
 
