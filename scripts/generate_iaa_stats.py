@@ -271,10 +271,13 @@ def compute_human_alignment(records: list) -> dict:
             human_votes[iid][verdict] += 1
 
     human_consensus: dict = {}
+    multi_annotator_items: set = set()  # consensus items backed by >=2 annotators
     for iid, counts in human_votes.items():
         if counts["ALLOWED"] == counts["REMOVED"]:
             continue  # tie — no consensus, drop
         human_consensus[iid] = "REMOVED" if counts["REMOVED"] > counts["ALLOWED"] else "ALLOWED"
+        if (counts["ALLOWED"] + counts["REMOVED"]) >= 2:
+            multi_annotator_items.add(iid)
 
     if not human_consensus:
         return {}
@@ -356,16 +359,22 @@ def compute_human_alignment(records: list) -> dict:
             "percentAgreement": round(_percent_agreement(overall_human, overall_model), 1),
         }
 
+    multi_annotator_consensus = len(multi_annotator_items)
     result = {
         "humanConsensusItems": len(human_consensus),
+        "multiAnnotatorConsensusItems": multi_annotator_consensus,
         "modelsCompared": len(per_model),
         "overall": overall,
         "perModel": per_model,
     }
-    if len(human_consensus) < 30:
+    # Honesty gate: most "consensus" items may rest on a SINGLE annotator (no true
+    # agreement). Flag the figures as preliminary based on how many consensus items
+    # actually have >=2 annotators backing them, not the inflated total.
+    if multi_annotator_consensus < 30:
         result["note"] = (
-            "Preliminary — based on a small human-annotation sample. "
-            "Figures stabilize as annotation volume grows."
+            f"Preliminary — only {multi_annotator_consensus} of {len(human_consensus)} "
+            "consensus prompts are backed by 2+ annotators; the rest rest on a single "
+            "label. Alignment figures stabilize as multi-annotator coverage grows."
         )
     return result
 

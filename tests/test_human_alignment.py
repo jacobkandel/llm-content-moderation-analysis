@@ -121,6 +121,22 @@ class TestHumanAlignment:
         mod = mod_with_csv(_consensus_matching_rows("good/model"))
         assert mod.compute_human_alignment([]) == {}
 
+    def test_single_annotator_consensus_flagged(self, mod_with_csv):
+        # 2 items backed by 2 annotators, 1 item by a single annotator.
+        records = [
+            {"itemId": "P1", "annotatorId": "a1", "verdict": "REMOVED"},
+            {"itemId": "P1", "annotatorId": "a2", "verdict": "REMOVED"},
+            {"itemId": "P2", "annotatorId": "a1", "verdict": "ALLOWED"},
+            {"itemId": "P2", "annotatorId": "a2", "verdict": "ALLOWED"},
+            {"itemId": "P3", "annotatorId": "a1", "verdict": "REMOVED"},  # single
+        ]
+        mod = mod_with_csv(_consensus_matching_rows("good/model"))
+        out = mod.compute_human_alignment(records)
+        assert out["humanConsensusItems"] == 3
+        assert out["multiAnnotatorConsensusItems"] == 2
+        # Note is driven by multi-annotator backing, and reports both counts.
+        assert "2 of 3" in out["note"]
+
     def test_variant_suffix_matches_base_prompt(self, mod_with_csv):
         # Audit rows carrying a -V<n> repetition suffix should map to the base id.
         rows = [{"prompt_id": p + "-V1", "model": "var/model", "verdict": "REMOVED"} for p in ("P1", "P2", "P3")] + \

@@ -47,6 +47,7 @@ interface IAAStats {
     }>;
     humanAlignment?: {
         humanConsensusItems: number;
+        multiAnnotatorConsensusItems?: number;
         modelsCompared?: number;
         overall?: {
             n: number;
