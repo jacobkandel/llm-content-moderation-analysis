@@ -64,5 +64,9 @@
   },
   "optionalDependencies": {
     "@next/swc-linux-x64-gnu": "^16.1.2"
+  },
+  "overrides": {
+    "serialize-javascript": ">=7.0.5",
+    "postcss": "$postcss"
   }
 }
