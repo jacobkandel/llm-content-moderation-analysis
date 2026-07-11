@@ -1,6 +1,6 @@
 # Methodology
 
-This document describes the experimental design, data collection, and statistical methods used in the Moderation Bias benchmark. For known limitations, see [LIMITATIONS.md](LIMITATIONS.md).
+This document describes the experimental design, data collection, and statistical methods used in the Moderation Bias benchmark. For the pre-specified hypotheses, outcomes, and exclusion rules, see [docs/ANALYSIS_PLAN.md](docs/ANALYSIS_PLAN.md); for known limitations, [LIMITATIONS.md](LIMITATIONS.md); for consent, privacy, and dual-use, [docs/ETHICS.md](docs/ETHICS.md).
 
 ---
 

@@ -145,6 +145,20 @@ See [CITATION.cff](CITATION.cff) for structured citation metadata.
 
 ---
 
+## Documentation
+
+| Document | What it covers |
+| --- | --- |
+| [METHODOLOGY.md](METHODOLOGY.md) | How the data is produced: corpus, judge pipeline, statistical methods. |
+| [docs/ANALYSIS_PLAN.md](docs/ANALYSIS_PLAN.md) | Pre-specified hypotheses, outcomes, tests, and inclusion/exclusion rules. |
+| [LIMITATIONS.md](LIMITATIONS.md) | What the results cannot support; known confounds. |
+| [docs/ETHICS.md](docs/ETHICS.md) | Consent model, privacy, sensitive content, dual-use, responsible use. |
+| [DATASHEET.md](DATASHEET.md) | Dataset motivation, composition, collection, distribution, maintenance. |
+| [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md) | Field-by-field schema of the audit log. |
+| [huggingface/DATASET_CARD.md](huggingface/DATASET_CARD.md) | The Hugging Face dataset card. |
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
