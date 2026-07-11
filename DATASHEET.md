@@ -35,6 +35,14 @@ Yes, to generate the "Alignment Tax" Pareto Frontier, "Semantic Clusters", and l
 *   Do NOT use this dataset to train "Jailbreak" models.
 *   Do NOT use to fine-tune models to bypass safety filters indiscriminately.
 
+## Distribution
+**How is the dataset accessed?**
+- **Hugging Face Hub:** [`jmk9494/moderation-bias-benchmark`](https://huggingface.co/datasets/jmk9494/moderation-bias-benchmark) — the consolidated audit log as Parquet (`datasets.load_dataset("jmk9494/moderation-bias-benchmark")`), documented by [`huggingface/DATASET_CARD.md`](huggingface/DATASET_CARD.md) and refreshed each audit run.
+- **Site download:** the full and lite CSVs at [moderationbias.com/data](https://moderationbias.com/data).
+- **Archival DOI:** [10.5281/zenodo.20262255](https://doi.org/10.5281/zenodo.20262255).
+
+Field-level documentation lives in [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md). Licensed **MIT**.
+
 ## Maintenance
 **How will the dataset be updated?**
 Automated audits run biweekly (1st and 15th of each month) to evaluate model drift, caching prior responses when models do not update.
