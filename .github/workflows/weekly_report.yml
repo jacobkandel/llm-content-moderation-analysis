@@ -1,9 +1,9 @@
-name: Weekly AI Analyst Report
+name: Weekly AI Analyst Report + IAA Refresh
 
 on:
   schedule:
     - cron: '0 6 * * 1'  # Every Monday at 6am UTC
-  workflow_dispatch:       # Allow manual trigger
+  workflow_dispatch:       # Allow manual trigger (refresh IAA / human-alignment on demand)
 
 permissions:
   contents: write
@@ -35,6 +35,17 @@ jobs:
           gzip -df web/public/audit_log.csv.gz
           echo "Audit log downloaded: $(wc -l < web/public/audit_log.csv) rows"
 
+      # Refresh IAA + human ↔ model alignment from the latest annotations. Cheap
+      # (stdlib only, no LLM calls) and independent of the analyst step, so it runs
+      # first and a flaky analyst run can't block the alignment refresh. Best-effort:
+      # a failure here must not fail the weekly report.
+      - name: Refresh IAA + Human-Alignment Stats
+        continue-on-error: true
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+          PYTHONPATH: .
+        run: python scripts/generate_iaa_stats.py
+
       - name: Generate AI Analyst Report
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -51,9 +62,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # iaa_stats.json may be absent if the refresh step failed; add it only if present.
           git add web/public/latest_report.md
+          git add web/public/iaa_stats.json 2>/dev/null || true
           git diff --cached --quiet && echo "No changes to commit" || (
-            git commit -m "Auto-update: Weekly AI Analyst Report $(date -u +%Y-%m-%d)"
+            git commit -m "Auto-update: Weekly AI Analyst Report + IAA $(date -u +%Y-%m-%d)"
             git pull --rebase origin main
             git push origin main
           )
