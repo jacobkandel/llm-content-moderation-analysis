@@ -11,12 +11,20 @@ Can be run standalone or called from compress_data.py / generate_all_reports.sh.
 import json
 import os
 import sys
+import csv
+import gzip
 import urllib.request
 import urllib.error
 import urllib.parse
-from collections import defaultdict
+from collections import defaultdict, Counter
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
+
+# Canonical refusal verdicts (kept in sync with src/refusal.py). Duplicated here
+# because this script must run standalone without importing the package.
+_REFUSAL_VERDICTS = {"REMOVED", "REFUSAL", "POLICY_REFUSAL", "META_REFUSAL", "BLOCKED", "Hard Refusal", "unsafe"}
+_NON_VERDICTS = {"ERROR", "", "UNKNOWN"}
+_AUDIT_CSV_PATHS = ["web/public/audit_log.csv", "web/public/audit_log.csv.gz"]
 
 BLOB_BASE = os.environ.get(
     "BLOB_BASE_URL",
@@ -219,6 +227,149 @@ def _interpret_kappa(k: float) -> str:
     else:          return "Almost Perfect"
 
 
+def _base_prompt_id(pid: str) -> str:
+    """Normalize a prompt/item id for cross-source matching.
+
+    Audit `prompt_id` and annotation `itemId` share the same scheme
+    (e.g. ``HS-22``, ``B-02-H``). Strip a trailing ``-V<n>`` variant/repetition
+    suffix if one is present so a variant still matches its base prompt.
+    """
+    pid = (pid or "").strip()
+    parts = pid.rsplit("-V", 1)
+    if len(parts) == 2 and parts[1].isdigit():
+        return parts[0]
+    return pid
+
+
+def _find_audit_csv() -> Optional[str]:
+    for p in _AUDIT_CSV_PATHS:
+        if os.path.exists(p):
+            return p
+    return None
+
+
+def compute_human_alignment(records: list) -> dict:
+    """Agreement between the human-annotation consensus and each model's verdict.
+
+    For every prompt that has human annotations, we take the majority human
+    verdict (ALLOWED / REMOVED; ties are dropped) as ground truth, then compare
+    it against each model's binarized verdict on the same prompt from the audit
+    log. We report Cohen's kappa and raw percent agreement per model, plus an
+    "overall" comparison of the human consensus against the models' majority
+    verdict. This is the alignment layer that lets the benchmark be validated
+    against real human judgement rather than an LLM judge alone.
+
+    Returns ``{}`` when there is no usable overlap (e.g. no annotations yet, or
+    the audit log is not present in this checkout).
+    """
+    # 1. Human consensus verdict per (base) prompt id.
+    human_votes: dict = defaultdict(Counter)
+    for r in records:
+        verdict = (r.get("verdict") or "").upper()
+        iid = _base_prompt_id(str(r.get("itemId", "")))
+        if verdict in ("ALLOWED", "REMOVED") and iid:
+            human_votes[iid][verdict] += 1
+
+    human_consensus: dict = {}
+    for iid, counts in human_votes.items():
+        if counts["ALLOWED"] == counts["REMOVED"]:
+            continue  # tie — no consensus, drop
+        human_consensus[iid] = "REMOVED" if counts["REMOVED"] > counts["ALLOWED"] else "ALLOWED"
+
+    if not human_consensus:
+        return {}
+
+    csv_path = _find_audit_csv()
+    if not csv_path:
+        return {
+            "humanConsensusItems": len(human_consensus),
+            "note": "Audit log not available in this checkout; alignment not computed.",
+        }
+
+    # 2. Per-(model, prompt) binarized verdicts from the audit log. Only prompts
+    #    that a human annotated are retained, to keep the scan cheap.
+    #    model_item[model][iid] = list of 1 (refusal) / 0 (allowed) across reps.
+    model_item: dict = defaultdict(lambda: defaultdict(list))
+    opener = gzip.open if csv_path.endswith(".gz") else open
+    try:
+        with opener(csv_path, "rt", encoding="utf-8", newline="") as f:
+            for row in csv.DictReader(f):
+                verdict = (row.get("verdict") or "").strip()
+                if verdict in _NON_VERDICTS:
+                    continue  # ERROR / blank — unscorable, exclude from denominator
+                iid = _base_prompt_id(str(row.get("prompt_id", "")))
+                if iid in human_consensus:
+                    model = (row.get("model") or "").strip()
+                    if model:
+                        model_item[model][iid].append(1 if verdict in _REFUSAL_VERDICTS else 0)
+    except OSError:
+        return {
+            "humanConsensusItems": len(human_consensus),
+            "note": "Audit log could not be read; alignment not computed.",
+        }
+
+    MIN_OVERLAP = 5  # need at least this many shared prompts for a stable kappa
+
+    # 3. Per-model agreement vs human consensus.
+    per_model = []
+    for model, items in model_item.items():
+        human_labels, model_labels = [], []
+        for iid, votes in items.items():
+            if not votes:
+                continue
+            model_verdict = "REMOVED" if (sum(votes) / len(votes)) >= 0.5 else "ALLOWED"
+            human_labels.append(human_consensus[iid])
+            model_labels.append(model_verdict)
+        if len(human_labels) < MIN_OVERLAP:
+            continue
+        kappa = _cohens_kappa(human_labels, model_labels)
+        per_model.append({
+            "model": model,
+            "n": len(human_labels),
+            "kappa": round(kappa, 4),
+            "kappaInterpretation": _interpret_kappa(kappa),
+            "percentAgreement": round(_percent_agreement(human_labels, model_labels), 1),
+        })
+    per_model.sort(key=lambda m: m["kappa"], reverse=True)
+
+    # 4. Overall: human consensus vs the models' majority verdict per prompt.
+    overall_human, overall_model = [], []
+    for iid, human_verdict in human_consensus.items():
+        model_verdicts = []
+        for model in model_item:
+            votes = model_item[model].get(iid)
+            if votes:
+                model_verdicts.append(1 if (sum(votes) / len(votes)) >= 0.5 else 0)
+        if not model_verdicts:
+            continue
+        majority = "REMOVED" if (sum(model_verdicts) / len(model_verdicts)) >= 0.5 else "ALLOWED"
+        overall_human.append(human_verdict)
+        overall_model.append(majority)
+
+    overall = {}
+    if len(overall_human) >= MIN_OVERLAP:
+        kappa = _cohens_kappa(overall_human, overall_model)
+        overall = {
+            "n": len(overall_human),
+            "kappa": round(kappa, 4),
+            "kappaInterpretation": _interpret_kappa(kappa),
+            "percentAgreement": round(_percent_agreement(overall_human, overall_model), 1),
+        }
+
+    result = {
+        "humanConsensusItems": len(human_consensus),
+        "modelsCompared": len(per_model),
+        "overall": overall,
+        "perModel": per_model,
+    }
+    if len(human_consensus) < 30:
+        result["note"] = (
+            "Preliminary — based on a small human-annotation sample. "
+            "Figures stabilize as annotation volume grows."
+        )
+    return result
+
+
 def generate_iaa_json(records: Optional[list] = None) -> dict:
     if records is None:
         records = _fetch_annotations()
@@ -366,6 +517,7 @@ def generate_iaa_json(records: Optional[list] = None) -> dict:
         "categoryStats": category_stats,
         "categoryAgreement": category_agreement,
         "annotatorStats": annotator_stats,
+        "humanAlignment": compute_human_alignment(records),
     }
 
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)

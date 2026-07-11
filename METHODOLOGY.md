@@ -115,6 +115,14 @@ The Political Compass analysis uses a curated set of politically contentious sta
 - **Model vs. Verdict (V = 0.66):** The choice of LLM is a *medium-large* predictor of whether a prompt is refused, confirming that inter-model policy differences are real and substantial
 - **Category vs. Verdict (V = 0.20):** Prompt topic is a *small* predictor — models disagree more on *which* topics to restrict than on the topic itself, suggesting policy idiosyncrasies rather than rational content-based rules
 
+### 3.8 Criterion Validity: Human–Model Alignment
+To validate the benchmark against human judgement rather than the LLM judge alone, we compute agreement between the **human-annotation consensus** and each model's own moderation verdict on the same prompts:
+- **Human consensus** for a prompt is the majority ALLOW/REMOVE verdict across all human annotators of that prompt; ties are dropped (no consensus).
+- For each model we binarize its verdict per prompt using the canonical refusal taxonomy (`src/refusal.py`), collapsing repetitions/variants to a majority verdict, and report **Cohen's Kappa** and raw percent agreement against the human consensus over the shared prompt set.
+- An **overall** figure compares the human consensus against the models' majority verdict per prompt.
+- A minimum overlap of **n ≥ 5** shared prompts is required before a per-model score is reported; results are flagged *preliminary* while the annotated sample is small (< 30 consensus items) and recompute automatically as annotation volume grows.
+- Computed in `scripts/generate_iaa_stats.py` (`compute_human_alignment`) and surfaced on the [IAA page](https://moderationbias.com/analysis/iaa). This is a **criterion-validity** check: a model whose refusals track human consensus (high κ) is moderating the way people do, independent of the automated judge.
+
 ---
 
 ## 4. Reproducibility

@@ -45,6 +45,32 @@ interface IAAStats {
         refusalRate: number;
         avgTimeMs: number;
     }>;
+    humanAlignment?: {
+        humanConsensusItems: number;
+        modelsCompared?: number;
+        overall?: {
+            n: number;
+            kappa: number;
+            kappaInterpretation: string;
+            percentAgreement: number;
+        };
+        perModel?: Array<{
+            model: string;
+            n: number;
+            kappa: number;
+            kappaInterpretation: string;
+            percentAgreement: number;
+        }>;
+        note?: string;
+    };
+}
+
+function kappaChipClass(kappa: number): string {
+    return kappa >= 0.8 ? 'bg-emerald-500/10 text-emerald-400' :
+           kappa >= 0.6 ? 'bg-green-500/10 text-green-400' :
+           kappa >= 0.4 ? 'bg-yellow-500/10 text-yellow-400' :
+           kappa >= 0.2 ? 'bg-orange-500/10 text-orange-400' :
+           'bg-red-500/10 text-red-400';
 }
 
 function AlphaBadge({ value, interpretation }: { value: number | null; interpretation: string }) {
@@ -195,6 +221,87 @@ export default function IAAPage() {
                         <p>α ≥ 0.400 = Moderate &nbsp;|&nbsp; α &lt; 0.400 = Unreliable</p>
                     </div>
                 </div>
+            </div>
+
+            {/* Human ↔ Model Alignment */}
+            <div className="bg-card p-6 rounded-2xl border border-border">
+                <h3 className="text-lg font-bold text-foreground mb-1">Human ↔ Model Alignment</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                    How closely each model&apos;s own moderation verdict matches the <span className="text-foreground font-medium">human-annotation consensus</span> on
+                    the same prompts. This validates the benchmark against real human judgement rather than an LLM judge alone —
+                    a high κ means the model moderates the way people do.
+                </p>
+                {(() => {
+                    const ha = data.humanAlignment;
+                    const perModel = ha?.perModel ?? [];
+                    const hasData = ha && (perModel.length > 0 || ha.overall);
+                    if (!hasData) {
+                        return (
+                            <div className="rounded-xl border border-dashed border-border bg-muted/10 p-6 text-center">
+                                <Users className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
+                                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                                    Alignment scores appear once enough prompts have been annotated by humans and matched to
+                                    model verdicts. They recompute automatically each pipeline run as annotation volume grows.
+                                    Contribute on the <a href="/annotate" className="text-brand underline">Annotate</a> page to build the sample.
+                                </p>
+                            </div>
+                        );
+                    }
+                    return (
+                        <div className="space-y-5">
+                            {ha!.overall && (
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-xl bg-muted/20 border border-border p-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`text-2xl font-bold font-mono px-3 py-1.5 rounded-lg ${kappaChipClass(ha!.overall.kappa)}`}>
+                                            κ = {ha!.overall.kappa.toFixed(3)}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">{ha!.overall.kappaInterpretation}</span>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground space-y-1">
+                                        <p><span className="text-foreground font-medium">Consensus vs. model majority:</span> {ha!.overall.percentAgreement}% raw agreement across {ha!.overall.n} shared prompts.</p>
+                                        <p>Human consensus is the majority ALLOW/REMOVE verdict per prompt; ties are dropped.</p>
+                                    </div>
+                                </div>
+                            )}
+                            {perModel.length > 0 && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b border-border">
+                                                <th className="text-left py-2 px-3 text-muted-foreground font-medium">Model</th>
+                                                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Shared</th>
+                                                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Agreement</th>
+                                                <th className="text-right py-2 px-3 text-muted-foreground font-medium">κ vs. humans</th>
+                                                <th className="text-left py-2 px-3 text-muted-foreground font-medium">Level</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {perModel.map((row) => (
+                                                <tr key={row.model} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                                                    <td className="py-2 px-3 font-mono text-xs">{row.model}</td>
+                                                    <td className="py-2 px-3 text-right">{row.n}</td>
+                                                    <td className="py-2 px-3 text-right">{row.percentAgreement}%</td>
+                                                    <td className="py-2 px-3 text-right font-mono font-bold">{row.kappa.toFixed(3)}</td>
+                                                    <td className="py-2 px-3">
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${kappaChipClass(row.kappa)}`}>
+                                                            {row.kappaInterpretation}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            {ha!.note && (
+                                <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                    <AlertTriangle className="h-3.5 w-3.5 text-yellow-400 shrink-0 mt-0.5" />
+                                    {ha!.note}
+                                </p>
+                            )}
+                        </div>
+                    );
+                })()}
             </div>
 
             {/* Progress Toward Goal */}
