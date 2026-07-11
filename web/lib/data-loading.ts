@@ -7,6 +7,8 @@
  */
 
 import Papa from 'papaparse';
+import { auditCost, auditTimestamp, decompressCsv, parseFullCsvText } from './csv-parse';
+import type { CsvWorkerRequest, CsvWorkerResponse } from './csv-parse';
 
 /**
  * Loosely-typed value from one of the pre-computed JSON datasets (drift,
@@ -57,28 +59,16 @@ export async function fetchAuditData(
   if (!res.ok) throw new Error(`Failed to load audit log (${csvUrl}): ${res.status}`);
 
   const buffer = await res.arrayBuffer();
-  let csvText = '';
 
-  const view = new Uint8Array(buffer);
-  // Check for gzip magic bytes (1F 8B)
-  if (view.length >= 2 && view[0] === 0x1F && view[1] === 0x8B) {
-    const ds = new DecompressionStream('gzip');
-    const decompressedStream = new Response(buffer).body!.pipeThrough(ds);
-    const reader = decompressedStream.getReader();
-
-    const chunks: Uint8Array[] = [];
-    let done = false;
-    while (!done) {
-      const result = await reader.read();
-      done = result.done;
-      if (result.value) chunks.push(result.value);
-    }
-    const decoder = new TextDecoder();
-    csvText = chunks.map(c => decoder.decode(c, { stream: true })).join('');
-  } else {
-    // Vercel (or the browser) already decompressed it transparently
-    csvText = new TextDecoder().decode(buffer);
+  // Full CSV (~230MB decompressed): offload decompression + parsing to a Web
+  // Worker so the main thread stays responsive while the user keeps interacting.
+  // The lite CSV (~3MB) is small enough to decompress + parse inline without
+  // noticeable jank, and staying on-thread avoids the worker's startup cost.
+  if (!lite) {
+    return parseFullCsvInWorker(buffer);
   }
+
+  const csvText = await decompressCsv(buffer);
 
   // Parse CSV with PapaParse
   const parsed = Papa.parse<Record<string, string>>(csvText, {
@@ -87,24 +77,65 @@ export async function fetchAuditData(
     dynamicTyping: false,
   });
 
-  // Map to AuditRow[]
+  // Map to AuditRow[], keeping only the lite structural columns. The lite CSV
+  // has no prompt/response text, but it does carry timestamp/cost under the raw
+  // column names (test_date/run_cost), so normalize those the same way the full
+  // path does (see auditTimestamp/auditCost).
   const rows: AuditRow[] = parsed.data.map((row) => {
-    if (lite) {
-      const liteRow: Record<string, JsonData> = {};
-      for (const key of Object.keys(row)) {
-        if (LITE_COLUMNS.has(key)) {
-          liteRow[key] = row[key];
-        }
+    const liteRow: Record<string, JsonData> = {};
+    for (const key of Object.keys(row)) {
+      if (LITE_COLUMNS.has(key)) {
+        liteRow[key] = row[key];
       }
-      liteRow.cost = liteRow.cost ? parseFloat(liteRow.cost) : 0;
-      return liteRow as AuditRow;
     }
-
-    return {
-      ...row,
-      cost: row.cost ? parseFloat(row.cost) : 0,
-    } as AuditRow;
+    liteRow.timestamp = auditTimestamp(row);
+    liteRow.cost = auditCost(row);
+    return liteRow as AuditRow;
   });
 
   return rows;
+}
+
+/**
+ * Decompress + parse the full audit-log CSV in a Web Worker so the ~230MB
+ * DecompressionStream + PapaParse work runs off the main thread. The gzipped
+ * bytes are transferred (not copied) into the worker; the parsed rows come back
+ * via structured clone.
+ *
+ * KNOWN LIMITATION: returning the full ~2.5M-row array structured-clones it back
+ * onto the main thread, and *deserializing* that many objects is itself a
+ * multi-second main-thread cost (empirically ≈ the parse it replaced). So this
+ * keeps the main thread free during decompress+parse but does NOT eliminate the
+ * end-of-load hitch. Chunked/streamed postback doesn't help either — the worker
+ * serializes and the main thread deserializes in lockstep, so the main thread
+ * never goes idle. Fully removing the freeze requires not materializing all rows
+ * on the main thread at all — i.e. doing the reduction (disagreement pairing,
+ * per-model stats) inside the worker and returning only the small result set.
+ *
+ * Falls back to on-thread parsing where `Worker` is unavailable (e.g. SSR or a
+ * test/JSDOM environment) so the function's contract holds everywhere.
+ */
+function parseFullCsvInWorker(buffer: ArrayBuffer): Promise<AuditRow[]> {
+  if (typeof Worker === 'undefined') {
+    return decompressCsv(buffer).then(parseFullCsvText);
+  }
+
+  return new Promise<AuditRow[]>((resolve, reject) => {
+    const worker = new Worker(new URL('./csv-worker.ts', import.meta.url));
+
+    worker.onmessage = (event: MessageEvent<CsvWorkerResponse>) => {
+      const { rows, error } = event.data;
+      worker.terminate();
+      if (error) reject(new Error(error));
+      else resolve(rows ?? []);
+    };
+    worker.onerror = (event) => {
+      worker.terminate();
+      reject(new Error(`CSV worker failed: ${event.message}`));
+    };
+
+    // Transfer the ArrayBuffer to avoid copying the (~26MB gzipped) bytes.
+    const request: CsvWorkerRequest = { buffer };
+    worker.postMessage(request, [buffer]);
+  });
 }

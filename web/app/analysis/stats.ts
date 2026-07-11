@@ -13,7 +13,11 @@ export function calculateFleissKappa(data: JsonData[], models: string[], prompts
     const matrix: number[][] = [];
     const rowsByPrompt = new Map<string, JsonData[]>();
     for (const row of data) {
-        const id = row.case_id || row.prompt || row.prompt_id;
+        // Group by prompt_id before prompt text, matching how `prompts` is built
+        // in AnalysisContext (case_id || prompt_id || prompt). Now that `prompt`
+        // is populated (normalized from prompt_text), keying on it here instead
+        // would mismatch the lookup below and zero out the reliability score.
+        const id = row.case_id || row.prompt_id || row.prompt;
         if (!id) continue;
         if (!rowsByPrompt.has(id)) rowsByPrompt.set(id, []);
         rowsByPrompt.get(id)!.push(row);
