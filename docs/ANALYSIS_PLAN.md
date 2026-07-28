@@ -57,10 +57,9 @@ a provider set a policy, only to measure the resulting behavior.
   refusal) vs. hard refusal.
 - **Drift:** change in a model's category refusal rates across `test_date`, conditioned
   on `model_version`.
-- **Criterion validity (human alignment):** Cohen's κ between the human-annotation
-  consensus and each model's verdict, and human-vs-judge agreement (see
-  METHODOLOGY §2.3, §3.8). Exploratory and **preliminary** until the annotated
-  sample reaches n ≥ 30 consensus items (target n ≥ 200 for publication-grade IAA).
+- **Judge robustness:** cross-judge agreement (Cohen's/Fleiss' κ) and verdict flip
+  rate from the multi-judge harness (see METHODOLOGY §2.3), quantifying how much
+  verdicts depend on the choice of LLM judge.
 - **Paternalism experiment:** effect of user-persona framing (Authority vs.
   Layperson) on refusal, holding prompt constant.
 
@@ -72,8 +71,8 @@ confirmatory cycles rather than testing pre-registered ones.
 Verdicts are assigned by an LLM-as-judge (`src/judge_config.py`, `JUDGE_MODEL`). To
 avoid self-preference bias, the judge model is **removed from the subject pool** and
 never scores its own outputs. Judge dependence is the benchmark's largest construct-
-validity risk; it is quantified (not eliminated) by the human-alignment check (§4) and
-the multi-judge robustness harness, and is disclosed in LIMITATIONS.
+validity risk; it is quantified (not eliminated) by the multi-judge robustness
+harness (§4), and is disclosed in LIMITATIONS.
 
 ## 6. Statistical Tests and Corrections (pre-specified)
 
@@ -83,8 +82,7 @@ the multi-judge robustness harness, and is disclosed in LIMITATIONS.
 | Single-proportion refusal rate | Wilson score 95% CI | — |
 | Two-model rate difference (unpaired) | Two-proportion z-test | BH-FDR |
 | Inter-model agreement | Fleiss' κ | — |
-| Human inter-annotator agreement | Krippendorff's α (nominal) | — |
-| Human ↔ model / judge agreement | Cohen's κ | — |
+| Cross-judge agreement (robustness harness) | Cohen's κ (pairwise), Fleiss' κ (overall) | — |
 | Effect size (rate gap) | Cohen's h | — |
 | Categorical association | Cramér's V (+ bootstrap CI) | — |
 
@@ -107,8 +105,6 @@ the multi-judge robustness harness, and is disclosed in LIMITATIONS.
 5. **Correlated variants:** repetitions/style variants of a seed prompt are collapsed
    to **one majority verdict per (prompt, model)** before paired tests, so correlated
    rows are not counted as independent evidence.
-6. **Consensus ties dropped:** a human-annotated prompt split evenly ALLOW/REMOVE has
-   no consensus and is excluded from criterion-validity computations.
 
 ## 8. Deviations Log
 
@@ -119,6 +115,14 @@ rationale, so readers can distinguish pre-specified from adapted analyses.
   `src/analysis/*` and `scripts/*`. The **political-compass** construct is withdrawn
   from confirmatory analysis pending revalidation and is disabled on the site (see
   METHODOLOGY §3.6); any future re-enablement will be logged here.
+- *2026-07-27* — The **human-annotation component** (crowdsourced annotation
+  interface, inter-annotator agreement, and human↔model criterion validity) is
+  **discontinued** for scope reasons: the collected sample (128 annotations, α ≈ 0.04,
+  21 multi-annotator consensus prompts) was too thin to serve as ground truth, and
+  sustaining an annotation campaign is outside the project's resources. Verdict
+  validation now rests on the multi-judge robustness harness alone, and the benchmark
+  explicitly scopes its claims to *LLM-judge consensus*, not human ground truth (see
+  LIMITATIONS §1).
 
 ## 9. Reproducibility
 

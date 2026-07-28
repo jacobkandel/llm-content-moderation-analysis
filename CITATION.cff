@@ -26,7 +26,6 @@ keywords:
   - "benchmark"
   - "red-teaming"
   - "censorship"
-  - "inter-annotator-agreement"
   - "statistical-nlp"
 license: "MIT"
 version: "2.1.0"

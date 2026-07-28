@@ -27,11 +27,11 @@ CARD_METADATA = {
     "pretty_name": "Moderation Bias: LLM Content Moderation Benchmark",
     "task_categories": ["text-classification"],
     "size_categories": ["100K<n<1M"],
-    "annotations_creators": ["machine-generated", "expert-generated"],
+    "annotations_creators": ["machine-generated"],
     "source_datasets": ["original"],
     "tags": [
         "content-moderation", "ai-safety", "llm", "bias-analysis",
-        "red-teaming", "censorship", "over-refusal", "inter-annotator-agreement",
+        "red-teaming", "censorship", "over-refusal",
     ],
 }
 

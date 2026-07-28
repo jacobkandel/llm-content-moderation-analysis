@@ -28,7 +28,7 @@ Open-source benchmark tracking censorship and content moderation bias across 30+
 ```
 ├── src/                    # Python backend
 │   ├── audit_runner.py       # Main auditing script
-│   ├── analysis/analyst.py   # AI analysis agent (weekly report + IAA pipeline)
+│   ├── analysis/analyst.py   # AI analysis agent (weekly report)
 │   └── statistics.py         # Statistical analysis (McNemar's, Fleiss' Kappa)
 ├── web/                    # Next.js frontend
 │   ├── app/                # App Router — compare, analysis, audit, about
@@ -152,7 +152,7 @@ See [CITATION.cff](CITATION.cff) for structured citation metadata.
 | [METHODOLOGY.md](METHODOLOGY.md) | How the data is produced: corpus, judge pipeline, statistical methods. |
 | [docs/ANALYSIS_PLAN.md](docs/ANALYSIS_PLAN.md) | Pre-specified hypotheses, outcomes, tests, and inclusion/exclusion rules. |
 | [LIMITATIONS.md](LIMITATIONS.md) | What the results cannot support; known confounds. |
-| [docs/ETHICS.md](docs/ETHICS.md) | Consent model, privacy, sensitive content, dual-use, responsible use. |
+| [docs/ETHICS.md](docs/ETHICS.md) | Privacy, sensitive content, dual-use, responsible use. |
 | [DATASHEET.md](DATASHEET.md) | Dataset motivation, composition, collection, distribution, maintenance. |
 | [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md) | Field-by-field schema of the audit log. |
 | [huggingface/DATASET_CARD.md](huggingface/DATASET_CARD.md) | The Hugging Face dataset card. |

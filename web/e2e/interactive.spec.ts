@@ -111,19 +111,3 @@ test.describe('Prompts search', () => {
     });
 });
 
-test.describe('Annotate page', () => {
-    test('annotate page shows annotation buttons', async ({ page }) => {
-        await page.goto('/annotate', { waitUntil: 'domcontentloaded' });
-
-        // Annotation buttons are typically labeled with category options or rating buttons
-        // Specifically, look for buttons that would be used for annotation actions
-        const annotationButtons = page.locator(
-            'button[data-label], button[aria-label*="annotate" i], button:has-text("ALLOWED"), button:has-text("REMOVED")'
-        );
-        // At least one annotate-specific button should be visible if annotation UI loaded
-        const annotationButtonCount = await annotationButtons.count();
-        if (annotationButtonCount > 0) {
-            await expect(annotationButtons.first()).toBeVisible({ timeout: 10_000 });
-        }
-    });
-});

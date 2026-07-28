@@ -22,7 +22,6 @@ const routeNames: Record<string, string> = {
     'clusters': 'Semantic Clustering',
     'triggers': 'Trigger Words',
     'alignment': 'Alignment Tax',
-    'iaa': 'Inter-Annotator Agreement',
     'overrefusal': 'Over-Refusal',
     'family': 'Model Families',
     // Top-level pages
@@ -31,7 +30,6 @@ const routeNames: Record<string, string> = {
     'categories': 'Categories',
     'models': 'Models',
     'leaderboard': 'Leaderboard',
-    'annotate': 'Annotate',
     'data': 'Access the Data',
     'prompts': 'Prompt Explorer',
     'glossary': 'Glossary',

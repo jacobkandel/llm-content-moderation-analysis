@@ -37,11 +37,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'weekly',
             priority: 0.8,
         },
-        // Analysis Deep Dives (all 15)
+        // Analysis Deep Dives (all 14)
         ...[
             'consensus', 'political', 'drift', 'paternalism', 'significance',
             'summary', 'overview', 'triggers', 'clusters', 'alignment',
-            'reliability', 'iaa', 'overrefusal', 'longitudinal', 'family'
+            'reliability', 'overrefusal', 'longitudinal', 'family'
         ].map(slug => ({
             url: `${BASE_URL}/analysis/${slug}`,
             lastModified: new Date(),
@@ -49,7 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.7,
         })),
         // Top-level pages (all included now)
-        ...['/data', '/annotate', '/prompts', '/glossary', '/methodology', '/about'].map(path => ({
+        ...['/data', '/prompts', '/glossary', '/methodology', '/about'].map(path => ({
             url: `${BASE_URL}${path}`,
             lastModified: new Date(),
             changeFrequency: 'monthly' as const,

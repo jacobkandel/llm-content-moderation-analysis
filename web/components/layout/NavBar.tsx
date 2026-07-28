@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     FileText, TrendingUp, Shield, Compass, Scale, DollarSign,
-    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles, ClipboardCheck, Layers, Trophy, BookOpen
+    Network, ListChecks, Users, Menu, X, ChevronDown, ArrowRightLeft, Info, Home, Box, Filter, Sparkles, Layers, Trophy, BookOpen
 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -18,7 +18,6 @@ const navItems = [
     { name: 'Comparison', href: '/compare', icon: ArrowRightLeft },
     { name: 'Models', href: '/models', icon: Box },
     { name: 'Categories', href: '/categories', icon: Filter },
-    { name: 'Annotate', href: '/annotate', icon: ClipboardCheck },
     { name: 'Prompts', href: '/prompts', icon: ListChecks },
     {
         name: 'Analysis',
@@ -29,7 +28,6 @@ const navItems = [
             { title: 'Longitudinal Analysis', href: '/analysis/longitudinal', icon: TrendingUp },
             { title: 'Model Stability', href: '/analysis/drift', icon: TrendingUp },
             { title: 'Significance', href: '/analysis/significance', icon: Scale },
-            { title: 'Annotator Agreement', href: '/analysis/iaa', icon: Users },
             { title: 'Family Analysis', href: '/analysis/family', icon: Layers },
             { title: 'Political Compass', href: '/analysis/political', icon: Compass },
             { title: 'Paternalism', href: '/analysis/paternalism', icon: Shield },

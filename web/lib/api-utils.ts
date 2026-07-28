@@ -1,7 +1,7 @@
 /**
- * Shared helpers for the write/aggregate API routes (annotations & grades).
+ * Shared helpers for write/aggregate API routes.
  *
- * These routes persist crowd-sourced records as individual blobs and later
+ * Such routes persist records as individual blobs and later
  * aggregate them, so they need (a) safe blob pathnames built from
  * user-controlled ids, (b) a lightweight per-IP rate limit, and (c) a bounded,
  * parallel blob fetch when aggregating.

@@ -42,7 +42,7 @@ P-values are corrected for multiple comparisons using both:
 • Benjamini-Hochberg FDR correction (controls false discovery rate)
 • Holm-Bonferroni step-down correction (controls family-wise error rate)
 
-Effect sizes are reported as Cohen's h. Confidence intervals on refusal rates use the Wilson score method. Inter-annotator agreement is measured with Krippendorff's Alpha (nominal, multi-rater).`,
+Effect sizes are reported as Cohen's h. Confidence intervals on refusal rates use the Wilson score method.`,
     },
     {
         icon: Microscope,
@@ -53,10 +53,10 @@ A model's over-refusal rate is the percentage of XSTest-safe prompts it refuses.
     },
     {
         icon: Users,
-        title: 'Human Annotation',
-        content: `To validate our automated verdicts, we run a crowdsourced annotation campaign at /annotate. Human annotators see only the prompt text (not the AI response, to prevent anchoring bias) and classify each as ALLOWED or REMOVED.
+        title: 'Judge Robustness',
+        content: `Verdicts are assigned by an LLM judge that is held out of the subject pool, so it never grades its own responses. To quantify how much results depend on the choice of judge, a multi-judge robustness harness re-classifies a stratified sample of responses with several alternative judge models and reports cross-judge agreement (Cohen's and Fleiss' Kappa) and the verdict flip rate — the share of items where judges disagree.
 
-Agreement between human annotators is measured with Krippendorff's Alpha. Agreement between the AI judge and human consensus provides a calibration check on the automated pipeline. We target 500+ annotations with ≥3 annotators per prompt for publication-grade reliability.`,
+This bounds the benchmark's judge-dependence empirically rather than assuming a single judge is correct.`,
     },
     {
         icon: BarChart2,
@@ -113,7 +113,6 @@ export default function MethodologyPage() {
                         { label: 'HuggingFace Dataset', href: 'https://huggingface.co/datasets/jmk9494/moderation-bias-benchmark', external: true },
                         { label: 'Compare Models', href: '/compare', external: false },
                         { label: 'Statistical Significance', href: '/analysis/significance', external: false },
-                        { label: 'Annotator Agreement', href: '/analysis/iaa', external: false },
                         { label: 'API Documentation', href: '/data', external: false },
                     ].map(({ label, href, external }) => (
                         <Link

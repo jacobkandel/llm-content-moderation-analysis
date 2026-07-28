@@ -226,10 +226,8 @@ export default function AboutPage() {
                 </div>
                 <ul className="text-sm text-muted-foreground leading-relaxed space-y-3 list-disc list-inside">
                     <li>
-                        <strong>IRB status:</strong> Automated auditing involves no human subjects (API calls to commercial AI systems only).
-                        Human annotations are collected via an anonymous, voluntary web interface — no personally identifiable information is recorded.
-                        Annotators receive a random browser-local ID and may participate or leave at any time.
-                        This study is exempt from IRB review under 45 CFR 46.104(d) categories (2) and (4).
+                        <strong>IRB status:</strong> This project involves no human subjects — the entire pipeline is automated
+                        (API calls to commercial AI systems only), and no personal data is collected from visitors.
                     </li>
                     <li>
                         <strong>Dual-use risk:</strong> The prompt dataset and refusal-rate data are published openly. We acknowledge that adversarial actors could theoretically use

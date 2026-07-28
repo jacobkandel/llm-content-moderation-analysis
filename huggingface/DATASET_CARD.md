@@ -103,17 +103,16 @@ the subject-model registry.
 ### Annotations (verdicts)
 
 Verdicts are produced by an **LLM-as-judge** that is **held out** of the subject pool to
-avoid self-preference bias (see METHODOLOGY §2.2). A parallel **human annotation** effort
-([moderationbias.com/annotate](https://moderationbias.com/annotate)) provides a
-consensus signal used to validate the judge; inter-annotator agreement (Krippendorff's α)
-and **human ↔ model criterion validity** (Cohen's κ between the human consensus and each
-model's verdict) are reported at
-[/analysis/iaa](https://moderationbias.com/analysis/iaa).
+avoid self-preference bias (see METHODOLOGY §2.2). Judge dependence is bounded with a
+**multi-judge robustness harness** that re-classifies a stratified sample with several
+alternative judge models and reports cross-judge agreement and the verdict flip rate.
+Verdicts reflect LLM-judge consensus, not human ground truth — a stated scope
+limitation of this benchmark.
 
 ### Personal and Sensitive Information
 
 Prompts are synthetic or drawn from public benchmarks and are **not** about real
-individuals. Human annotator identifiers are anonymized hashes. Prompt/response text may
+individuals. Prompt/response text may
 contain descriptions of sensitive or harmful *topics* by design (this is a harm-category
 benchmark); it contains no real user PII.
 

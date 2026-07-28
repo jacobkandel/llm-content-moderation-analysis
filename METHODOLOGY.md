@@ -72,8 +72,8 @@ A **refusal** for rate purposes is any of `REMOVED`, `REFUSAL`, `POLICY_REFUSAL`
 
 > **Data provenance caveat.** The currently-published results were classified by `google/gemini-2.0-flash-001`, which *was* also a subject model — so those results carry a self-preference confound for that model. The held-out-judge configuration above takes effect on the next full audit re-run; see [LIMITATIONS.md](LIMITATIONS.md) §1.
 
-### 2.3 Inter-Annotator Agreement
-Human annotations are collected via a public annotation interface at [moderationbias.com/annotate](https://moderationbias.com/annotate), where community volunteers classify a stratified sample of prompt–response pairs. Krippendorff's Alpha is computed across all annotators and between human consensus and the model judge to validate automated verdict accuracy. Results are reported in the [IAA section](#appendix-inter-annotator-agreement) below.
+### 2.3 Judge Robustness
+Verdict validity is checked with a **multi-judge robustness harness** (`scripts/judge_robustness.py`): a stratified sample of recorded responses is re-classified by several alternative judge models, and cross-judge agreement (Cohen's κ per judge pair, Fleiss' κ overall) and the **verdict flip rate** (share of items without unanimous agreement) are reported. This bounds how much results depend on the choice of judge empirically, rather than assuming a single judge is correct.
 
 ---
 
@@ -115,14 +115,6 @@ The Political Compass analysis uses a curated set of politically contentious sta
 - **Model vs. Verdict (V = 0.66):** The choice of LLM is a *medium-large* predictor of whether a prompt is refused, confirming that inter-model policy differences are real and substantial
 - **Category vs. Verdict (V = 0.20):** Prompt topic is a *small* predictor — models disagree more on *which* topics to restrict than on the topic itself, suggesting policy idiosyncrasies rather than rational content-based rules
 
-### 3.8 Criterion Validity: Human–Model Alignment
-To validate the benchmark against human judgement rather than the LLM judge alone, we compute agreement between the **human-annotation consensus** and each model's own moderation verdict on the same prompts:
-- **Human consensus** for a prompt is the majority ALLOW/REMOVE verdict across all human annotators of that prompt; ties are dropped (no consensus).
-- For each model we binarize its verdict per prompt using the canonical refusal taxonomy (`src/refusal.py`), collapsing repetitions/variants to a majority verdict, and report **Cohen's Kappa** and raw percent agreement against the human consensus over the shared prompt set.
-- An **overall** figure compares the human consensus against the models' majority verdict per prompt.
-- A minimum overlap of **n ≥ 5** shared prompts is required before a per-model score is reported; results are flagged *preliminary* while the annotated sample is small (< 30 consensus items) and recompute automatically as annotation volume grows.
-- Computed in `scripts/generate_iaa_stats.py` (`compute_human_alignment`) and surfaced on the [IAA page](https://moderationbias.com/analysis/iaa). This is a **criterion-validity** check: a model whose refusals track human consensus (high κ) is moderating the way people do, independent of the automated judge.
-
 ---
 
 ## 4. Reproducibility
@@ -146,20 +138,6 @@ All JSON outputs pass automated validation (`scripts/validate_outputs.py`) befor
 - Every audit run logs the exact model version string returned by the API
 - Prompt corpus is versioned in `data/prompts.csv` under git
 - CITATION.cff tracks the benchmark version number
-
----
-
-## Appendix: Inter-Annotator Agreement
-
-*Pending completion of human annotation campaign (166 samples, 2 annotators). Cohen's Kappa scores will be reported here.*
-
-| Metric | Value |
-|--------|-------|
-| Sample size | 166+ |
-| Annotators | Community volunteers via moderationbias.com/annotate |
-| Krippendorff's Alpha (Human–Human) | *TBD* |
-| Krippendorff's Alpha (Human–Judge) | *TBD* |
-| Agreement Rate | *TBD* |
 
 ---
 

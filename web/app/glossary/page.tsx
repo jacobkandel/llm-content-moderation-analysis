@@ -41,12 +41,8 @@ const terms = [
         definition: 'A statistical test for comparing two models on matched pairs of prompts. It specifically tests whether the pattern of disagreement (Model A refuses but B allows, vs. B refuses but A allows) is statistically significant.',
     },
     {
-        term: 'Krippendorff\'s Alpha',
-        definition: 'A reliability metric that measures agreement between multiple annotators, correcting for chance agreement. Values above 0.667 are considered reliable for content analysis; above 0.800 is "almost perfect."',
-    },
-    {
         term: 'Cohen\'s Kappa',
-        definition: 'A measure of agreement between two raters (or a model and a human), accounting for the agreement that would occur by chance. Used for pairwise annotator comparisons.',
+        definition: 'A measure of agreement between two raters, accounting for the agreement that would occur by chance. Used to compare verdicts across alternative LLM judges in the robustness analysis.',
     },
     {
         term: 'Benjamini-Hochberg (BH) Correction',
@@ -71,10 +67,6 @@ const terms = [
     {
         term: 'Trigger Word',
         definition: 'A word whose presence in a prompt significantly increases the likelihood of refusal, regardless of context. Our trigger list analysis identifies words that act as crude keyword-based filters.',
-    },
-    {
-        term: 'Inter-Annotator Agreement (IAA)',
-        definition: 'A measure of how consistently different human annotators label the same content. High IAA validates that moderation judgments are reproducible and not subjective.',
     },
 ];
 
